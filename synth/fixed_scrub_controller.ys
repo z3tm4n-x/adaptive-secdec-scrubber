@@ -1,0 +1,4 @@
+read_verilog rtl/secded_32_39_decoder.v
+read_verilog rtl/fixed_scrub_controller.v
+synth -top fixed_scrub_controller
+stat
