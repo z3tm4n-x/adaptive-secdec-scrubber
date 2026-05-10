@@ -1,0 +1,3 @@
+read_verilog rtl/secded_32_39_decoder.v
+synth -top secded_32_39_decoder
+stat
