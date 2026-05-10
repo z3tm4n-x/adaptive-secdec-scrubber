@@ -1,4 +1,4 @@
-.PHONY: test_counter synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -30,6 +30,10 @@ synth_secded_decoder:
 test_secded_codec: gen_secded_vectors
 	iverilog -g2012 -o results/logs/secded_codec.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v tb/tb_secded_codec.v
 	vvp results/logs/secded_codec.out
+
+test_memory_model:
+	iverilog -g2012 -o results/logs/protected_memory_model.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v tb/tb_protected_memory_model.v
+	vvp results/logs/protected_memory_model.out
 
 clean:
 	rm -f results/logs/*.out
