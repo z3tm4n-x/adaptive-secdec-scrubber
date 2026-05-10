@@ -1,4 +1,4 @@
-.PHONY: test_counter test_memory_model synth_fixed_scrub_controller test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -41,6 +41,13 @@ test_fixed_scrub_controller:
 
 synth_fixed_scrub_controller:
 	yosys -s synth/fixed_scrub_controller.ys > results/logs/fixed_scrub_controller_synth.log
+
+test_interval_selector:
+	iverilog -g2012 -o results/logs/interval_selector.out rtl/interval_selector.v tb/tb_interval_selector.v
+	vvp results/logs/interval_selector.out
+
+synth_interval_selector:
+	yosys -s synth/interval_selector.ys > results/logs/interval_selector_synth.log
 
 clean:
 	rm -f results/logs/*.out

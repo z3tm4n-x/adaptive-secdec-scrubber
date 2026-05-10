@@ -1,0 +1,3 @@
+read_verilog rtl/interval_selector.v
+synth -top interval_selector
+stat
