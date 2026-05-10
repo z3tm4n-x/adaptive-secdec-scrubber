@@ -1,0 +1,5 @@
+read_verilog rtl/secded_32_39_decoder.v
+read_verilog rtl/interval_selector.v
+read_verilog rtl/adaptive_scrub_controller.v
+synth -top adaptive_scrub_controller
+stat
