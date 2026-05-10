@@ -1,4 +1,4 @@
-.PHONY: test_counter synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder clean
+.PHONY: test_counter synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -26,6 +26,10 @@ test_secded_decoder: gen_secded_vectors
 
 synth_secded_decoder:
 	yosys -s synth/secded_decoder.ys > results/logs/secded_decoder_synth.log
+
+test_secded_codec: gen_secded_vectors
+	iverilog -g2012 -o results/logs/secded_codec.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v tb/tb_secded_codec.v
+	vvp results/logs/secded_codec.out
 
 clean:
 	rm -f results/logs/*.out
