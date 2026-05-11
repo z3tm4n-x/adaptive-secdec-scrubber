@@ -10,7 +10,7 @@ FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 
-.PHONY: test_counter test_memory_model test_strategy_comparison synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -38,6 +38,14 @@ synth_all: prepare_dirs \
 	synth_interval_selector \
 	synth_adaptive_scrub_controller \
 	synth_adaptive_scrub_controller_aw21
+
+analyze_synthesis_logs: prepare_dirs
+	$(PYTHON) model/analyze_synthesis_logs.py \
+		--csv-output results/tables/synthesis_summary.csv \
+		--md-output results/tables/synthesis_summary.md
+	cat results/tables/synthesis_summary.md
+
+synthesis_report: synth_all analyze_synthesis_logs
 
 test_counter: prepare_dirs
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
