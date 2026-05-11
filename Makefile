@@ -28,7 +28,7 @@ test_all: prepare_dirs \
 	test_adaptive_safe_mode \
 	test_adaptive_threshold_mode \
 	test_adaptive_metrics \
-	test_strategy_comparison_upsets_paired
+	test_strategy_comparison
 
 synth_all: prepare_dirs \
 	synth_counter \
