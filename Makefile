@@ -1,4 +1,11 @@
 PYTHON ?= python3
+FAULT_SCENARIO ?= baseline
+UPSETS_FILE ?= data/upsets.xlsx
+FAULT_START_INDEX ?= 0
+FAULT_WINDOW_SIZE ?= 1300
+FAULT_TOTAL_CYCLES ?= 1300
+FAULT_EVENT_COUNT ?= 8
+FAULT_SEED ?= 12345
 
 .PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_adaptive_metrics test_adaptive_scrub_controller test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
@@ -71,7 +78,15 @@ test_adaptive_metrics:
 	vvp results/logs/adaptive_metrics.out
 
 gen_fault_events:
-	$(PYTHON) model/generate_fault_events.py --output tb/fault_events.csv
+	$(PYTHON) model/generate_fault_events.py \
+		--scenario $(FAULT_SCENARIO) \
+		--input $(UPSETS_FILE) \
+		--output tb/fault_events.csv \
+		--start-index $(FAULT_START_INDEX) \
+		--window-size $(FAULT_WINDOW_SIZE) \
+		--total-cycles $(FAULT_TOTAL_CYCLES) \
+		--event-count $(FAULT_EVENT_COUNT) \
+		--seed $(FAULT_SEED)
 
 test_strategy_comparison: gen_fault_events
 	mkdir -p results/logs results/tables
