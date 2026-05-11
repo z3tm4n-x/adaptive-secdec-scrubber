@@ -10,7 +10,7 @@ FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 
-.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -36,7 +36,8 @@ synth_all: prepare_dirs \
 	synth_secded_decoder \
 	synth_fixed_scrub_controller \
 	synth_interval_selector \
-	synth_adaptive_scrub_controller
+	synth_adaptive_scrub_controller \
+	synth_adaptive_scrub_controller_aw21
 
 test_counter: prepare_dirs
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -93,6 +94,9 @@ test_adaptive_scrub_controller: prepare_dirs
 
 synth_adaptive_scrub_controller: prepare_dirs
 	yosys -s synth/adaptive_scrub_controller.ys > results/logs/adaptive_scrub_controller_synth.log
+
+synth_adaptive_scrub_controller_aw21: prepare_dirs
+	yosys -s synth/adaptive_scrub_controller_aw21.ys > results/logs/adaptive_scrub_controller_aw21_synth.log
 
 test_adaptive_safe_mode: prepare_dirs
 	iverilog -g2012 -o results/logs/adaptive_safe_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_safe_mode.v

@@ -1,0 +1,11 @@
+read_verilog rtl/secded_32_39_decoder.v
+read_verilog rtl/interval_selector.v
+read_verilog rtl/adaptive_scrub_controller.v
+
+chparam -set ADDR_WIDTH 21 adaptive_scrub_controller
+
+hierarchy -check -top adaptive_scrub_controller
+check
+
+synth -top adaptive_scrub_controller
+stat
