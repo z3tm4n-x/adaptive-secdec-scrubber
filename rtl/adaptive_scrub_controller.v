@@ -52,6 +52,15 @@ module adaptive_scrub_controller #(
     output reg  [31:0]                  uncorrectable_error_count,
     output reg  [31:0]                  interval_switch_count,
 
+    /*
+     * Системные счётчики для сравнения стратегий.
+     */
+    output reg  [31:0]                  total_cycle_count,
+    output reg  [31:0]                  scrub_active_cycle_count,
+    output reg  [31:0]                  memory_busy_cycle_count,
+    output reg  [31:0]                  safe_mode_cycle_count,
+    output reg  [31:0]                  safe_mode_entry_count,
+
     output wire [INTERVAL_WIDTH-1:0]     selected_interval,
     output wire                         safe_mode_active,
     output wire [LEVEL_WIDTH-1:0]        current_level,
@@ -75,6 +84,7 @@ reg [ADDR_WIDTH-1:0] current_addr;
 
 reg [INTERVAL_WIDTH-1:0] previous_selected_interval;
 reg interval_initialized;
+reg previous_safe_mode_active;
 
 wire [INTERVAL_WIDTH-1:0] effective_interval;
 
@@ -164,9 +174,51 @@ always @(posedge clk) begin
         uncorrectable_error_count <= 32'd0;
         interval_switch_count <= 32'd0;
 
+        total_cycle_count <= 32'd0;
+        scrub_active_cycle_count <= 32'd0;
+        memory_busy_cycle_count <= 32'd0;
+        safe_mode_cycle_count <= 32'd0;
+        safe_mode_entry_count <= 32'd0;
+
         previous_selected_interval <= {INTERVAL_WIDTH{1'b0}};
         interval_initialized <= 1'b0;
+        previous_safe_mode_active <= 1'b0;
     end else begin
+
+        /*
+         * Системные счётчики.
+         *
+         * total_cycle_count считает такты, в течение которых контроллер включён.
+         * scrub_active_cycle_count считает такты активного прохода памяти.
+         * memory_busy_cycle_count считает такты, когда контроллер выдаёт
+         * чтение или запись в память.
+         * safe_mode_cycle_count считает такты нахождения в безопасном режиме.
+         * safe_mode_entry_count считает число входов в безопасный режим.
+         *
+         * Сигналы scrub_active, mem_read_en, mem_write_en и safe_mode_active
+         * учитываются по их значениям на текущем такте до обновления регистров.
+         */
+        if (enable) begin
+            total_cycle_count <= total_cycle_count + 32'd1;
+
+            if (scrub_active) begin
+                scrub_active_cycle_count <= scrub_active_cycle_count + 32'd1;
+            end
+
+            if (mem_read_en || mem_write_en) begin
+                memory_busy_cycle_count <= memory_busy_cycle_count + 32'd1;
+            end
+
+            if (safe_mode_active) begin
+                safe_mode_cycle_count <= safe_mode_cycle_count + 32'd1;
+            end
+
+            if (safe_mode_active && !previous_safe_mode_active) begin
+                safe_mode_entry_count <= safe_mode_entry_count + 32'd1;
+            end
+        end
+
+        previous_safe_mode_active <= safe_mode_active;
 
         /*
          * Отдельно считаем переключения выбранного интервала.
