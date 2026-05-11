@@ -247,6 +247,77 @@ def write_markdown(
 
     lines.append("")
 
+    lines.append("## Ключевой численный вывод")
+    lines.append("")
+
+    for scenario_name in ["no_clusters", "with_clusters"]:
+        if scenario_name not in by_scenario:
+            continue
+
+        strategies = by_scenario[scenario_name]
+
+        if "fixed" not in strategies:
+            continue
+
+        fixed = strategies["fixed"]
+
+        lines.append(f"### Сценарий `{scenario_name}`")
+        lines.append("")
+
+        adaptive_strategies = [
+            strategy for strategy in ["table", "threshold"]
+            if strategy in strategies
+        ]
+
+        for strategy in adaptive_strategies:
+            row = strategies[strategy]
+
+            corrected_delta = row.corrected_mean - fixed.corrected_mean
+            unique_delta = (
+                row.unique_uncorrectable_words_mean
+                - fixed.unique_uncorrectable_words_mean
+            )
+            busy_delta = row.busy_percent_mean - fixed.busy_percent_mean
+            busy_relative = percent_change(row.busy_percent_mean, fixed.busy_percent_mean)
+
+            lines.append(
+                f"- `{strategy}`: занятость памяти изменилась "
+                f"с {fixed.busy_percent_mean:.3f} % до {row.busy_percent_mean:.3f} % "
+                f"({busy_delta:+.3f} п.п., {busy_relative:+.2f} % относительно `fixed`); "
+                f"среднее число уникальных неустранимых слов изменилось "
+                f"с {fixed.unique_uncorrectable_words_mean:.3f} "
+                f"до {row.unique_uncorrectable_words_mean:.3f} "
+                f"({unique_delta:+.3f}); "
+                f"среднее число исправленных ошибок изменилось "
+                f"с {fixed.corrected_mean:.3f} "
+                f"до {row.corrected_mean:.3f} "
+                f"({corrected_delta:+.3f})."
+            )
+
+        if adaptive_strategies:
+            all_busy_lower = all(
+                strategies[strategy].busy_percent_mean < fixed.busy_percent_mean
+                for strategy in adaptive_strategies
+            )
+
+            max_abs_unique_delta = max(
+                abs(
+                    strategies[strategy].unique_uncorrectable_words_mean
+                    - fixed.unique_uncorrectable_words_mean
+                )
+                for strategy in adaptive_strategies
+            )
+
+            if all_busy_lower and max_abs_unique_delta <= 1.0:
+                lines.append("")
+                lines.append(
+                    "Итог: адаптивные стратегии в данном сценарии обеспечивают "
+                    "сопоставимое среднее число уникальных неустранимых слов "
+                    "при меньшей средней занятости интерфейса памяти."
+                )
+
+        lines.append("")
+
     if "no_clusters" in by_scenario and "with_clusters" in by_scenario:
         lines.append("## Вклад мгновенных кластеров")
         lines.append("")
