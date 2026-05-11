@@ -10,7 +10,7 @@ FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 
-.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -119,7 +119,12 @@ analyze_strategy_results:
 		--output results/tables/strategy_summary.md
 	cat results/tables/strategy_summary.md
 
-strategy_report: test_strategy_comparison_upsets_paired analyze_strategy_results
+plot_strategy_results:
+	$(PYTHON) model/plot_strategy_results.py \
+		--input results/tables/strategy_comparison.csv \
+		--output-dir results/figures
+
+strategy_report: test_strategy_comparison_upsets_paired analyze_strategy_results plot_strategy_results
 
 clean:
 	rm -f results/logs/*.out
