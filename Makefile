@@ -1,4 +1,4 @@
-.PHONY: test_counter test_memory_model test_adaptive_metrics test_adaptive_scrub_controller test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model test_strategy_comparison test_adaptive_metrics test_adaptive_scrub_controller test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -67,6 +67,16 @@ test_adaptive_threshold_mode:
 test_adaptive_metrics:
 	iverilog -g2012 -o results/logs/adaptive_metrics.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_metrics.v
 	vvp results/logs/adaptive_metrics.out
+
+test_strategy_comparison:
+	mkdir -p results/logs results/tables
+	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
+	rm -f results/tables/strategy_comparison.csv
+	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
+	vvp results/logs/strategy_comparison.out +STRATEGY=0
+	vvp results/logs/strategy_comparison.out +STRATEGY=1
+	vvp results/logs/strategy_comparison.out +STRATEGY=2
+	cat results/tables/strategy_comparison.csv
 
 clean:
 	rm -f results/logs/*.out

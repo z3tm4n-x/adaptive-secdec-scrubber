@@ -1,0 +1,553 @@
+`timescale 1ns/1ps
+
+module tb_strategy_comparison;
+
+localparam ADDR_WIDTH = 4;
+localparam CODEWORD_WIDTH = 39;
+localparam LEVEL_WIDTH = 3;
+localparam INTERVAL_WIDTH = 32;
+localparam DEPTH = (1 << ADDR_WIDTH);
+
+localparam TOTAL_RUN_CYCLES = 1300;
+
+localparam MODE_FIXED     = 2'd0;
+localparam MODE_TABLE     = 2'd1;
+localparam MODE_THRESHOLD = 2'd2;
+
+reg clk;
+reg rst;
+reg enable;
+
+reg [1:0] mode;
+
+reg [LEVEL_WIDTH-1:0] ctrl_level;
+reg ctrl_valid;
+reg ctrl_update;
+
+reg [INTERVAL_WIDTH-1:0] fixed_interval;
+reg [INTERVAL_WIDTH-1:0] safe_interval;
+reg [31:0] max_control_age;
+
+reg [INTERVAL_WIDTH-1:0] level0_interval;
+reg [INTERVAL_WIDTH-1:0] level1_interval;
+reg [INTERVAL_WIDTH-1:0] level2_interval;
+reg [INTERVAL_WIDTH-1:0] level3_interval;
+reg [INTERVAL_WIDTH-1:0] level4_interval;
+reg [INTERVAL_WIDTH-1:0] level5_interval;
+reg [INTERVAL_WIDTH-1:0] level6_interval;
+reg [INTERVAL_WIDTH-1:0] level7_interval;
+
+reg [LEVEL_WIDTH-1:0] threshold_low_to_medium;
+reg [LEVEL_WIDTH-1:0] threshold_medium_to_low;
+reg [LEVEL_WIDTH-1:0] threshold_medium_to_high;
+reg [LEVEL_WIDTH-1:0] threshold_high_to_medium;
+
+reg [INTERVAL_WIDTH-1:0] threshold_low_interval;
+reg [INTERVAL_WIDTH-1:0] threshold_medium_interval;
+reg [INTERVAL_WIDTH-1:0] threshold_high_interval;
+
+wire ctrl_read_en;
+wire [ADDR_WIDTH-1:0] ctrl_read_addr;
+wire [CODEWORD_WIDTH-1:0] mem_read_data;
+
+wire ctrl_write_en;
+wire [ADDR_WIDTH-1:0] ctrl_write_addr;
+wire [CODEWORD_WIDTH-1:0] ctrl_write_data;
+
+/*
+ * В режиме начальной записи памятью управляет проверочная среда.
+ * После инициализации памятью управляет контроллер.
+ */
+reg tb_mode;
+
+reg tb_read_en;
+reg [ADDR_WIDTH-1:0] tb_read_addr;
+
+reg tb_write_en;
+reg [ADDR_WIDTH-1:0] tb_write_addr;
+reg [CODEWORD_WIDTH-1:0] tb_write_data;
+
+reg tb_inject_en;
+reg [ADDR_WIDTH-1:0] tb_inject_addr;
+reg [5:0] tb_inject_bit;
+
+wire mem_read_en;
+wire [ADDR_WIDTH-1:0] mem_read_addr;
+
+wire mem_write_en;
+wire [ADDR_WIDTH-1:0] mem_write_addr;
+wire [CODEWORD_WIDTH-1:0] mem_write_data;
+
+assign mem_read_en   = tb_mode ? tb_read_en   : ctrl_read_en;
+assign mem_read_addr = tb_mode ? tb_read_addr : ctrl_read_addr;
+
+assign mem_write_en   = tb_mode ? tb_write_en   : ctrl_write_en;
+assign mem_write_addr = tb_mode ? tb_write_addr : ctrl_write_addr;
+assign mem_write_data = tb_mode ? tb_write_data : ctrl_write_data;
+
+reg [31:0] encoder_data_in;
+wire [38:0] encoded_codeword;
+
+wire scrub_active;
+wire [31:0] scrub_cycle_count;
+wire [31:0] memory_read_count;
+wire [31:0] memory_write_count;
+wire [31:0] corrected_error_count;
+wire [31:0] uncorrectable_error_count;
+wire [31:0] interval_switch_count;
+
+wire [31:0] total_cycle_count;
+wire [31:0] scrub_active_cycle_count;
+wire [31:0] memory_busy_cycle_count;
+wire [31:0] safe_mode_cycle_count;
+wire [31:0] safe_mode_entry_count;
+
+wire [INTERVAL_WIDTH-1:0] selected_interval;
+wire safe_mode_active;
+wire [LEVEL_WIDTH-1:0] current_level;
+wire [1:0] threshold_state;
+wire [31:0] control_age;
+
+integer strategy_id;
+reg [127:0] strategy_name;
+
+integer sim_cycle;
+integer i;
+integer error_count;
+integer injected_event_count;
+integer csv_file;
+integer busy_per_mille;
+integer scrub_per_mille;
+integer safe_per_mille;
+
+secded_32_39_encoder encoder_inst (
+    .data_in(encoder_data_in),
+    .codeword_out(encoded_codeword)
+);
+
+protected_memory_model #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .CODEWORD_WIDTH(CODEWORD_WIDTH)
+) memory_inst (
+    .clk(clk),
+
+    .read_en(mem_read_en),
+    .read_addr(mem_read_addr),
+    .read_data(mem_read_data),
+
+    .write_en(mem_write_en),
+    .write_addr(mem_write_addr),
+    .write_data(mem_write_data),
+
+    .inject_en(tb_inject_en),
+    .inject_addr(tb_inject_addr),
+    .inject_bit(tb_inject_bit)
+);
+
+adaptive_scrub_controller #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .CODEWORD_WIDTH(CODEWORD_WIDTH),
+    .LEVEL_WIDTH(LEVEL_WIDTH),
+    .INTERVAL_WIDTH(INTERVAL_WIDTH)
+) controller_inst (
+    .clk(clk),
+    .rst(rst),
+    .enable(enable),
+
+    .mode(mode),
+
+    .ctrl_level(ctrl_level),
+    .ctrl_valid(ctrl_valid),
+    .ctrl_update(ctrl_update),
+
+    .fixed_interval(fixed_interval),
+    .safe_interval(safe_interval),
+    .max_control_age(max_control_age),
+
+    .level0_interval(level0_interval),
+    .level1_interval(level1_interval),
+    .level2_interval(level2_interval),
+    .level3_interval(level3_interval),
+    .level4_interval(level4_interval),
+    .level5_interval(level5_interval),
+    .level6_interval(level6_interval),
+    .level7_interval(level7_interval),
+
+    .threshold_low_to_medium(threshold_low_to_medium),
+    .threshold_medium_to_low(threshold_medium_to_low),
+    .threshold_medium_to_high(threshold_medium_to_high),
+    .threshold_high_to_medium(threshold_high_to_medium),
+
+    .threshold_low_interval(threshold_low_interval),
+    .threshold_medium_interval(threshold_medium_interval),
+    .threshold_high_interval(threshold_high_interval),
+
+    .mem_read_en(ctrl_read_en),
+    .mem_read_addr(ctrl_read_addr),
+    .mem_read_data(mem_read_data),
+
+    .mem_write_en(ctrl_write_en),
+    .mem_write_addr(ctrl_write_addr),
+    .mem_write_data(ctrl_write_data),
+
+    .scrub_active(scrub_active),
+    .scrub_cycle_count(scrub_cycle_count),
+    .memory_read_count(memory_read_count),
+    .memory_write_count(memory_write_count),
+    .corrected_error_count(corrected_error_count),
+    .uncorrectable_error_count(uncorrectable_error_count),
+    .interval_switch_count(interval_switch_count),
+
+    .total_cycle_count(total_cycle_count),
+    .scrub_active_cycle_count(scrub_active_cycle_count),
+    .memory_busy_cycle_count(memory_busy_cycle_count),
+    .safe_mode_cycle_count(safe_mode_cycle_count),
+    .safe_mode_entry_count(safe_mode_entry_count),
+
+    .selected_interval(selected_interval),
+    .safe_mode_active(safe_mode_active),
+    .current_level(current_level),
+    .threshold_state(threshold_state),
+    .control_age(control_age)
+);
+
+initial begin
+    clk = 1'b0;
+    forever #5 clk = ~clk;
+end
+
+task write_memory_word;
+    input [ADDR_WIDTH-1:0] addr;
+    input [31:0] data;
+    begin
+        encoder_data_in = data;
+        #1;
+
+        tb_write_addr = addr;
+        tb_write_data = encoded_codeword;
+        tb_write_en = 1'b1;
+
+        @(posedge clk);
+        #1;
+
+        tb_write_en = 1'b0;
+    end
+endtask
+
+task configure_strategy;
+    begin
+        if (!$value$plusargs("STRATEGY=%d", strategy_id)) begin
+            strategy_id = 0;
+        end
+
+        /*
+         * Общие параметры.
+         * Безопасный режим в этом сравнительном сценарии выключаться не должен,
+         * поэтому max_control_age заведомо больше длительности моделирования.
+         */
+        safe_interval = 32'd5;
+        max_control_age = 32'd10000;
+
+        /*
+         * Таблица уровень -> интервал.
+         */
+        level0_interval = 32'd100;
+        level1_interval = 32'd80;
+        level2_interval = 32'd60;
+        level3_interval = 32'd40;
+        level4_interval = 32'd25;
+        level5_interval = 32'd15;
+        level6_interval = 32'd10;
+        level7_interval = 32'd5;
+
+        /*
+         * Пороги трёхрежимного управления.
+         */
+        threshold_low_to_medium = 3'd3;
+        threshold_medium_to_low = 3'd1;
+        threshold_medium_to_high = 3'd6;
+        threshold_high_to_medium = 3'd4;
+
+        /*
+         * Интервалы трёх режимов:
+         * фоновый, промежуточный, высокий.
+         */
+        threshold_low_interval = 32'd100;
+        threshold_medium_interval = 32'd25;
+        threshold_high_interval = 32'd8;
+
+        fixed_interval = 32'd80;
+
+        case (strategy_id)
+            0: begin
+                strategy_name = "fixed";
+                mode = MODE_FIXED;
+            end
+
+            1: begin
+                strategy_name = "table";
+                mode = MODE_TABLE;
+            end
+
+            2: begin
+                strategy_name = "threshold";
+                mode = MODE_THRESHOLD;
+            end
+
+            default: begin
+                strategy_name = "fixed";
+                mode = MODE_FIXED;
+            end
+        endcase
+    end
+endtask
+
+task apply_level_schedule;
+    input integer cycle_index;
+    begin
+        ctrl_update = 1'b0;
+
+        /*
+         * Сценарий сбойной обстановки:
+         *
+         * 0...199      фон
+         * 200...399    слабый рост
+         * 400...699    высокий уровень
+         * 700...899    максимум
+         * 900...1099   спад
+         * 1100...1299  возврат к фону
+         */
+        if (cycle_index == 0) begin
+            ctrl_level = 3'd0;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end else if (cycle_index == 200) begin
+            ctrl_level = 3'd2;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end else if (cycle_index == 400) begin
+            ctrl_level = 3'd6;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end else if (cycle_index == 700) begin
+            ctrl_level = 3'd7;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end else if (cycle_index == 900) begin
+            ctrl_level = 3'd4;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end else if (cycle_index == 1100) begin
+            ctrl_level = 3'd1;
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
+        end
+    end
+endtask
+
+task apply_error_schedule;
+    input integer cycle_index;
+    begin
+        tb_inject_en = 1'b0;
+        tb_inject_addr = {ADDR_WIDTH{1'b0}};
+        tb_inject_bit = 6'd0;
+
+        /*
+         * Одинаковая ошибочная нагрузка для всех стратегий.
+         *
+         * Часть ошибок одиночная.
+         * Часть ошибок образует пары в одном слове, чтобы проверить,
+         * успевает ли стратегия устранить первую ошибку до появления второй.
+         */
+        if (cycle_index == 120) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd3;
+            tb_inject_bit = 6'd5;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 260) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd7;
+            tb_inject_bit = 6'd10;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 430) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd0;
+            tb_inject_bit = 6'd2;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 450) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd0;
+            tb_inject_bit = 6'd4;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 740) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd5;
+            tb_inject_bit = 6'd9;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 760) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd5;
+            tb_inject_bit = 6'd14;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 980) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd9;
+            tb_inject_bit = 6'd1;
+            injected_event_count = injected_event_count + 1;
+        end else if (cycle_index == 1120) begin
+            tb_inject_en = 1'b1;
+            tb_inject_addr = 4'd2;
+            tb_inject_bit = 6'd20;
+            injected_event_count = injected_event_count + 1;
+        end
+    end
+endtask
+
+task write_results;
+    begin
+        if (total_cycle_count != 32'd0) begin
+            busy_per_mille = (memory_busy_cycle_count * 1000) / total_cycle_count;
+            scrub_per_mille = (scrub_active_cycle_count * 1000) / total_cycle_count;
+            safe_per_mille = (safe_mode_cycle_count * 1000) / total_cycle_count;
+        end else begin
+            busy_per_mille = 0;
+            scrub_per_mille = 0;
+            safe_per_mille = 0;
+        end
+
+        csv_file = $fopen("results/tables/strategy_comparison.csv", "a");
+
+        if (csv_file == 0) begin
+            $display("ERROR: cannot open results/tables/strategy_comparison.csv");
+            error_count = error_count + 1;
+        end else begin
+            $fdisplay(
+                csv_file,
+                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                strategy_name,
+                total_cycle_count,
+                scrub_cycle_count,
+                memory_read_count,
+                memory_write_count,
+                corrected_error_count,
+                uncorrectable_error_count,
+                interval_switch_count,
+                safe_mode_entry_count,
+                safe_mode_cycle_count,
+                scrub_active_cycle_count,
+                memory_busy_cycle_count,
+                scrub_per_mille,
+                busy_per_mille,
+                safe_per_mille
+            );
+
+            $fclose(csv_file);
+        end
+
+        $display("STRATEGY RESULT: %0s", strategy_name);
+        $display("  total_cycle_count        = %0d", total_cycle_count);
+        $display("  scrub_cycle_count        = %0d", scrub_cycle_count);
+        $display("  memory_read_count        = %0d", memory_read_count);
+        $display("  memory_write_count       = %0d", memory_write_count);
+        $display("  corrected_error_count    = %0d", corrected_error_count);
+        $display("  uncorrectable_error_count = %0d", uncorrectable_error_count);
+        $display("  interval_switch_count    = %0d", interval_switch_count);
+        $display("  memory_busy_cycle_count  = %0d", memory_busy_cycle_count);
+        $display("  busy_per_mille           = %0d", busy_per_mille);
+    end
+endtask
+
+initial begin
+    $dumpfile("results/logs/strategy_comparison.vcd");
+    $dumpvars(0, tb_strategy_comparison);
+
+    error_count = 0;
+    injected_event_count = 0;
+
+    rst = 1'b1;
+    enable = 1'b0;
+
+    ctrl_level = 3'd0;
+    ctrl_valid = 1'b0;
+    ctrl_update = 1'b0;
+
+    tb_mode = 1'b1;
+
+    tb_read_en = 1'b0;
+    tb_read_addr = {ADDR_WIDTH{1'b0}};
+
+    tb_write_en = 1'b0;
+    tb_write_addr = {ADDR_WIDTH{1'b0}};
+    tb_write_data = {CODEWORD_WIDTH{1'b0}};
+
+    tb_inject_en = 1'b0;
+    tb_inject_addr = {ADDR_WIDTH{1'b0}};
+    tb_inject_bit = 6'd0;
+
+    encoder_data_in = 32'd0;
+
+    configure_strategy();
+
+    repeat (3) @(posedge clk);
+    #1;
+
+    /*
+     * Начальная запись одинакового содержимого памяти.
+     */
+    for (i = 0; i < DEPTH; i = i + 1) begin
+        write_memory_word(i[ADDR_WIDTH-1:0], 32'h4000_0000 + i);
+    end
+
+    /*
+     * Передаём память контроллеру.
+     */
+    tb_mode = 1'b0;
+
+    rst = 1'b0;
+    enable = 1'b1;
+
+    /*
+     * Основной цикл моделирования.
+     */
+    for (sim_cycle = 0; sim_cycle < TOTAL_RUN_CYCLES; sim_cycle = sim_cycle + 1) begin
+        apply_level_schedule(sim_cycle);
+        apply_error_schedule(sim_cycle);
+
+        @(posedge clk);
+        #1;
+
+        ctrl_update = 1'b0;
+        tb_inject_en = 1'b0;
+    end
+
+    enable = 1'b0;
+
+    repeat (3) @(posedge clk);
+    #1;
+
+    if (injected_event_count !== 8) begin
+        $display("ERROR: wrong injected_event_count");
+        $display("  expected = 8");
+        $display("  actual   = %0d", injected_event_count);
+        error_count = error_count + 1;
+    end
+
+    if (safe_mode_entry_count !== 32'd0) begin
+        $display("ERROR: safe mode must not be entered in strategy comparison");
+        $display("  safe_mode_entry_count = %0d", safe_mode_entry_count);
+        error_count = error_count + 1;
+    end
+
+    write_results();
+
+    if (error_count == 0) begin
+        $display("Strategy comparison run passed for strategy %0s.", strategy_name);
+    end else begin
+        $display("Strategy comparison run failed for strategy %0s. Errors: %0d", strategy_name, error_count);
+        $fatal(1);
+    end
+
+    $finish;
+end
+
+endmodule
