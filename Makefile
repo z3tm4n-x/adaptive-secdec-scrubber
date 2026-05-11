@@ -38,71 +38,71 @@ synth_all: prepare_dirs \
 	synth_interval_selector \
 	synth_adaptive_scrub_controller
 
-test_counter:
+test_counter: prepare_dirs
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
 	vvp results/logs/simple_counter.out
 
-synth_counter:
+synth_counter: prepare_dirs
 	yosys -s synth/simple_counter.ys > results/logs/simple_counter_synth.log
 
 check_secded_ref:
-	python model/secded_ref.py
+	$(PYTHON) model/secded_ref.py
 
 gen_secded_vectors:
-	python model/generate_secded_vectors.py
+	$(PYTHON) model/generate_secded_vectors.py
 
-test_secded_encoder: gen_secded_vectors
+test_secded_encoder: prepare_dirs gen_secded_vectors
 	iverilog -g2012 -o results/logs/secded_encoder.out rtl/secded_32_39_encoder.v tb/tb_secded_encoder.v
 	vvp results/logs/secded_encoder.out
 
-synth_secded_encoder:
+synth_secded_encoder: prepare_dirs
 	yosys -s synth/secded_encoder.ys > results/logs/secded_encoder_synth.log
 
-test_secded_decoder: gen_secded_vectors
+test_secded_decoder: prepare_dirs gen_secded_vectors
 	iverilog -g2012 -o results/logs/secded_decoder.out rtl/secded_32_39_decoder.v tb/tb_secded_decoder.v
 	vvp results/logs/secded_decoder.out
 
-synth_secded_decoder:
+synth_secded_decoder: prepare_dirs
 	yosys -s synth/secded_decoder.ys > results/logs/secded_decoder_synth.log
 
-test_secded_codec: gen_secded_vectors
+test_secded_codec: prepare_dirs gen_secded_vectors
 	iverilog -g2012 -o results/logs/secded_codec.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v tb/tb_secded_codec.v
 	vvp results/logs/secded_codec.out
 
-test_memory_model:
+test_memory_model: prepare_dirs
 	iverilog -g2012 -o results/logs/protected_memory_model.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v tb/tb_protected_memory_model.v
 	vvp results/logs/protected_memory_model.out
 
-test_fixed_scrub_controller:
+test_fixed_scrub_controller: prepare_dirs
 	iverilog -g2012 -o results/logs/fixed_scrub_controller.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/fixed_scrub_controller.v tb/tb_fixed_scrub_controller.v
 	vvp results/logs/fixed_scrub_controller.out
 
-synth_fixed_scrub_controller:
+synth_fixed_scrub_controller: prepare_dirs
 	yosys -s synth/fixed_scrub_controller.ys > results/logs/fixed_scrub_controller_synth.log
 
-test_interval_selector:
+test_interval_selector: prepare_dirs
 	iverilog -g2012 -o results/logs/interval_selector.out rtl/interval_selector.v tb/tb_interval_selector.v
 	vvp results/logs/interval_selector.out
 
-synth_interval_selector:
+synth_interval_selector: prepare_dirs
 	yosys -s synth/interval_selector.ys > results/logs/interval_selector_synth.log
 
-test_adaptive_scrub_controller:
+test_adaptive_scrub_controller: prepare_dirs
 	iverilog -g2012 -o results/logs/adaptive_scrub_controller.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_scrub_controller.v
 	vvp results/logs/adaptive_scrub_controller.out
 
-synth_adaptive_scrub_controller:
+synth_adaptive_scrub_controller: prepare_dirs
 	yosys -s synth/adaptive_scrub_controller.ys > results/logs/adaptive_scrub_controller_synth.log
 
-test_adaptive_safe_mode:
+test_adaptive_safe_mode: prepare_dirs
 	iverilog -g2012 -o results/logs/adaptive_safe_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_safe_mode.v
 	vvp results/logs/adaptive_safe_mode.out
 
-test_adaptive_threshold_mode:
+test_adaptive_threshold_mode: prepare_dirs
 	iverilog -g2012 -o results/logs/adaptive_threshold_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_threshold_mode.v
 	vvp results/logs/adaptive_threshold_mode.out
 
-test_adaptive_metrics:
+test_adaptive_metrics: prepare_dirs
 	iverilog -g2012 -o results/logs/adaptive_metrics.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_metrics.v
 	vvp results/logs/adaptive_metrics.out
 
@@ -120,8 +120,7 @@ gen_fault_events:
 		--pair-gap-max $(FAULT_PAIR_GAP_MAX) \
 		--seed $(FAULT_SEED)
 
-test_strategy_comparison: gen_fault_events
-	mkdir -p results/logs results/tables
+test_strategy_comparison: prepare_dirs gen_fault_events
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
 	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
