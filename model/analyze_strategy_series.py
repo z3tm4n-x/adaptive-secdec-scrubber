@@ -20,6 +20,8 @@ REQUIRED_COLUMNS = [
     "paired_event_count",
     "pair_gap_min",
     "pair_gap_max",
+    "cluster_event_count",
+    "cluster_bit_count",
     "strategy",
     "corrected",
     "uncorrectable_detections",
@@ -225,6 +227,8 @@ def write_summary_markdown(
     paired_event_count_values = unique_values(rows, "paired_event_count")
     pair_gap_min_values = unique_values(rows, "pair_gap_min")
     pair_gap_max_values = unique_values(rows, "pair_gap_max")
+    cluster_event_count_values = unique_values(rows, "cluster_event_count")
+    cluster_bit_count_values = unique_values(rows, "cluster_bit_count")
 
     lines: list[str] = []
 
@@ -238,9 +242,11 @@ def write_summary_markdown(
     lines.append(f"- Длительность моделирования: {', '.join(total_cycle_values)} тактов")
     lines.append(f"- Размер окна временного ряда: {', '.join(window_size_values)}")
     lines.append(f"- Число одиночных событий: {', '.join(event_count_values)}")
-    lines.append(f"- Число парных событий: {', '.join(paired_event_count_values)}")
-    lines.append(f"- Минимальный разрыв в паре: {', '.join(pair_gap_min_values)}")
-    lines.append(f"- Максимальный разрыв в паре: {', '.join(pair_gap_max_values)}")
+    lines.append(f"- Число накопительных пар: {', '.join(paired_event_count_values)}")
+    lines.append(f"- Минимальный разрыв в накопительной паре: {', '.join(pair_gap_min_values)}")
+    lines.append(f"- Максимальный разрыв в накопительной паре: {', '.join(pair_gap_max_values)}")
+    lines.append(f"- Число мгновенных кластерных событий: {', '.join(cluster_event_count_values)}")
+    lines.append(f"- Число повреждаемых битов в одном мгновенном кластере: {', '.join(cluster_bit_count_values)}")
     lines.append(f"- Число зёрен генератора: {len(unique_values(rows, 'seed'))}")
     lines.append("")
 
@@ -351,6 +357,27 @@ def write_summary_markdown(
             "по нескольким зёрнам генератора. Поэтому она существенно надёжнее "
             "одиночного демонстрационного запуска."
         )
+        cluster_counts = [int(value) for value in cluster_event_count_values]
+        cluster_bit_counts = [int(value) for value in cluster_bit_count_values]
+
+        if any(value > 0 for value in cluster_counts):
+            lines.append("")
+            lines.append(
+                "В серии присутствуют мгновенные кластерные события. "
+                "Они отличаются от накопительных пар тем, что несколько битов "
+                "одного кодового слова повреждаются в один и тот же модельный такт. "
+                "Для двухбитового мгновенного кластера код SECDED выполняет обнаружение, "
+                "но не исправление. Поэтому такие события задают дополнительную нижнюю "
+                "границу числа неустранимых состояний памяти и должны интерпретироваться "
+                "отдельно от накопительных ошибок, зависящих от интервала скраббинга."
+            )
+
+            lines.append("")
+            lines.append(
+                f"В данной серии число мгновенных кластерных событий: "
+                f"{', '.join(cluster_event_count_values)}, "
+                f"размер кластера в битах: {', '.join(cluster_bit_count_values)}."
+            )
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
