@@ -9,6 +9,7 @@ localparam INTERVAL_WIDTH = 32;
 localparam DEPTH = (1 << ADDR_WIDTH);
 
 localparam TOTAL_RUN_CYCLES = 1300;
+localparam MAX_FAULT_EVENTS = 1024;
 
 localparam MODE_FIXED     = 2'd0;
 localparam MODE_TABLE     = 2'd1;
@@ -127,6 +128,18 @@ integer busy_per_mille;
 integer scrub_per_mille;
 integer safe_per_mille;
 integer unique_uncorrectable_word_count;
+
+integer fault_event_time [0:MAX_FAULT_EVENTS-1];
+integer fault_event_addr [0:MAX_FAULT_EVENTS-1];
+integer fault_event_bit  [0:MAX_FAULT_EVENTS-1];
+
+integer fault_event_count;
+integer fault_event_index;
+integer fault_file;
+integer fault_read_count;
+integer fault_time_value;
+integer fault_addr_value;
+integer fault_bit_value;
 
 integer snap_total_cycle_count;
 integer snap_scrub_cycle_count;
@@ -345,6 +358,47 @@ task configure_strategy;
     end
 endtask
 
+task load_fault_events;
+    begin
+        fault_event_count = 0;
+        fault_event_index = 0;
+
+        fault_file = $fopen("tb/fault_events.csv", "r");
+
+        if (fault_file == 0) begin
+            $display("ERROR: cannot open tb/fault_events.csv");
+            $fatal(1);
+        end
+
+        while (!$feof(fault_file)) begin
+            fault_read_count = $fscanf(
+                fault_file,
+                "%d,%d,%d\n",
+                fault_time_value,
+                fault_addr_value,
+                fault_bit_value
+            );
+
+            if (fault_read_count == 3) begin
+                if (fault_event_count >= MAX_FAULT_EVENTS) begin
+                    $display("ERROR: too many fault events");
+                    $fatal(1);
+                end
+
+                fault_event_time[fault_event_count] = fault_time_value;
+                fault_event_addr[fault_event_count] = fault_addr_value;
+                fault_event_bit[fault_event_count] = fault_bit_value;
+
+                fault_event_count = fault_event_count + 1;
+            end
+        end
+
+        $fclose(fault_file);
+
+        $display("Loaded fault events: %0d", fault_event_count);
+    end
+endtask
+
 task apply_level_schedule;
     input integer cycle_index;
     begin
@@ -396,52 +450,32 @@ task apply_error_schedule;
         tb_inject_bit = 6'd0;
 
         /*
-         * Одинаковая ошибочная нагрузка для всех стратегий.
+         * События сбоев читаются из tb/fault_events.csv.
          *
-         * Часть ошибок одиночная.
-         * Часть ошибок образует пары в одном слове, чтобы проверить,
-         * успевает ли стратегия устранить первую ошибку до появления второй.
+         * Текущая версия поддерживает не более одного события
+         * на один такт моделирования. Для кластерных одномоментных
+         * событий позже будет добавлен отдельный интерфейс.
          */
-        if (cycle_index == 120) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd3;
-            tb_inject_bit = 6'd5;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 260) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd7;
-            tb_inject_bit = 6'd10;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 430) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd0;
-            tb_inject_bit = 6'd2;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 450) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd0;
-            tb_inject_bit = 6'd4;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 740) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd5;
-            tb_inject_bit = 6'd9;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 760) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd5;
-            tb_inject_bit = 6'd14;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 980) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd9;
-            tb_inject_bit = 6'd1;
-            injected_event_count = injected_event_count + 1;
-        end else if (cycle_index == 1120) begin
-            tb_inject_en = 1'b1;
-            tb_inject_addr = 4'd2;
-            tb_inject_bit = 6'd20;
-            injected_event_count = injected_event_count + 1;
+        if (fault_event_index < fault_event_count) begin
+            if (fault_event_time[fault_event_index] < cycle_index) begin
+                $display("ERROR: missed fault event at time %0d", fault_event_time[fault_event_index]);
+                error_count = error_count + 1;
+                fault_event_index = fault_event_index + 1;
+            end else if (fault_event_time[fault_event_index] == cycle_index) begin
+                tb_inject_en = 1'b1;
+                tb_inject_addr = fault_event_addr[fault_event_index][ADDR_WIDTH-1:0];
+                tb_inject_bit = fault_event_bit[fault_event_index][5:0];
+
+                injected_event_count = injected_event_count + 1;
+                fault_event_index = fault_event_index + 1;
+
+                if ((fault_event_index < fault_event_count) &&
+                    (fault_event_time[fault_event_index] == cycle_index)) begin
+                    $display("ERROR: multiple fault events in one cycle are not supported yet");
+                    $display("  cycle = %0d", cycle_index);
+                    error_count = error_count + 1;
+                end
+            end
         end
     end
 endtask
@@ -574,6 +608,7 @@ initial begin
     encoder_data_in = 32'd0;
 
     configure_strategy();
+    load_fault_events();
 
     repeat (3) @(posedge clk);
     #1;
@@ -624,9 +659,9 @@ initial begin
      */
     audit_final_memory();
 
-    if (injected_event_count !== 8) begin
+    if (injected_event_count !== fault_event_count) begin
         $display("ERROR: wrong injected_event_count");
-        $display("  expected = 8");
+        $display("  expected = %0d", fault_event_count);
         $display("  actual   = %0d", injected_event_count);
         error_count = error_count + 1;
     end
