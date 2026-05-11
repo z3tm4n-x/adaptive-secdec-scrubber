@@ -10,7 +10,33 @@ FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 
-.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+
+prepare_dirs:
+	mkdir -p results/logs results/tables results/figures
+
+test_all: prepare_dirs \
+	test_counter \
+	check_secded_ref \
+	test_secded_encoder \
+	test_secded_decoder \
+	test_secded_codec \
+	test_memory_model \
+	test_fixed_scrub_controller \
+	test_interval_selector \
+	test_adaptive_scrub_controller \
+	test_adaptive_safe_mode \
+	test_adaptive_threshold_mode \
+	test_adaptive_metrics \
+	test_strategy_comparison_upsets_paired
+
+synth_all: prepare_dirs \
+	synth_counter \
+	synth_secded_encoder \
+	synth_secded_decoder \
+	synth_fixed_scrub_controller \
+	synth_interval_selector \
+	synth_adaptive_scrub_controller
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
