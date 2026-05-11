@@ -8,9 +8,9 @@ localparam LEVEL_WIDTH = 3;
 localparam INTERVAL_WIDTH = 32;
 localparam DEPTH = (1 << ADDR_WIDTH);
 
-localparam TOTAL_RUN_CYCLES = 1300;
-localparam MAX_FAULT_EVENTS = 1024;
-localparam MAX_CONTROL_EVENTS = 4096;
+localparam DEFAULT_TOTAL_RUN_CYCLES = 1300;
+localparam MAX_FAULT_EVENTS = 100000;
+localparam MAX_CONTROL_EVENTS = 100000;
 
 localparam MODE_FIXED     = 2'd0;
 localparam MODE_TABLE     = 2'd1;
@@ -121,6 +121,7 @@ integer strategy_id;
 reg [127:0] strategy_name;
 
 integer sim_cycle;
+integer total_run_cycles;
 integer i;
 integer error_count;
 integer injected_event_count;
@@ -301,6 +302,22 @@ task read_memory_word;
     end
 endtask
 
+task configure_run_length;
+    begin
+        if (!$value$plusargs("TOTAL_RUN_CYCLES=%d", total_run_cycles)) begin
+            total_run_cycles = DEFAULT_TOTAL_RUN_CYCLES;
+        end
+
+        if (total_run_cycles <= 0) begin
+            $display("ERROR: TOTAL_RUN_CYCLES must be positive");
+            $display("  actual = %0d", total_run_cycles);
+            $fatal(1);
+        end
+
+        $display("Total run cycles: %0d", total_run_cycles);
+    end
+endtask
+
 task configure_strategy;
     begin
         if (!$value$plusargs("STRATEGY=%d", strategy_id)) begin
@@ -313,7 +330,12 @@ task configure_strategy;
          * поэтому max_control_age заведомо больше длительности моделирования.
          */
         safe_interval = 32'd5;
-        max_control_age = 32'd10000;
+
+        /*
+        * В сравнительном эксперименте безопасный режим не должен включаться
+        * только из-за окончания расписания управляющих уровней.
+        */
+        max_control_age = total_run_cycles + 100;
 
         /*
          * Таблица уровень -> интервал.
@@ -653,6 +675,7 @@ initial begin
 
     encoder_data_in = 32'd0;
 
+    configure_run_length();
     configure_strategy();
     load_fault_events();
     load_control_levels();
@@ -678,7 +701,7 @@ initial begin
     /*
      * Основной цикл моделирования.
      */
-    for (sim_cycle = 0; sim_cycle < TOTAL_RUN_CYCLES; sim_cycle = sim_cycle + 1) begin
+    for (sim_cycle = 0; sim_cycle < total_run_cycles; sim_cycle = sim_cycle + 1) begin
         apply_level_schedule(sim_cycle);
         apply_error_schedule(sim_cycle);
 
