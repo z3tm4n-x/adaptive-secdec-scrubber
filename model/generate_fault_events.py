@@ -18,6 +18,15 @@ DEFAULT_TOTAL_CYCLES = 1300
 
 
 FaultEvent = tuple[int, int, int]
+
+def bit_to_mask(bit_index: int) -> int:
+    if bit_index < 0 or bit_index >= CODEWORD_WIDTH:
+        raise ValueError(
+            f"bit_index={bit_index} is outside codeword width {CODEWORD_WIDTH}"
+        )
+
+    return 1 << bit_index
+
 ControlLevelEvent = tuple[int, int]
 
 def baseline_events() -> list[FaultEvent]:
@@ -25,17 +34,19 @@ def baseline_events() -> list[FaultEvent]:
     Базовый детерминированный сценарий сбойных событий.
 
     Формат события:
-        модельный такт, адрес слова, номер бита в кодовом слове.
+        модельный такт, адрес слова, битовая маска кодового слова.
+
+    Для одиночной ошибки маска содержит ровно один установленный бит.
     """
     return [
-        (120, 3, 5),
-        (260, 7, 10),
-        (430, 0, 2),
-        (450, 0, 4),
-        (740, 5, 9),
-        (760, 5, 14),
-        (980, 9, 1),
-        (1120, 2, 20),
+        (120, 3, bit_to_mask(5)),
+        (260, 7, bit_to_mask(10)),
+        (430, 0, bit_to_mask(2)),
+        (450, 0, bit_to_mask(4)),
+        (740, 5, bit_to_mask(9)),
+        (760, 5, bit_to_mask(14)),
+        (980, 9, bit_to_mask(1)),
+        (1120, 2, bit_to_mask(20)),
     ]
 
 def baseline_control_levels() -> list[ControlLevelEvent]:
@@ -281,8 +292,9 @@ def add_single_events(
 
         address = rng.randrange(DEPTH)
         bit_index = rng.randrange(CODEWORD_WIDTH)
+        fault_mask = bit_to_mask(bit_index)
 
-        events.append((cycle, address, bit_index))
+        events.append((cycle, address, fault_mask))
 
 
 def add_paired_events(
@@ -354,8 +366,8 @@ def add_paired_events(
                 used_cycles.add(first_cycle)
                 used_cycles.add(second_cycle)
 
-                events.append((first_cycle, address, first_bit))
-                events.append((second_cycle, address, second_bit))
+                events.append((first_cycle, address, bit_to_mask(first_bit)))
+                events.append((second_cycle, address, bit_to_mask(second_bit)))
 
                 placed = True
                 break
@@ -439,7 +451,7 @@ def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -
     previous_time = -1
     used_times: set[int] = set()
 
-    for index, (time_cycle, address, bit_index) in enumerate(events):
+    for index, (time_cycle, address, fault_mask) in enumerate(events):
         if time_cycle < 0:
             raise ValueError(f"Event {index}: negative time_cycle={time_cycle}")
 
@@ -466,9 +478,12 @@ def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -
                 f"Event {index}: address={address} is outside memory depth {DEPTH}"
             )
 
-        if bit_index < 0 or bit_index >= CODEWORD_WIDTH:
+        if fault_mask <= 0:
+            raise ValueError(f"Event {index}: fault_mask must be non-zero")
+
+        if fault_mask >= (1 << CODEWORD_WIDTH):
             raise ValueError(
-                f"Event {index}: bit_index={bit_index} is outside "
+                f"Event {index}: fault_mask=0x{fault_mask:x} exceeds "
                 f"codeword width {CODEWORD_WIDTH}"
             )
 
@@ -509,8 +524,8 @@ def write_events(events: list[FaultEvent], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with output_path.open("w", encoding="utf-8", newline="\n") as file:
-        for time_cycle, address, bit_index in events:
-            file.write(f"{time_cycle},{address},{bit_index}\n")
+        for time_cycle, address, fault_mask in events:
+            file.write(f"{time_cycle},{address},{fault_mask:010x}\n")
 
 
 def write_control_levels(

@@ -71,7 +71,7 @@ reg [CODEWORD_WIDTH-1:0] tb_write_data;
 
 reg tb_inject_en;
 reg [ADDR_WIDTH-1:0] tb_inject_addr;
-reg [5:0] tb_inject_bit;
+reg [CODEWORD_WIDTH-1:0] tb_inject_mask;
 
 wire mem_read_en;
 wire [ADDR_WIDTH-1:0] mem_read_addr;
@@ -133,7 +133,7 @@ integer unique_uncorrectable_word_count;
 
 integer fault_event_time [0:MAX_FAULT_EVENTS-1];
 integer fault_event_addr [0:MAX_FAULT_EVENTS-1];
-integer fault_event_bit  [0:MAX_FAULT_EVENTS-1];
+reg [CODEWORD_WIDTH-1:0] fault_event_mask [0:MAX_FAULT_EVENTS-1];
 
 integer fault_event_count;
 integer fault_event_index;
@@ -141,7 +141,7 @@ integer fault_file;
 integer fault_read_count;
 integer fault_time_value;
 integer fault_addr_value;
-integer fault_bit_value;
+reg [CODEWORD_WIDTH-1:0] fault_mask_value;
 
 integer control_event_time [0:MAX_CONTROL_EVENTS-1];
 integer control_event_level [0:MAX_CONTROL_EVENTS-1];
@@ -194,9 +194,13 @@ protected_memory_model #(
     .write_addr(mem_write_addr),
     .write_data(mem_write_data),
 
-    .inject_en(tb_inject_en),
-    .inject_addr(tb_inject_addr),
-    .inject_bit(tb_inject_bit)
+    .inject_en(1'b0),
+    .inject_addr({ADDR_WIDTH{1'b0}}),
+    .inject_bit(6'd0),
+
+    .inject_mask_en(tb_inject_en),
+    .inject_mask_addr(tb_inject_addr),
+    .inject_mask(tb_inject_mask)
 );
 
 adaptive_scrub_controller #(
@@ -406,10 +410,10 @@ task load_fault_events;
         while (!$feof(fault_file)) begin
             fault_read_count = $fscanf(
                 fault_file,
-                "%d,%d,%d\n",
+                "%d,%d,%h\n",
                 fault_time_value,
                 fault_addr_value,
-                fault_bit_value
+                fault_mask_value
             );
 
             if (fault_read_count == 3) begin
@@ -420,7 +424,12 @@ task load_fault_events;
 
                 fault_event_time[fault_event_count] = fault_time_value;
                 fault_event_addr[fault_event_count] = fault_addr_value;
-                fault_event_bit[fault_event_count] = fault_bit_value;
+                if (fault_mask_value == {CODEWORD_WIDTH{1'b0}}) begin
+                    $display("ERROR: zero fault mask");
+                    $fatal(1);
+                end
+
+                fault_event_mask[fault_event_count] = fault_mask_value;
 
                 fault_event_count = fault_event_count + 1;
             end
@@ -515,7 +524,7 @@ task apply_error_schedule;
     begin
         tb_inject_en = 1'b0;
         tb_inject_addr = {ADDR_WIDTH{1'b0}};
-        tb_inject_bit = 6'd0;
+        tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
 
         /*
          * События сбоев читаются из tb/fault_events.csv.
@@ -532,7 +541,7 @@ task apply_error_schedule;
             end else if (fault_event_time[fault_event_index] == cycle_index) begin
                 tb_inject_en = 1'b1;
                 tb_inject_addr = fault_event_addr[fault_event_index][ADDR_WIDTH-1:0];
-                tb_inject_bit = fault_event_bit[fault_event_index][5:0];
+                tb_inject_mask = fault_event_mask[fault_event_index];
 
                 injected_event_count = injected_event_count + 1;
                 fault_event_index = fault_event_index + 1;
@@ -671,7 +680,7 @@ initial begin
 
     tb_inject_en = 1'b0;
     tb_inject_addr = {ADDR_WIDTH{1'b0}};
-    tb_inject_bit = 6'd0;
+    tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
 
     encoder_data_in = 32'd0;
 
@@ -709,7 +718,7 @@ initial begin
         #1;
 
         ctrl_update = 1'b0;
-        tb_inject_en = 1'b0;
+        tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
     end
 
     /*
