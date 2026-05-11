@@ -27,6 +27,32 @@ def bit_to_mask(bit_index: int) -> int:
 
     return 1 << bit_index
 
+def random_distinct_bit_mask(
+    rng: random.Random,
+    bit_count: int,
+) -> int:
+    """
+    Формирует маску из bit_count различных битов кодового слова.
+
+    bit_count = 1 соответствует одиночной ошибке.
+    bit_count = 2 соответствует мгновенному двухбитовому кластеру.
+    """
+    if bit_count <= 0:
+        raise ValueError("bit_count must be positive")
+
+    if bit_count > CODEWORD_WIDTH:
+        raise ValueError(
+            f"bit_count={bit_count} exceeds codeword width {CODEWORD_WIDTH}"
+        )
+
+    selected_bits = rng.sample(range(CODEWORD_WIDTH), bit_count)
+
+    mask = 0
+    for bit_index in selected_bits:
+        mask |= bit_to_mask(bit_index)
+
+    return mask
+
 ControlLevelEvent = tuple[int, int]
 
 def baseline_events() -> list[FaultEvent]:
@@ -379,6 +405,47 @@ def add_paired_events(
             )
 
 
+def add_instant_cluster_events(
+    events: list[FaultEvent],
+    used_cycles: set[int],
+    rng: random.Random,
+    weights: list[float],
+    total_cycles: int,
+    cluster_event_count: int,
+    cluster_bit_count: int,
+) -> None:
+    """
+    Добавляет мгновенные кластерные события.
+
+    Каждое событие имеет вид:
+        t, address A, mask
+
+    В отличие от накопительной пары, здесь несколько битов
+    одного кодового слова повреждаются в один и тот же модельный такт.
+    """
+    if cluster_event_count < 0:
+        raise ValueError("cluster_event_count must be non-negative")
+
+    if cluster_bit_count <= 1:
+        raise ValueError("cluster_bit_count must be greater than 1")
+
+    if cluster_bit_count > CODEWORD_WIDTH:
+        raise ValueError(
+            f"cluster_bit_count={cluster_bit_count} exceeds "
+            f"codeword width {CODEWORD_WIDTH}"
+        )
+
+    for _ in range(cluster_event_count):
+        preferred_cycle = weighted_cycle_from_series(rng, weights, total_cycles)
+        cycle = find_free_cycle_near(preferred_cycle, used_cycles, total_cycles)
+
+        used_cycles.add(cycle)
+
+        address = rng.randrange(DEPTH)
+        fault_mask = random_distinct_bit_mask(rng, cluster_bit_count)
+
+        events.append((cycle, address, fault_mask))
+
 def upsets_weighted_events(
     input_path: Path,
     start_index: int,
@@ -388,6 +455,8 @@ def upsets_weighted_events(
     paired_event_count: int,
     pair_gap_min: int,
     pair_gap_max: int,
+    cluster_event_count: int,
+    cluster_bit_count: int,
     seed: int,
 ) -> list[FaultEvent]:
     """
@@ -395,11 +464,14 @@ def upsets_weighted_events(
 
     Модель:
         - event_count одиночных событий;
-        - paired_event_count парных событий;
+        - paired_event_count накопительных пар;
+        - cluster_event_count мгновенных кластерных событий;
         - моменты событий выбираются с вероятностью,
           пропорциональной upsets(t);
-        - адреса и биты выбираются равномерно;
-        - в одной паре оба события относятся к одному адресу.
+        - адреса выбираются равномерно;
+        - в накопительной паре оба события относятся к одному адресу;
+        - в мгновенном кластере несколько битов одного слова
+          повреждаются в один модельный такт.
     """
     if total_cycles <= 0:
         raise ValueError("total_cycles must be positive")
@@ -407,7 +479,7 @@ def upsets_weighted_events(
     if event_count < 0:
         raise ValueError("event_count must be non-negative")
 
-    total_injections = event_count + 2 * paired_event_count
+    total_injections = event_count + 2 * paired_event_count + cluster_event_count
 
     if total_injections > total_cycles:
         raise ValueError(
@@ -441,6 +513,16 @@ def upsets_weighted_events(
         paired_event_count=paired_event_count,
         pair_gap_min=pair_gap_min,
         pair_gap_max=pair_gap_max,
+    )
+
+    add_instant_cluster_events(
+        events=events,
+        used_cycles=used_cycles,
+        rng=rng,
+        weights=window,
+        total_cycles=total_cycles,
+        cluster_event_count=cluster_event_count,
+        cluster_bit_count=cluster_bit_count,
     )
 
     events.sort(key=lambda item: item[0])
@@ -629,6 +711,23 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--cluster-event-count",
+        type=int,
+        default=0,
+        help=(
+            "Number of instantaneous cluster events for --scenario upsets. "
+            "Each cluster creates one mask-based injection."
+        ),
+    )
+
+    parser.add_argument(
+        "--cluster-bit-count",
+        type=int,
+        default=2,
+        help="Number of flipped bits in each instantaneous cluster.",
+    )
+
+    parser.add_argument(
         "--pair-gap-min",
         type=int,
         default=10,
@@ -668,6 +767,8 @@ def main() -> None:
             paired_event_count=args.paired_event_count,
             pair_gap_min=args.pair_gap_min,
             pair_gap_max=args.pair_gap_max,
+            cluster_event_count=args.cluster_event_count,
+            cluster_bit_count=args.cluster_bit_count,
             seed=args.seed,
         )
 
@@ -701,6 +802,10 @@ def main() -> None:
         print(f"Start index: {args.start_index}")
         print(f"Window size: {args.window_size}")
         print(f"Total cycles: {args.total_cycles}")
+        print(f"Single events: {args.event_count}")
+        print(f"Paired events: {args.paired_event_count}")
+        print(f"Cluster events: {args.cluster_event_count}")
+        print(f"Cluster bit count: {args.cluster_bit_count}")
         print(f"Seed: {args.seed}")
 
 

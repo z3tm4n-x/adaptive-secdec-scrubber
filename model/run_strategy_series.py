@@ -37,6 +37,8 @@ SERIES_COLUMNS = [
     "paired_event_count",
     "pair_gap_min",
     "pair_gap_max",
+    "cluster_event_count",
+    "cluster_bit_count",
     *BASE_COLUMNS,
 ]
 
@@ -71,6 +73,8 @@ def append_series_rows(
     paired_event_count: int,
     pair_gap_min: int,
     pair_gap_max: int,
+    cluster_event_count: int,
+    cluster_bit_count: int,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -92,6 +96,8 @@ def append_series_rows(
                 "paired_event_count": paired_event_count,
                 "pair_gap_min": pair_gap_min,
                 "pair_gap_max": pair_gap_max,
+                "cluster_event_count": cluster_event_count,
+                "cluster_bit_count": cluster_bit_count,
             }
 
             for column in BASE_COLUMNS:
@@ -109,6 +115,8 @@ def run_one_seed(
     paired_event_count: int,
     pair_gap_min: int,
     pair_gap_max: int,
+    cluster_event_count: int,
+    cluster_bit_count: int,
     make_command: str,
 ) -> None:
     command = [
@@ -121,6 +129,8 @@ def run_one_seed(
         f"FAULT_PAIRED_EVENT_COUNT={paired_event_count}",
         f"FAULT_PAIR_GAP_MIN={pair_gap_min}",
         f"FAULT_PAIR_GAP_MAX={pair_gap_max}",
+        f"FAULT_CLUSTER_EVENT_COUNT={cluster_event_count}",
+        f"FAULT_CLUSTER_BIT_COUNT={cluster_bit_count}",
         f"FAULT_SEED={seed}",
     ]
 
@@ -202,6 +212,20 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--cluster-event-count",
+        type=int,
+        default=10,
+        help="Number of instantaneous cluster events.",
+    )
+
+    parser.add_argument(
+        "--cluster-bit-count",
+        type=int,
+        default=2,
+        help="Number of flipped bits in each instantaneous cluster.",
+    )
+
+    parser.add_argument(
         "--single-run-input",
         type=Path,
         default=Path("results/tables/strategy_comparison.csv"),
@@ -247,6 +271,8 @@ def main() -> None:
             paired_event_count=args.paired_event_count,
             pair_gap_min=args.pair_gap_min,
             pair_gap_max=args.pair_gap_max,
+            cluster_event_count=args.cluster_event_count,
+            cluster_bit_count=args.cluster_bit_count,
             make_command=args.make_command,
         )
 
@@ -263,6 +289,8 @@ def main() -> None:
             paired_event_count=args.paired_event_count,
             pair_gap_min=args.pair_gap_min,
             pair_gap_max=args.pair_gap_max,
+            cluster_event_count=args.cluster_event_count,
+            cluster_bit_count=args.cluster_bit_count,
         )
 
     print("")

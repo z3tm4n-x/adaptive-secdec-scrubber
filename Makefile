@@ -9,6 +9,8 @@ FAULT_SEED ?= 12345
 FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
+FAULT_CLUSTER_EVENT_COUNT ?= 0
+FAULT_CLUSTER_BIT_COUNT ?= 2
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -17,6 +19,8 @@ SERIES_EVENT_COUNT ?= 80
 SERIES_PAIRED_EVENT_COUNT ?= 20
 SERIES_PAIR_GAP_MIN ?= 60
 SERIES_PAIR_GAP_MAX ?= 300
+SERIES_CLUSTER_EVENT_COUNT ?= 10
+SERIES_CLUSTER_BIT_COUNT ?= 2
 
 .PHONY: test_counter test_memory_model test_strategy_comparison plot_strategy_series analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
@@ -139,6 +143,8 @@ gen_fault_events:
 		--paired-event-count $(FAULT_PAIRED_EVENT_COUNT) \
 		--pair-gap-min $(FAULT_PAIR_GAP_MIN) \
 		--pair-gap-max $(FAULT_PAIR_GAP_MAX) \
+		--cluster-event-count $(FAULT_CLUSTER_EVENT_COUNT) \
+		--cluster-bit-count $(FAULT_CLUSTER_BIT_COUNT) \
 		--seed $(FAULT_SEED)
 
 test_strategy_comparison: prepare_dirs gen_fault_events
@@ -157,6 +163,8 @@ test_strategy_comparison_upsets_paired:
 		FAULT_PAIRED_EVENT_COUNT=2 \
 		FAULT_PAIR_GAP_MIN=60 \
 		FAULT_PAIR_GAP_MAX=130 \
+		FAULT_CLUSTER_EVENT_COUNT=2 \
+		FAULT_CLUSTER_BIT_COUNT=2 \
 		FAULT_SEED=12345
 
 analyze_strategy_results:
@@ -182,7 +190,9 @@ strategy_series: prepare_dirs
 		--event-count $(SERIES_EVENT_COUNT) \
 		--paired-event-count $(SERIES_PAIRED_EVENT_COUNT) \
 		--pair-gap-min $(SERIES_PAIR_GAP_MIN) \
-		--pair-gap-max $(SERIES_PAIR_GAP_MAX)
+		--pair-gap-max $(SERIES_PAIR_GAP_MAX) \
+		--cluster-event-count $(SERIES_CLUSTER_EVENT_COUNT) \
+		--cluster-bit-count $(SERIES_CLUSTER_BIT_COUNT)
 
 analyze_strategy_series: prepare_dirs
 	$(PYTHON) model/analyze_strategy_series.py \
