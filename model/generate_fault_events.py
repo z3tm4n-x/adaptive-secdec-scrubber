@@ -17,7 +17,10 @@ DEPTH = 1 << ADDR_WIDTH
 DEFAULT_TOTAL_CYCLES = 1300
 
 
-def baseline_events() -> list[tuple[int, int, int]]:
+FaultEvent = tuple[int, int, int]
+
+
+def baseline_events() -> list[FaultEvent]:
     """
     Базовый детерминированный сценарий сбойных событий.
 
@@ -111,10 +114,6 @@ def weighted_cycle_from_series(
     """
     Выбирает такт моделирования с вероятностью,
     пропорциональной значению временного ряда.
-
-    Индекс временного ряда сначала выбирается по весу,
-    затем равномерно отображается внутрь соответствующего
-    участка модельного времени.
     """
     total_weight = sum(weights)
 
@@ -145,52 +144,49 @@ def weighted_cycle_from_series(
     return cycle
 
 
-def upsets_weighted_events(
-    input_path: Path,
-    start_index: int,
-    window_size: int,
+def find_free_cycle_near(
+    preferred_cycle: int,
+    used_cycles: set[int],
+    total_cycles: int,
+) -> int:
+    """
+    Находит ближайший свободный такт к preferred_cycle.
+    Это нужно, потому что текущий Verilog-стенд поддерживает
+    не более одного события на один такт.
+    """
+    if preferred_cycle < 0:
+        preferred_cycle = 0
+
+    if preferred_cycle >= total_cycles:
+        preferred_cycle = total_cycles - 1
+
+    if preferred_cycle not in used_cycles:
+        return preferred_cycle
+
+    for distance in range(1, total_cycles):
+        right = preferred_cycle + distance
+        left = preferred_cycle - distance
+
+        if right < total_cycles and right not in used_cycles:
+            return right
+
+        if left >= 0 and left not in used_cycles:
+            return left
+
+    raise ValueError("No free simulation cycle is available")
+
+
+def add_single_events(
+    events: list[FaultEvent],
+    used_cycles: set[int],
+    rng: random.Random,
+    weights: list[float],
     total_cycles: int,
     event_count: int,
-    seed: int,
-) -> list[tuple[int, int, int]]:
-    """
-    Генерирует поток сбойных событий из временного ряда upsets(t).
-
-    Это первая нагрузочная модель:
-        - число событий задаётся параметром event_count;
-        - момент события выбирается с вероятностью,
-          пропорциональной upsets(t);
-        - адрес и бит выбираются равномерно;
-        - если два события попали в один такт, второе сдвигается вправо.
-
-    Для статьи эту модель затем можно расширить до пуассоновского
-    процесса с параметром, зависящим от upsets(t).
-    """
-    values = read_upsets_xlsx(input_path)
-    window = select_window(values, start_index, window_size)
-
-    rng = random.Random(seed)
-
-    used_cycles: set[int] = set()
-    events: list[tuple[int, int, int]] = []
-
+) -> None:
     for _ in range(event_count):
-        cycle = weighted_cycle_from_series(rng, window, total_cycles)
-
-        # Если два события попали в один такт, сдвигаем новое событие
-        # к ближайшему свободному такту.
-
-        while cycle in used_cycles and cycle < total_cycles - 1:
-            cycle += 1
-
-        while cycle in used_cycles and cycle > 0:
-            cycle -= 1
-
-        if cycle in used_cycles:
-            raise ValueError(
-                "Could not place all events into unique cycles. "
-                "Reduce event_count or increase total_cycles."
-            )
+        preferred_cycle = weighted_cycle_from_series(rng, weights, total_cycles)
+        cycle = find_free_cycle_near(preferred_cycle, used_cycles, total_cycles)
 
         used_cycles.add(cycle)
 
@@ -199,12 +195,160 @@ def upsets_weighted_events(
 
         events.append((cycle, address, bit_index))
 
+
+def add_paired_events(
+    events: list[FaultEvent],
+    used_cycles: set[int],
+    rng: random.Random,
+    weights: list[float],
+    total_cycles: int,
+    paired_event_count: int,
+    pair_gap_min: int,
+    pair_gap_max: int,
+) -> None:
+    """
+    Добавляет парные события в одно слово памяти.
+
+    Каждая пара имеет вид:
+        t,      address A, bit b1
+        t+gap,  address A, bit b2
+
+    Если скраббинг успевает пройти слово A между этими событиями,
+    первая ошибка исправляется. Если не успевает, в слове накапливаются
+    две ошибки и SECDED фиксирует неустранимое состояние.
+    """
+    if paired_event_count < 0:
+        raise ValueError("paired_event_count must be non-negative")
+
+    if pair_gap_min <= 0:
+        raise ValueError("pair_gap_min must be positive")
+
+    if pair_gap_max < pair_gap_min:
+        raise ValueError("pair_gap_max must be >= pair_gap_min")
+
+    for pair_index in range(paired_event_count):
+        placed = False
+
+        for _attempt in range(1000):
+            gap = rng.randint(pair_gap_min, pair_gap_max)
+
+            if gap >= total_cycles:
+                raise ValueError("pair gap must be smaller than total_cycles")
+
+            preferred_first = weighted_cycle_from_series(rng, weights, total_cycles)
+
+            if preferred_first + gap >= total_cycles:
+                preferred_first = total_cycles - 1 - gap
+
+            first_cycle = preferred_first
+            second_cycle = first_cycle + gap
+
+            if first_cycle < 0:
+                first_cycle = 0
+                second_cycle = first_cycle + gap
+
+            if (
+                first_cycle != second_cycle
+                and first_cycle not in used_cycles
+                and second_cycle not in used_cycles
+                and 0 <= first_cycle < total_cycles
+                and 0 <= second_cycle < total_cycles
+            ):
+                address = rng.randrange(DEPTH)
+
+                first_bit = rng.randrange(CODEWORD_WIDTH)
+                second_bit = rng.randrange(CODEWORD_WIDTH)
+
+                while second_bit == first_bit:
+                    second_bit = rng.randrange(CODEWORD_WIDTH)
+
+                used_cycles.add(first_cycle)
+                used_cycles.add(second_cycle)
+
+                events.append((first_cycle, address, first_bit))
+                events.append((second_cycle, address, second_bit))
+
+                placed = True
+                break
+
+        if not placed:
+            raise ValueError(
+                f"Could not place paired event {pair_index}. "
+                "Try reducing paired_event_count or gap range."
+            )
+
+
+def upsets_weighted_events(
+    input_path: Path,
+    start_index: int,
+    window_size: int,
+    total_cycles: int,
+    event_count: int,
+    paired_event_count: int,
+    pair_gap_min: int,
+    pair_gap_max: int,
+    seed: int,
+) -> list[FaultEvent]:
+    """
+    Генерирует поток сбойных событий из временного ряда upsets(t).
+
+    Модель:
+        - event_count одиночных событий;
+        - paired_event_count парных событий;
+        - моменты событий выбираются с вероятностью,
+          пропорциональной upsets(t);
+        - адреса и биты выбираются равномерно;
+        - в одной паре оба события относятся к одному адресу.
+    """
+    if total_cycles <= 0:
+        raise ValueError("total_cycles must be positive")
+
+    if event_count < 0:
+        raise ValueError("event_count must be non-negative")
+
+    total_injections = event_count + 2 * paired_event_count
+
+    if total_injections > total_cycles:
+        raise ValueError(
+            f"Too many injections: {total_injections} for "
+            f"total_cycles={total_cycles}"
+        )
+
+    values = read_upsets_xlsx(input_path)
+    window = select_window(values, start_index, window_size)
+
+    rng = random.Random(seed)
+
+    used_cycles: set[int] = set()
+    events: list[FaultEvent] = []
+
+    add_single_events(
+        events=events,
+        used_cycles=used_cycles,
+        rng=rng,
+        weights=window,
+        total_cycles=total_cycles,
+        event_count=event_count,
+    )
+
+    add_paired_events(
+        events=events,
+        used_cycles=used_cycles,
+        rng=rng,
+        weights=window,
+        total_cycles=total_cycles,
+        paired_event_count=paired_event_count,
+        pair_gap_min=pair_gap_min,
+        pair_gap_max=pair_gap_max,
+    )
+
     events.sort(key=lambda item: item[0])
     return events
 
 
-def validate_events(events: list[tuple[int, int, int]], total_cycles: int | None = None) -> None:
+def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -> None:
     previous_time = -1
+    used_times: set[int] = set()
 
     for index, (time_cycle, address, bit_index) in enumerate(events):
         if time_cycle < 0:
@@ -222,6 +366,12 @@ def validate_events(events: list[tuple[int, int, int]], total_cycles: int | None
                 f"({time_cycle} after {previous_time})"
             )
 
+        if time_cycle in used_times:
+            raise ValueError(
+                f"Event {index}: more than one event in cycle {time_cycle} "
+                "is not supported by the current Verilog testbench"
+            )
+
         if address < 0 or address >= DEPTH:
             raise ValueError(
                 f"Event {index}: address={address} is outside memory depth {DEPTH}"
@@ -233,15 +383,34 @@ def validate_events(events: list[tuple[int, int, int]], total_cycles: int | None
                 f"codeword width {CODEWORD_WIDTH}"
             )
 
+        used_times.add(time_cycle)
         previous_time = time_cycle
 
 
-def write_events(events: list[tuple[int, int, int]], output_path: Path) -> None:
+def write_events(events: list[FaultEvent], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with output_path.open("w", encoding="utf-8", newline="\n") as file:
         for time_cycle, address, bit_index in events:
             file.write(f"{time_cycle},{address},{bit_index}\n")
+
+
+def print_summary(
+    events: list[FaultEvent],
+    scenario: str,
+    paired_event_count: int,
+) -> None:
+    address_counts: dict[int, int] = {}
+
+    for _time_cycle, address, _bit_index in events:
+        address_counts[address] = address_counts.get(address, 0) + 1
+
+    repeated_addresses = sum(1 for count in address_counts.values() if count >= 2)
+
+    print(f"Generated {len(events)} fault injections")
+    print(f"Scenario: {scenario}")
+    print(f"Paired events: {paired_event_count}")
+    print(f"Addresses with repeated injections: {repeated_addresses}")
 
 
 def main() -> None:
@@ -295,7 +464,31 @@ def main() -> None:
         "--event-count",
         type=int,
         default=8,
-        help="Number of generated fault events for --scenario upsets.",
+        help="Number of single generated fault events for --scenario upsets.",
+    )
+
+    parser.add_argument(
+        "--paired-event-count",
+        type=int,
+        default=0,
+        help=(
+            "Number of paired events for --scenario upsets. "
+            "Each pair creates two injections in the same memory word."
+        ),
+    )
+
+    parser.add_argument(
+        "--pair-gap-min",
+        type=int,
+        default=10,
+        help="Minimum cycle distance between two injections in a pair.",
+    )
+
+    parser.add_argument(
+        "--pair-gap-max",
+        type=int,
+        default=80,
+        help="Maximum cycle distance between two injections in a pair.",
     )
 
     parser.add_argument(
@@ -318,6 +511,9 @@ def main() -> None:
             window_size=args.window_size,
             total_cycles=args.total_cycles,
             event_count=args.event_count,
+            paired_event_count=args.paired_event_count,
+            pair_gap_min=args.pair_gap_min,
+            pair_gap_max=args.pair_gap_max,
             seed=args.seed,
         )
         validate_events(events, total_cycles=args.total_cycles)
@@ -327,8 +523,12 @@ def main() -> None:
 
     write_events(events, args.output)
 
-    print(f"Generated {len(events)} fault events: {args.output}")
-    print(f"Scenario: {args.scenario}")
+    print(f"Generated fault events: {args.output}")
+    print_summary(
+        events=events,
+        scenario=args.scenario,
+        paired_event_count=args.paired_event_count if args.scenario == "upsets" else 0,
+    )
 
     if args.scenario == "upsets":
         print(f"Input: {args.input}")

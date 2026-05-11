@@ -6,8 +6,11 @@ FAULT_WINDOW_SIZE ?= 1300
 FAULT_TOTAL_CYCLES ?= 1300
 FAULT_EVENT_COUNT ?= 8
 FAULT_SEED ?= 12345
+FAULT_PAIRED_EVENT_COUNT ?= 0
+FAULT_PAIR_GAP_MIN ?= 10
+FAULT_PAIR_GAP_MAX ?= 80
 
-.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_adaptive_metrics test_adaptive_scrub_controller test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
+.PHONY: test_counter test_memory_model test_strategy_comparison gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics test_adaptive_scrub_controller test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec clean
 
 test_counter:
 	iverilog -o results/logs/simple_counter.out rtl/simple_counter.v tb/tb_simple_counter.v
@@ -86,6 +89,9 @@ gen_fault_events:
 		--window-size $(FAULT_WINDOW_SIZE) \
 		--total-cycles $(FAULT_TOTAL_CYCLES) \
 		--event-count $(FAULT_EVENT_COUNT) \
+		--paired-event-count $(FAULT_PAIRED_EVENT_COUNT) \
+		--pair-gap-min $(FAULT_PAIR_GAP_MIN) \
+		--pair-gap-max $(FAULT_PAIR_GAP_MAX) \
 		--seed $(FAULT_SEED)
 
 test_strategy_comparison: gen_fault_events
@@ -97,6 +103,15 @@ test_strategy_comparison: gen_fault_events
 	vvp results/logs/strategy_comparison.out +STRATEGY=1
 	vvp results/logs/strategy_comparison.out +STRATEGY=2
 	cat results/tables/strategy_comparison.csv
+
+test_strategy_comparison_upsets_paired:
+	$(MAKE) test_strategy_comparison \
+		FAULT_SCENARIO=upsets \
+		FAULT_EVENT_COUNT=8 \
+		FAULT_PAIRED_EVENT_COUNT=2 \
+		FAULT_PAIR_GAP_MIN=60 \
+		FAULT_PAIR_GAP_MAX=130 \
+		FAULT_SEED=12345
 
 clean:
 	rm -f results/logs/*.out
