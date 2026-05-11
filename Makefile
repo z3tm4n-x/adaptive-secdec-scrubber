@@ -9,8 +9,16 @@ FAULT_SEED ?= 12345
 FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
+SERIES_SEED_START ?= 1
+SERIES_SEED_COUNT ?= 10
+SERIES_TOTAL_CYCLES ?= 10000
+SERIES_WINDOW_SIZE ?= 10000
+SERIES_EVENT_COUNT ?= 80
+SERIES_PAIRED_EVENT_COUNT ?= 20
+SERIES_PAIR_GAP_MIN ?= 60
+SERIES_PAIR_GAP_MAX ?= 300
 
-.PHONY: test_counter test_memory_model test_strategy_comparison synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -163,6 +171,18 @@ plot_strategy_results:
 		--output-dir results/figures
 
 strategy_report: test_strategy_comparison_upsets_paired analyze_strategy_results plot_strategy_results
+
+strategy_series: prepare_dirs
+	$(PYTHON) model/run_strategy_series.py \
+		--scenario upsets \
+		--seed-start $(SERIES_SEED_START) \
+		--seed-count $(SERIES_SEED_COUNT) \
+		--total-cycles $(SERIES_TOTAL_CYCLES) \
+		--window-size $(SERIES_WINDOW_SIZE) \
+		--event-count $(SERIES_EVENT_COUNT) \
+		--paired-event-count $(SERIES_PAIRED_EVENT_COUNT) \
+		--pair-gap-min $(SERIES_PAIR_GAP_MIN) \
+		--pair-gap-max $(SERIES_PAIR_GAP_MAX)
 
 clean:
 	rm -f results/logs/*.out
