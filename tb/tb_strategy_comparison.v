@@ -108,6 +108,13 @@ wire [LEVEL_WIDTH-1:0] current_level;
 wire [1:0] threshold_state;
 wire [31:0] control_age;
 
+wire [38:0] checked_corrected_codeword;
+wire [31:0] checked_data_out;
+wire checked_single_error;
+wire checked_double_error;
+wire checked_uncorrectable;
+wire [5:0] checked_error_position;
+
 integer strategy_id;
 reg [127:0] strategy_name;
 
@@ -119,10 +126,33 @@ integer csv_file;
 integer busy_per_mille;
 integer scrub_per_mille;
 integer safe_per_mille;
+integer unique_uncorrectable_word_count;
+
+integer snap_total_cycle_count;
+integer snap_scrub_cycle_count;
+integer snap_memory_read_count;
+integer snap_memory_write_count;
+integer snap_corrected_error_count;
+integer snap_uncorrectable_error_count;
+integer snap_interval_switch_count;
+integer snap_safe_mode_entry_count;
+integer snap_safe_mode_cycle_count;
+integer snap_scrub_active_cycle_count;
+integer snap_memory_busy_cycle_count;
 
 secded_32_39_encoder encoder_inst (
     .data_in(encoder_data_in),
     .codeword_out(encoded_codeword)
+);
+
+secded_32_39_decoder checker_decoder_inst (
+    .codeword_in(mem_read_data),
+    .codeword_corrected(checked_corrected_codeword),
+    .data_out(checked_data_out),
+    .single_error(checked_single_error),
+    .double_error(checked_double_error),
+    .uncorrectable(checked_uncorrectable),
+    .error_position(checked_error_position)
 );
 
 protected_memory_model #(
@@ -231,6 +261,19 @@ task write_memory_word;
         #1;
 
         tb_write_en = 1'b0;
+    end
+endtask
+
+task read_memory_word;
+    input [ADDR_WIDTH-1:0] addr;
+    begin
+        tb_read_addr = addr;
+        tb_read_en = 1'b1;
+
+        @(posedge clk);
+        #1;
+
+        tb_read_en = 1'b0;
     end
 endtask
 
@@ -403,12 +446,54 @@ task apply_error_schedule;
     end
 endtask
 
+task audit_final_memory;
+    integer addr_index;
+    begin
+        unique_uncorrectable_word_count = 0;
+
+        /*
+         * После завершения основного прогона управление памятью
+         * возвращается проверочной среде. Мы читаем все слова памяти
+         * и считаем число разных адресов, в которых декодер видит
+         * неустранимую ошибку.
+         */
+        tb_mode = 1'b1;
+        tb_read_en = 1'b0;
+        tb_write_en = 1'b0;
+        tb_inject_en = 1'b0;
+
+        for (addr_index = 0; addr_index < DEPTH; addr_index = addr_index + 1) begin
+            read_memory_word(addr_index[ADDR_WIDTH-1:0]);
+
+            if (checked_uncorrectable) begin
+                unique_uncorrectable_word_count = unique_uncorrectable_word_count + 1;
+            end
+        end
+    end
+endtask
+
+task capture_metrics_snapshot;
+    begin
+        snap_total_cycle_count = total_cycle_count;
+        snap_scrub_cycle_count = scrub_cycle_count;
+        snap_memory_read_count = memory_read_count;
+        snap_memory_write_count = memory_write_count;
+        snap_corrected_error_count = corrected_error_count;
+        snap_uncorrectable_error_count = uncorrectable_error_count;
+        snap_interval_switch_count = interval_switch_count;
+        snap_safe_mode_entry_count = safe_mode_entry_count;
+        snap_safe_mode_cycle_count = safe_mode_cycle_count;
+        snap_scrub_active_cycle_count = scrub_active_cycle_count;
+        snap_memory_busy_cycle_count = memory_busy_cycle_count;
+    end
+endtask
+
 task write_results;
     begin
-        if (total_cycle_count != 32'd0) begin
-            busy_per_mille = (memory_busy_cycle_count * 1000) / total_cycle_count;
-            scrub_per_mille = (scrub_active_cycle_count * 1000) / total_cycle_count;
-            safe_per_mille = (safe_mode_cycle_count * 1000) / total_cycle_count;
+        if (snap_total_cycle_count != 0) begin
+            busy_per_mille = (snap_memory_busy_cycle_count * 1000) / snap_total_cycle_count;
+            scrub_per_mille = (snap_scrub_active_cycle_count * 1000) / snap_total_cycle_count;
+            safe_per_mille = (snap_safe_mode_cycle_count * 1000) / snap_total_cycle_count;
         end else begin
             busy_per_mille = 0;
             scrub_per_mille = 0;
@@ -423,19 +508,20 @@ task write_results;
         end else begin
             $fdisplay(
                 csv_file,
-                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                 strategy_name,
-                total_cycle_count,
-                scrub_cycle_count,
-                memory_read_count,
-                memory_write_count,
-                corrected_error_count,
-                uncorrectable_error_count,
-                interval_switch_count,
-                safe_mode_entry_count,
-                safe_mode_cycle_count,
-                scrub_active_cycle_count,
-                memory_busy_cycle_count,
+                snap_total_cycle_count,
+                snap_scrub_cycle_count,
+                snap_memory_read_count,
+                snap_memory_write_count,
+                snap_corrected_error_count,
+                snap_uncorrectable_error_count,
+                unique_uncorrectable_word_count,
+                snap_interval_switch_count,
+                snap_safe_mode_entry_count,
+                snap_safe_mode_cycle_count,
+                snap_scrub_active_cycle_count,
+                snap_memory_busy_cycle_count,
                 scrub_per_mille,
                 busy_per_mille,
                 safe_per_mille
@@ -445,15 +531,16 @@ task write_results;
         end
 
         $display("STRATEGY RESULT: %0s", strategy_name);
-        $display("  total_cycle_count        = %0d", total_cycle_count);
-        $display("  scrub_cycle_count        = %0d", scrub_cycle_count);
-        $display("  memory_read_count        = %0d", memory_read_count);
-        $display("  memory_write_count       = %0d", memory_write_count);
-        $display("  corrected_error_count    = %0d", corrected_error_count);
-        $display("  uncorrectable_error_count = %0d", uncorrectable_error_count);
-        $display("  interval_switch_count    = %0d", interval_switch_count);
-        $display("  memory_busy_cycle_count  = %0d", memory_busy_cycle_count);
-        $display("  busy_per_mille           = %0d", busy_per_mille);
+        $display("  total_cycle_count         = %0d", snap_total_cycle_count);
+        $display("  scrub_cycle_count         = %0d", snap_scrub_cycle_count);
+        $display("  memory_read_count         = %0d", snap_memory_read_count);
+        $display("  memory_write_count        = %0d", snap_memory_write_count);
+        $display("  corrected_error_count     = %0d", snap_corrected_error_count);
+        $display("  uncorrectable_detections  = %0d", snap_uncorrectable_error_count);
+        $display("  unique_uncorrectable_words = %0d", unique_uncorrectable_word_count);
+        $display("  interval_switch_count     = %0d", snap_interval_switch_count);
+        $display("  memory_busy_cycle_count   = %0d", snap_memory_busy_cycle_count);
+        $display("  busy_per_mille            = %0d", busy_per_mille);
     end
 endtask
 
@@ -520,10 +607,22 @@ initial begin
         tb_inject_en = 1'b0;
     end
 
+    /*
+     * Сохраняем снимок метрик сразу после основного окна моделирования.
+     * Дальнейший аудит памяти не должен изменять численные метрики стратегии.
+     */
+    capture_metrics_snapshot();
+
     enable = 1'b0;
 
     repeat (3) @(posedge clk);
     #1;
+
+    /*
+     * Итоговая проверка памяти:
+     * считаем число разных слов, оставшихся в неустранимом состоянии.
+     */
+    audit_final_memory();
 
     if (injected_event_count !== 8) begin
         $display("ERROR: wrong injected_event_count");

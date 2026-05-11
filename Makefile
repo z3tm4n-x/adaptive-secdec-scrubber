@@ -72,7 +72,7 @@ test_strategy_comparison:
 	mkdir -p results/logs results/tables
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
-	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
+	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
 	vvp results/logs/strategy_comparison.out +STRATEGY=0
 	vvp results/logs/strategy_comparison.out +STRATEGY=1
 	vvp results/logs/strategy_comparison.out +STRATEGY=2
