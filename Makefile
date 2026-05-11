@@ -123,6 +123,7 @@ gen_fault_events:
 		--scenario $(FAULT_SCENARIO) \
 		--input $(UPSETS_FILE) \
 		--output tb/fault_events.csv \
+		--control-output tb/control_levels.csv \
 		--start-index $(FAULT_START_INDEX) \
 		--window-size $(FAULT_WINDOW_SIZE) \
 		--total-cycles $(FAULT_TOTAL_CYCLES) \

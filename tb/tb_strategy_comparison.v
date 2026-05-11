@@ -10,6 +10,7 @@ localparam DEPTH = (1 << ADDR_WIDTH);
 
 localparam TOTAL_RUN_CYCLES = 1300;
 localparam MAX_FAULT_EVENTS = 1024;
+localparam MAX_CONTROL_EVENTS = 4096;
 
 localparam MODE_FIXED     = 2'd0;
 localparam MODE_TABLE     = 2'd1;
@@ -140,6 +141,16 @@ integer fault_read_count;
 integer fault_time_value;
 integer fault_addr_value;
 integer fault_bit_value;
+
+integer control_event_time [0:MAX_CONTROL_EVENTS-1];
+integer control_event_level [0:MAX_CONTROL_EVENTS-1];
+
+integer control_event_count;
+integer control_event_index;
+integer control_file;
+integer control_read_count;
+integer control_time_value;
+integer control_level_value;
 
 integer snap_total_cycle_count;
 integer snap_scrub_cycle_count;
@@ -399,45 +410,80 @@ task load_fault_events;
     end
 endtask
 
+
+task load_control_levels;
+    begin
+        control_event_count = 0;
+        control_event_index = 0;
+
+        control_file = $fopen("tb/control_levels.csv", "r");
+
+        if (control_file == 0) begin
+            $display("ERROR: cannot open tb/control_levels.csv");
+            $fatal(1);
+        end
+
+        while (!$feof(control_file)) begin
+            control_read_count = $fscanf(
+                control_file,
+                "%d,%d\n",
+                control_time_value,
+                control_level_value
+            );
+
+            if (control_read_count == 2) begin
+                if (control_event_count >= MAX_CONTROL_EVENTS) begin
+                    $display("ERROR: too many control level events");
+                    $fatal(1);
+                end
+
+                if ((control_level_value < 0) || (control_level_value > 7)) begin
+                    $display("ERROR: control level out of range: %0d", control_level_value);
+                    $fatal(1);
+                end
+
+                control_event_time[control_event_count] = control_time_value;
+                control_event_level[control_event_count] = control_level_value;
+
+                control_event_count = control_event_count + 1;
+            end
+        end
+
+        $fclose(control_file);
+
+        $display("Loaded control level events: %0d", control_event_count);
+    end
+endtask
+
 task apply_level_schedule;
     input integer cycle_index;
     begin
         ctrl_update = 1'b0;
 
         /*
-         * Сценарий сбойной обстановки:
-         *
-         * 0...199      фон
-         * 200...399    слабый рост
-         * 400...699    высокий уровень
-         * 700...899    максимум
-         * 900...1099   спад
-         * 1100...1299  возврат к фону
+         * Управляющие уровни читаются из tb/control_levels.csv.
+         * Формат строки: time_cycle,level.
          */
-        if (cycle_index == 0) begin
-            ctrl_level = 3'd0;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
-        end else if (cycle_index == 200) begin
-            ctrl_level = 3'd2;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
-        end else if (cycle_index == 400) begin
-            ctrl_level = 3'd6;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
-        end else if (cycle_index == 700) begin
-            ctrl_level = 3'd7;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
-        end else if (cycle_index == 900) begin
-            ctrl_level = 3'd4;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
-        end else if (cycle_index == 1100) begin
-            ctrl_level = 3'd1;
-            ctrl_valid = 1'b1;
-            ctrl_update = 1'b1;
+        if (control_event_index < control_event_count) begin
+            if (control_event_time[control_event_index] < cycle_index) begin
+                $display("ERROR: missed control level event at time %0d",
+                         control_event_time[control_event_index]);
+                error_count = error_count + 1;
+                control_event_index = control_event_index + 1;
+            end else if (control_event_time[control_event_index] == cycle_index) begin
+                ctrl_level = control_event_level[control_event_index][LEVEL_WIDTH-1:0];
+                ctrl_valid = 1'b1;
+                ctrl_update = 1'b1;
+
+                control_event_index = control_event_index + 1;
+
+                if ((control_event_index < control_event_count) &&
+                    (control_event_time[control_event_index] == cycle_index)) begin
+                    $display("ERROR: multiple control level events in one cycle are not supported");
+                    $display("  cycle = %0d", cycle_index);
+                    error_count = error_count + 1;
+                end
+            end
         end
     end
 endtask
@@ -609,6 +655,7 @@ initial begin
 
     configure_strategy();
     load_fault_events();
+    load_control_levels();
 
     repeat (3) @(posedge clk);
     #1;
@@ -658,6 +705,13 @@ initial begin
      * считаем число разных слов, оставшихся в неустранимом состоянии.
      */
     audit_final_memory();
+
+    if (control_event_index !== control_event_count) begin
+        $display("ERROR: not all control level events were applied");
+        $display("  expected = %0d", control_event_count);
+        $display("  actual   = %0d", control_event_index);
+        error_count = error_count + 1;
+    end
 
     if (injected_event_count !== fault_event_count) begin
         $display("ERROR: wrong injected_event_count");

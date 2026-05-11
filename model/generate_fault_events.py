@@ -18,7 +18,7 @@ DEFAULT_TOTAL_CYCLES = 1300
 
 
 FaultEvent = tuple[int, int, int]
-
+ControlLevelEvent = tuple[int, int]
 
 def baseline_events() -> list[FaultEvent]:
     """
@@ -38,6 +38,24 @@ def baseline_events() -> list[FaultEvent]:
         (1120, 2, 20),
     ]
 
+def baseline_control_levels() -> list[ControlLevelEvent]:
+    """
+    Базовый детерминированный сценарий управляющего уровня.
+
+    Формат события:
+        модельный такт, дискретный уровень сбойной обстановки.
+
+    Этот сценарий соответствует прежнему ручному расписанию
+    в tb_strategy_comparison.v.
+    """
+    return [
+        (0, 0),
+        (200, 2),
+        (400, 6),
+        (700, 7),
+        (900, 4),
+        (1100, 1),
+    ]
 
 def read_upsets_xlsx(input_path: Path) -> list[float]:
     """
@@ -105,6 +123,77 @@ def select_window(
 
     return values[start_index:end_index]
 
+def quantize_upset_value(value: float, max_value: float) -> int:
+    """
+    Преобразует значение временного ряда upsets(t)
+    в дискретный управляющий уровень 0...7.
+
+    Это простая нормированная аппроксимация:
+        0 соответствует нулевой или минимальной сбойной обстановке;
+        7 соответствует максимуму выбранного окна.
+    """
+    if max_value <= 0.0:
+        return 0
+
+    normalized = value / max_value
+
+    if normalized < 0.0:
+        normalized = 0.0
+
+    if normalized > 1.0:
+        normalized = 1.0
+
+    level = int(round(7.0 * normalized))
+
+    if level < 0:
+        return 0
+
+    if level > 7:
+        return 7
+
+    return level
+
+
+def control_levels_from_upsets(
+    input_path: Path,
+    start_index: int,
+    window_size: int,
+    total_cycles: int,
+) -> list[ControlLevelEvent]:
+    """
+    Формирует поток управляющих уровней из того же окна upsets(t),
+    которое используется для генерации сбойных событий.
+
+    На выходе создаются только моменты изменения уровня, а не строка
+    на каждый такт моделирования.
+    """
+    if total_cycles <= 0:
+        raise ValueError("total_cycles must be positive")
+
+    values = read_upsets_xlsx(input_path)
+    window = select_window(values, start_index, window_size)
+
+    max_value = max(window) if window else 0.0
+
+    events: list[ControlLevelEvent] = []
+    previous_level: int | None = None
+
+    for index, value in enumerate(window):
+        cycle = (index * total_cycles) // len(window)
+
+        if cycle >= total_cycles:
+            cycle = total_cycles - 1
+
+        level = quantize_upset_value(value, max_value)
+
+        if previous_level is None or level != previous_level:
+            events.append((cycle, level))
+            previous_level = level
+
+    if not events or events[0][0] != 0:
+        events.insert(0, (0, 0))
+
+    return events
 
 def weighted_cycle_from_series(
     rng: random.Random,
@@ -387,6 +476,35 @@ def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -
         previous_time = time_cycle
 
 
+def validate_control_levels(
+    events: list[ControlLevelEvent],
+    total_cycles: int | None = None,
+) -> None:
+    previous_time = -1
+
+    for index, (time_cycle, level) in enumerate(events):
+        if time_cycle < 0:
+            raise ValueError(f"Control event {index}: negative time_cycle={time_cycle}")
+
+        if total_cycles is not None and time_cycle >= total_cycles:
+            raise ValueError(
+                f"Control event {index}: time_cycle={time_cycle} is outside "
+                f"total_cycles={total_cycles}"
+            )
+
+        if time_cycle < previous_time:
+            raise ValueError(
+                f"Control event {index}: events must be sorted by time "
+                f"({time_cycle} after {previous_time})"
+            )
+
+        if level < 0 or level > 7:
+            raise ValueError(
+                f"Control event {index}: level={level} is outside range 0...7"
+            )
+
+        previous_time = time_cycle
+
 def write_events(events: list[FaultEvent], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -394,6 +512,16 @@ def write_events(events: list[FaultEvent], output_path: Path) -> None:
         for time_cycle, address, bit_index in events:
             file.write(f"{time_cycle},{address},{bit_index}\n")
 
+
+def write_control_levels(
+    events: list[ControlLevelEvent],
+    output_path: Path,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("w", encoding="utf-8", newline="\n") as file:
+        for time_cycle, level in events:
+            file.write(f"{time_cycle},{level}\n")
 
 def print_summary(
     events: list[FaultEvent],
@@ -424,6 +552,14 @@ def main() -> None:
         default=Path("tb/fault_events.csv"),
         help="Output CSV file without header. Default: tb/fault_events.csv",
     )
+
+    parser.add_argument(
+        "--control-output",
+        type=Path,
+        default=Path("tb/control_levels.csv"),
+        help="Output control-level CSV file without header. Default: tb/control_levels.csv",
+    )
+
 
     parser.add_argument(
         "--scenario",
@@ -502,7 +638,10 @@ def main() -> None:
 
     if args.scenario == "baseline":
         events = baseline_events()
+        control_events = baseline_control_levels()
+
         validate_events(events, total_cycles=args.total_cycles)
+        validate_control_levels(control_events, total_cycles=args.total_cycles)
 
     elif args.scenario == "upsets":
         events = upsets_weighted_events(
@@ -516,14 +655,26 @@ def main() -> None:
             pair_gap_max=args.pair_gap_max,
             seed=args.seed,
         )
+
+        control_events = control_levels_from_upsets(
+            input_path=args.input,
+            start_index=args.start_index,
+            window_size=args.window_size,
+            total_cycles=args.total_cycles,
+        )
+
         validate_events(events, total_cycles=args.total_cycles)
+        validate_control_levels(control_events, total_cycles=args.total_cycles)
 
     else:
         raise ValueError(f"Unsupported scenario: {args.scenario}")
 
     write_events(events, args.output)
+    write_control_levels(control_events, args.control_output)
 
     print(f"Generated fault events: {args.output}")
+    print(f"Generated control levels: {args.control_output}")
+    print(f"Control level changes: {len(control_events)}")
     print_summary(
         events=events,
         scenario=args.scenario,
