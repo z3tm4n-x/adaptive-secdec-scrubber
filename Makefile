@@ -18,7 +18,7 @@ SERIES_PAIRED_EVENT_COUNT ?= 20
 SERIES_PAIR_GAP_MIN ?= 60
 SERIES_PAIR_GAP_MAX ?= 300
 
-.PHONY: test_counter test_memory_model test_strategy_comparison strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -183,6 +183,15 @@ strategy_series: prepare_dirs
 		--paired-event-count $(SERIES_PAIRED_EVENT_COUNT) \
 		--pair-gap-min $(SERIES_PAIR_GAP_MIN) \
 		--pair-gap-max $(SERIES_PAIR_GAP_MAX)
+
+analyze_strategy_series: prepare_dirs
+	$(PYTHON) model/analyze_strategy_series.py \
+		--input results/tables/strategy_comparison_series.csv \
+		--csv-output results/tables/strategy_series_summary.csv \
+		--md-output results/tables/strategy_series_summary.md
+	cat results/tables/strategy_series_summary.md
+
+strategy_series_report: strategy_series analyze_strategy_series
 
 clean:
 	rm -f results/logs/*.out
