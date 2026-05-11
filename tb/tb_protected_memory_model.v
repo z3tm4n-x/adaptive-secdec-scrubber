@@ -20,6 +20,10 @@ reg inject_en;
 reg [ADDR_WIDTH-1:0] inject_addr;
 reg [5:0] inject_bit;
 
+reg inject_mask_en;
+reg [ADDR_WIDTH-1:0] inject_mask_addr;
+reg [CODEWORD_WIDTH-1:0] inject_mask;
+
 reg [31:0] encoder_data_in;
 wire [38:0] encoded_codeword;
 
@@ -35,6 +39,7 @@ reg [38:0] expected_codeword [0:DEPTH-1];
 
 integer i;
 integer error_count;
+reg [CODEWORD_WIDTH-1:0] expected_masked_codeword;
 
 secded_32_39_encoder encoder_inst (
     .data_in(encoder_data_in),
@@ -67,7 +72,11 @@ protected_memory_model #(
 
     .inject_en(inject_en),
     .inject_addr(inject_addr),
-    .inject_bit(inject_bit)
+    .inject_bit(inject_bit),
+
+    .inject_mask_en(inject_mask_en),
+    .inject_mask_addr(inject_mask_addr),
+    .inject_mask(inject_mask)
 );
 
 initial begin
@@ -123,6 +132,22 @@ task inject_single_bit_error;
     end
 endtask
 
+task inject_mask_error;
+    input [ADDR_WIDTH-1:0] addr;
+    input [CODEWORD_WIDTH-1:0] mask;
+    begin
+        inject_mask_addr = addr;
+        inject_mask = mask;
+        inject_mask_en = 1'b1;
+
+        @(posedge clk);
+        #1;
+
+        inject_mask_en = 1'b0;
+        inject_mask = {CODEWORD_WIDTH{1'b0}};
+    end
+endtask
+
 initial begin
     $dumpfile("results/logs/protected_memory_model.vcd");
     $dumpvars(0, tb_protected_memory_model);
@@ -137,6 +162,10 @@ initial begin
     inject_en = 1'b0;
     inject_addr = {ADDR_WIDTH{1'b0}};
     inject_bit = 6'd0;
+
+    inject_mask_en = 1'b0;
+    inject_mask_addr = {ADDR_WIDTH{1'b0}};
+    inject_mask = {CODEWORD_WIDTH{1'b0}};
 
     encoder_data_in = 32'd0;
     error_count = 0;
@@ -215,6 +244,38 @@ initial begin
         uncorrectable !== 1'b1) begin
 
         $display("ERROR: wrong flags after double-bit injection");
+        $display("  single_error  = %0d", single_error);
+        $display("  double_error  = %0d", double_error);
+        $display("  uncorrectable = %0d", uncorrectable);
+        error_count = error_count + 1;
+    end
+
+    /*
+     * 6. Проверяем мгновенный двухбитовый кластер через маску.
+     * Берём свежий адрес 4, чтобы проверка не зависела от предыдущих
+     * накопленных ошибок в адресе 3.
+     */
+    expected_masked_codeword = expected_codeword[4] ^ ((39'd1 << 2) | (39'd1 << 11));
+
+    inject_mask_error(
+        4'd4,
+        ((39'd1 << 2) | (39'd1 << 11))
+    );
+
+    read_memory_word(4'd4);
+
+    if (read_data !== expected_masked_codeword) begin
+        $display("ERROR: memory content mismatch after mask injection");
+        $display("  expected codeword = 0x%010h", expected_masked_codeword);
+        $display("  actual codeword   = 0x%010h", read_data);
+        error_count = error_count + 1;
+    end
+
+    if (single_error !== 1'b0 ||
+        double_error !== 1'b1 ||
+        uncorrectable !== 1'b1) begin
+
+        $display("ERROR: wrong flags after instantaneous two-bit mask injection");
         $display("  single_error  = %0d", single_error);
         $display("  double_error  = %0d", double_error);
         $display("  uncorrectable = %0d", uncorrectable);
