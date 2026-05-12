@@ -26,10 +26,39 @@ SERIES_SUMMARY_CSV ?= results/tables/strategy_series_summary.csv
 SERIES_SUMMARY_MD ?= results/tables/strategy_series_summary.md
 SERIES_FIGURE_DIR ?= results/figures/strategy_series
 
-.PHONY: test_counter test_memory_model test_strategy_comparison plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+PAPER_RESULTS_DIR ?= results/paper
+
+PAPER_SEED_COUNT ?= 30
+PAPER_TOTAL_CYCLES ?= 50000
+PAPER_WINDOW_SIZE ?= 43676
+PAPER_EVENT_COUNT ?= 400
+PAPER_PAIRED_EVENT_COUNT ?= 100
+PAPER_PAIR_GAP_MIN ?= 60
+PAPER_PAIR_GAP_MAX ?= 300
+PAPER_CLUSTER_EVENT_COUNT ?= 10
+PAPER_CLUSTER_BIT_COUNT ?= 2
+PAPER_CODEWORD_COUNT ?= 16
+
+NO_CLUSTER_SERIES_OUTPUT ?= results/tables/strategy_comparison_series_no_clusters.csv
+NO_CLUSTER_SUMMARY_CSV ?= results/tables/strategy_series_summary_no_clusters.csv
+NO_CLUSTER_SUMMARY_MD ?= results/tables/strategy_series_summary_no_clusters.md
+NO_CLUSTER_FIGURE_DIR ?= results/figures/series_no_clusters
+
+WITH_CLUSTER_SERIES_OUTPUT ?= results/tables/strategy_comparison_series_with_clusters.csv
+WITH_CLUSTER_SUMMARY_CSV ?= results/tables/strategy_series_summary_with_clusters.csv
+WITH_CLUSTER_SUMMARY_MD ?= results/tables/strategy_series_summary_with_clusters.md
+WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
+
+SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
+SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
+
+.PHONY: test_counter test_memory_model test_strategy_comparison prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
+
+prepare_paper_dirs:
+	mkdir -p $(PAPER_RESULTS_DIR)/tables $(PAPER_RESULTS_DIR)/figures
 
 test_all: prepare_dirs \
 	test_counter \
@@ -217,29 +246,66 @@ strategy_series_report_no_clusters:
 	$(MAKE) strategy_series_report \
 		SERIES_CLUSTER_EVENT_COUNT=0 \
 		SERIES_CLUSTER_BIT_COUNT=2 \
-		SERIES_OUTPUT=results/tables/strategy_comparison_series_no_clusters.csv \
-		SERIES_SUMMARY_CSV=results/tables/strategy_series_summary_no_clusters.csv \
-		SERIES_SUMMARY_MD=results/tables/strategy_series_summary_no_clusters.md \
-		SERIES_FIGURE_DIR=results/figures/series_no_clusters
+		SERIES_OUTPUT=$(NO_CLUSTER_SERIES_OUTPUT) \
+		SERIES_SUMMARY_CSV=$(NO_CLUSTER_SUMMARY_CSV) \
+		SERIES_SUMMARY_MD=$(NO_CLUSTER_SUMMARY_MD) \
+		SERIES_FIGURE_DIR=$(NO_CLUSTER_FIGURE_DIR)
 
 strategy_series_report_with_clusters:
 	$(MAKE) strategy_series_report \
-		SERIES_CLUSTER_EVENT_COUNT=10 \
-		SERIES_CLUSTER_BIT_COUNT=2 \
-		SERIES_OUTPUT=results/tables/strategy_comparison_series_with_clusters.csv \
-		SERIES_SUMMARY_CSV=results/tables/strategy_series_summary_with_clusters.csv \
-		SERIES_SUMMARY_MD=results/tables/strategy_series_summary_with_clusters.md \
-		SERIES_FIGURE_DIR=results/figures/series_with_clusters
+		SERIES_CLUSTER_EVENT_COUNT=$(PAPER_CLUSTER_EVENT_COUNT) \
+		SERIES_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		SERIES_OUTPUT=$(WITH_CLUSTER_SERIES_OUTPUT) \
+		SERIES_SUMMARY_CSV=$(WITH_CLUSTER_SUMMARY_CSV) \
+		SERIES_SUMMARY_MD=$(WITH_CLUSTER_SUMMARY_MD) \
+		SERIES_FIGURE_DIR=$(WITH_CLUSTER_FIGURE_DIR)
 
 compare_series_scenarios: prepare_dirs
 	$(PYTHON) model/compare_series_scenarios.py \
-		--no-clusters-input results/tables/strategy_series_summary_no_clusters.csv \
-		--with-clusters-input results/tables/strategy_series_summary_with_clusters.csv \
-		--csv-output results/tables/strategy_scenario_comparison.csv \
-		--md-output results/tables/strategy_scenario_comparison.md
-	cat results/tables/strategy_scenario_comparison.md
+		--no-clusters-input $(NO_CLUSTER_SUMMARY_CSV) \
+		--with-clusters-input $(WITH_CLUSTER_SUMMARY_CSV) \
+		--csv-output $(SCENARIO_COMPARISON_CSV) \
+		--md-output $(SCENARIO_COMPARISON_MD)
+	cat $(SCENARIO_COMPARISON_MD)
+
+analyze_upsets_window_paper: prepare_paper_dirs
+	$(PYTHON) model/analyze_upsets_window.py \
+		--input $(UPSETS_FILE) \
+		--start-index $(FAULT_START_INDEX) \
+		--window-size $(PAPER_WINDOW_SIZE) \
+		--total-cycles $(PAPER_TOTAL_CYCLES) \
+		--event-count $(PAPER_EVENT_COUNT) \
+		--paired-event-count $(PAPER_PAIRED_EVENT_COUNT) \
+		--cluster-event-count $(PAPER_CLUSTER_EVENT_COUNT) \
+		--codeword-count $(PAPER_CODEWORD_COUNT) \
+		--summary-csv $(PAPER_RESULTS_DIR)/tables/upsets_window_summary.csv \
+		--level-csv $(PAPER_RESULTS_DIR)/tables/control_level_distribution.csv \
+		--md-output $(PAPER_RESULTS_DIR)/tables/upsets_window_summary.md
+	cat $(PAPER_RESULTS_DIR)/tables/upsets_window_summary.md
 
 strategy_modeling_report: strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios
+
+strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper
+	$(MAKE) strategy_modeling_report \
+		SERIES_SEED_COUNT=$(PAPER_SEED_COUNT) \
+		SERIES_TOTAL_CYCLES=$(PAPER_TOTAL_CYCLES) \
+		SERIES_WINDOW_SIZE=$(PAPER_WINDOW_SIZE) \
+		SERIES_EVENT_COUNT=$(PAPER_EVENT_COUNT) \
+		SERIES_PAIRED_EVENT_COUNT=$(PAPER_PAIRED_EVENT_COUNT) \
+		SERIES_PAIR_GAP_MIN=$(PAPER_PAIR_GAP_MIN) \
+		SERIES_PAIR_GAP_MAX=$(PAPER_PAIR_GAP_MAX) \
+		PAPER_CLUSTER_EVENT_COUNT=$(PAPER_CLUSTER_EVENT_COUNT) \
+		PAPER_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		NO_CLUSTER_SERIES_OUTPUT=$(PAPER_RESULTS_DIR)/tables/strategy_comparison_series_no_clusters.csv \
+		NO_CLUSTER_SUMMARY_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.csv \
+		NO_CLUSTER_SUMMARY_MD=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.md \
+		NO_CLUSTER_FIGURE_DIR=$(PAPER_RESULTS_DIR)/figures/series_no_clusters \
+		WITH_CLUSTER_SERIES_OUTPUT=$(PAPER_RESULTS_DIR)/tables/strategy_comparison_series_with_clusters.csv \
+		WITH_CLUSTER_SUMMARY_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_with_clusters.csv \
+		WITH_CLUSTER_SUMMARY_MD=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_with_clusters.md \
+		WITH_CLUSTER_FIGURE_DIR=$(PAPER_RESULTS_DIR)/figures/series_with_clusters \
+		SCENARIO_COMPARISON_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.csv \
+		SCENARIO_COMPARISON_MD=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.md
 
 clean:
 	rm -f results/logs/*.out
