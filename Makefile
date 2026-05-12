@@ -42,6 +42,9 @@ PAPER_CLUSTER_BIT_COUNT ?= 2
 PAPER_CODEWORD_COUNT ?= 16
 PAPER_CONTROL_QUANTIZATION ?= percentile_tail
 
+RISK_TARGET_PMISSION ?= 0.01
+RISK_INTERVALS_SECONDS ?= 1,2,5,10,30,60,120,300,600,1200,1800,3600
+
 ETA_RESULTS_DIR ?= $(PAPER_RESULTS_DIR)/eta
 ETA_FIXED_INTERVALS ?= 20,30,40,60,80,100,150,200
 
@@ -70,7 +73,7 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -317,6 +320,16 @@ plot_control_quantization_paper: prepare_paper_dirs
 		--output-dir $(PAPER_RESULTS_DIR)/figures \
 		--control-quantization $(PAPER_CONTROL_QUANTIZATION)
 	cat $(PAPER_RESULTS_DIR)/tables/control_quantization_summary.md
+
+build_scrub_risk_policy_paper: prepare_paper_dirs
+	$(PYTHON) model/scrub_risk_policy.py \
+		--input $(UPSETS_FILE) \
+		--start-index $(FAULT_START_INDEX) \
+		--window-size $(PAPER_WINDOW_SIZE) \
+		--target-pmission $(RISK_TARGET_PMISSION) \
+		--intervals-seconds $(RISK_INTERVALS_SECONDS) \
+		--output-dir $(PAPER_RESULTS_DIR)/tables
+	cat $(PAPER_RESULTS_DIR)/tables/risk_policy_summary.md
 
 strategy_modeling_report: strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios
 
