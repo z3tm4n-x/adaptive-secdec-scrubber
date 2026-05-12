@@ -1,7 +1,7 @@
-scenario,seed,requested_total_cycles,window_size,event_count,paired_event_count,pair_gap_min,pair_gap_max,cluster_event_count,cluster_bit_count,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
-upsets,1,10000,10000,80,20,60,300,10,2,fixed,10000,68,1088,97,97,199,4,0,0,0,4517,1185,451,118,0
-upsets,1,10000,10000,80,20,60,300,10,2,table,10000,60,960,98,98,173,4,13,0,0,3998,1058,399,105,0
-upsets,1,10000,10000,80,20,60,300,10,2,threshold,10000,60,960,98,98,173,4,4,0,0,3998,1058,399,105,0
-upsets,2,10000,10000,80,20,60,300,10,2,fixed,10000,68,1088,93,93,164,4,0,0,0,4513,1181,451,118,0
-upsets,2,10000,10000,80,20,60,300,10,2,table,10000,60,960,87,87,158,4,13,0,0,3987,1047,398,104,0
-upsets,2,10000,10000,80,20,60,300,10,2,threshold,10000,60,960,87,87,158,4,4,0,0,3987,1047,398,104,0
+scenario,seed,requested_total_cycles,window_size,event_count,paired_event_count,pair_gap_min,pair_gap_max,cluster_event_count,cluster_bit_count,control_quantization,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
+upsets,1,10000,10000,80,20,60,300,10,2,percentile_tail,fixed,10000,68,1088,97,97,199,4,0,0,0,4517,1185,451,118,0
+upsets,1,10000,10000,80,20,60,300,10,2,percentile_tail,table,10000,76,1221,93,93,283,3,2040,0,0,5050,1314,505,131,0
+upsets,1,10000,10000,80,20,60,300,10,2,percentile_tail,threshold,10000,79,1268,100,100,247,4,280,0,0,5251,1368,525,136,0
+upsets,2,10000,10000,80,20,60,300,10,2,percentile_tail,fixed,10000,68,1088,93,93,164,4,0,0,0,4513,1181,451,118,0
+upsets,2,10000,10000,80,20,60,300,10,2,percentile_tail,table,10000,77,1232,107,107,87,4,2040,0,0,5112,1339,511,133,0
+upsets,2,10000,10000,80,20,60,300,10,2,percentile_tail,threshold,10000,79,1268,100,101,144,6,280,0,0,5250,1368,525,136,0

@@ -11,7 +11,15 @@ from statistics import mean, pstdev
 from generate_fault_events import (
     read_upsets_xlsx,
     select_window,
-    quantize_upset_value,
+)
+
+from control_quantization import (
+    add_quantization_arguments,
+    build_quantization_config,
+    count_level_changes,
+    level_counts as count_levels,
+    parse_percentile_boundaries,
+    quantize_value,
 )
 
 
@@ -56,6 +64,8 @@ def write_markdown(
     paired_event_count: int,
     cluster_event_count: int,
     codeword_count: int,
+    control_quantization: str,
+    control_thresholds: tuple[float, ...],
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -88,6 +98,7 @@ def write_markdown(
     lines.append(f"- Модельных тактов: {total_cycles}")
     lines.append(f"- Часов ряда на один модельный такт: {hours_per_cycle:.6f}")
     lines.append(f"- Модельных тактов на один час ряда: {cycles_per_hour:.6f}")
+    lines.append(f"- Режим квантования управляющего уровня: `{control_quantization}`")
     lines.append("")
     lines.append("## Статистика ν(t)")
     lines.append("")
@@ -128,6 +139,14 @@ def write_markdown(
         lines.append(f"| {level} | {count} | {fraction:.6f} |")
 
     lines.append("")
+    lines.append("")
+    lines.append("## Пороги управляющих уровней")
+    lines.append("")
+    lines.append("| Граница | Значение ν(t) |")
+    lines.append("|---|---:|")
+
+    for index, threshold in enumerate(control_thresholds):
+        lines.append(f"| level {index} → {index + 1} | {threshold:.9g} |")
     lines.append(f"Число изменений управляющего уровня: {control_level_changes}")
     lines.append("")
     lines.append("## Методическое пояснение")
@@ -141,10 +160,10 @@ def write_markdown(
     )
     lines.append("")
     lines.append(
-        "Квантование управляющего уровня выполняется линейной нормировкой "
-        "по максимуму выбранного окна. При сильно асимметричном распределении "
-        "ν(t) это может приводить к высокой доле уровня 0 и слабому "
-        "использованию старших уровней управления."
+        "Режим `linear_max` соответствует прежней линейной нормировке "
+        "по максимуму выбранного окна. Режим `percentile_tail` задаёт "
+        "пороги по перцентилям окна и предназначен для публикационного "
+        "анализа тяжёлого хвоста распределения ν(t)."
     )
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -231,6 +250,8 @@ def main() -> None:
         default=Path("results/paper/tables/upsets_window_summary.md"),
         help="Output Markdown summary.",
     )
+    
+    add_quantization_arguments(parser)
 
     args = parser.parse_args()
 
@@ -242,22 +263,19 @@ def main() -> None:
     window_cv2 = (window_std / window_mean) ** 2 if window_mean > 0.0 else 0.0
     eta_theory = 1.0 + window_cv2
 
-    max_value = max(window) if window else 0.0
+    quantization_config = build_quantization_config(
+        values=window,
+        mode=args.control_quantization,
+        percentile_boundaries=parse_percentile_boundaries(args.control_percentiles),
+    )
 
-    levels = [quantize_upset_value(value, max_value) for value in window]
+    levels = [
+        quantize_value(value, quantization_config)
+        for value in window
+    ]
 
-    level_counts = [0 for _ in range(8)]
-
-    for level in levels:
-        level_counts[level] += 1
-
-    control_level_changes = 0
-    previous_level: int | None = None
-
-    for level in levels:
-        if previous_level is None or level != previous_level:
-            control_level_changes += 1
-            previous_level = level
+    level_counts = count_levels(levels)
+    control_level_changes = count_level_changes(levels)
 
     hours_per_cycle = args.window_size / args.total_cycles
     cycles_per_hour = args.total_cycles / args.window_size
@@ -268,6 +286,8 @@ def main() -> None:
         ("start_index", str(args.start_index)),
         ("window_size", str(args.window_size)),
         ("total_cycles", str(args.total_cycles)),
+        ("control_quantization", args.control_quantization),
+        ("control_thresholds", ";".join(f"{value:.12g}" for value in quantization_config.boundaries)),
         ("hours_per_cycle", f"{hours_per_cycle:.9f}"),
         ("cycles_per_hour", f"{cycles_per_hour:.9f}"),
         ("window_min", f"{min(window):.12g}"),
@@ -307,6 +327,8 @@ def main() -> None:
         paired_event_count=args.paired_event_count,
         cluster_event_count=args.cluster_event_count,
         codeword_count=args.codeword_count,
+        control_quantization=args.control_quantization,
+        control_thresholds=quantization_config.boundaries,
     )
 
     print(f"Usable series length: {len(all_values)}")

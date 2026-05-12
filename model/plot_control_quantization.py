@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import csv
 from pathlib import Path
 from statistics import mean, pstdev
 
@@ -12,59 +11,29 @@ import matplotlib.pyplot as plt
 from generate_fault_events import (
     read_upsets_xlsx,
     select_window,
-    quantize_upset_value,
+)
+
+from control_quantization import (
+    add_quantization_arguments,
+    build_quantization_config,
+    count_level_changes,
+    level_counts,
+    parse_percentile_boundaries,
+    quantize_value,
+    write_thresholds_csv,
 )
 
 
-def compute_levels(values: list[float]) -> list[int]:
-    max_value = max(values) if values else 0.0
-    return [quantize_upset_value(value, max_value) for value in values]
+def compute_levels(values: list[float], mode: str, percentiles: tuple[float, ...]):
+    config = build_quantization_config(
+        values=values,
+        mode=mode,
+        percentile_boundaries=percentiles,
+    )
 
+    levels = [quantize_value(value, config) for value in values]
 
-def level_counts(levels: list[int]) -> list[int]:
-    counts = [0 for _ in range(8)]
-
-    for level in levels:
-        if level < 0 or level > 7:
-            raise ValueError(f"Control level out of range: {level}")
-
-        counts[level] += 1
-
-    return counts
-
-
-def quantization_boundaries(max_value: float) -> list[float]:
-    """
-    Границы между уровнями для правила:
-        level = round(7 * value / max_value)
-
-    Для непрерывных значений граница между level=k и level=k+1
-    примерно соответствует (k + 0.5) / 7 от максимума окна.
-    """
-    if max_value <= 0.0:
-        return []
-
-    return [((level + 0.5) / 7.0) * max_value for level in range(7)]
-
-
-def write_thresholds_csv(output_path: Path, max_value: float) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    boundaries = quantization_boundaries(max_value)
-
-    with output_path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["boundary", "lower_level", "upper_level", "upsets_value"])
-
-        for lower_level, value in enumerate(boundaries):
-            writer.writerow(
-                [
-                    f"level_{lower_level}_to_{lower_level + 1}",
-                    lower_level,
-                    lower_level + 1,
-                    f"{value:.12g}",
-                ]
-            )
+    return levels, config
 
 
 def write_plot_summary(
@@ -75,6 +44,9 @@ def write_plot_summary(
     total_cycles: int,
     values: list[float],
     counts: list[int],
+    control_level_changes: int,
+    control_quantization: str,
+    thresholds: tuple[float, ...],
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -95,10 +67,12 @@ def write_plot_summary(
     lines.append(f"- Начальный индекс: {start_index}")
     lines.append(f"- Размер окна: {window_size}")
     lines.append(f"- Модельных тактов: {total_cycles}")
+    lines.append(f"- Режим квантования: `{control_quantization}`")
     lines.append(f"- Максимум окна: {max_value:.9g}")
     lines.append(f"- Среднее окна: {window_mean:.9g}")
     lines.append(f"- CV² окна: {window_cv2:.9g}")
     lines.append(f"- η_theory = 1 + CV²: {eta_theory:.9g}")
+    lines.append(f"- Число изменений уровня: {control_level_changes}")
     lines.append("")
     lines.append("## Распределение уровней")
     lines.append("")
@@ -112,12 +86,21 @@ def write_plot_summary(
         lines.append(f"| {level} | {count} | {fraction:.6f} |")
 
     lines.append("")
+    lines.append("## Пороги уровней")
+    lines.append("")
+    lines.append("| Граница | Значение ν(t) |")
+    lines.append("|---|---:|")
+
+    for index, threshold in enumerate(thresholds):
+        lines.append(f"| level {index} → {index + 1} | {threshold:.9g} |")
+
+    lines.append("")
     lines.append("## Пояснение")
     lines.append("")
     lines.append(
-        "Границы уровней построены для текущей линейной нормировки по максимуму окна. "
-        "Если распределение ν(t) имеет тяжёлый хвост, высокий максимум сдвигает "
-        "пороги вверх, и большая часть фоновых значений попадает в уровень 0."
+        "Режим `linear_max` использует прежние пороги, пропорциональные максимуму окна. "
+        "Режим `percentile_tail` задаёт пороги по перцентилям окна и лучше "
+        "использует управляющие уровни при тяжёлом хвосте распределения ν(t)."
     )
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -168,22 +151,20 @@ def plot_upsets_histogram(
     output_path: Path,
     bins: int,
     log_y: bool,
+    thresholds: tuple[float, ...],
 ) -> None:
     if not values:
         raise ValueError("Cannot plot empty upsets window")
-
-    max_value = max(values)
-    boundaries = quantization_boundaries(max_value)
 
     plt.figure(figsize=(8.4, 5.2))
     plt.hist(values, bins=bins)
 
     y_min, y_max = plt.ylim()
 
-    for index, boundary in enumerate(boundaries):
-        plt.axvline(boundary, linestyle="--", linewidth=1)
+    for index, threshold in enumerate(thresholds):
+        plt.axvline(threshold, linestyle="--", linewidth=1)
         plt.text(
-            boundary,
+            threshold,
             y_max,
             f"L{index}/L{index + 1}",
             rotation=90,
@@ -196,7 +177,7 @@ def plot_upsets_histogram(
 
     plt.xlabel("ν(t)")
     plt.ylabel("Число точек окна")
-    plt.title("Распределение ν(t) и границы линейного квантования")
+    plt.title("Распределение ν(t) и границы квантования")
     plt.tight_layout()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -257,13 +238,21 @@ def main() -> None:
         help="Use linear Y scale for the histogram. Default is logarithmic Y.",
     )
 
+    add_quantization_arguments(parser)
+
     args = parser.parse_args()
 
     all_values = read_upsets_xlsx(args.input)
     window = select_window(all_values, args.start_index, args.window_size)
 
-    levels = compute_levels(window)
+    levels, config = compute_levels(
+        values=window,
+        mode=args.control_quantization,
+        percentiles=parse_percentile_boundaries(args.control_percentiles),
+    )
+
     counts = level_counts(levels)
+    changes = count_level_changes(levels)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -282,11 +271,12 @@ def main() -> None:
         output_path=histogram_png,
         bins=args.bins,
         log_y=not args.linear_y,
+        thresholds=config.boundaries,
     )
 
     write_thresholds_csv(
         output_path=thresholds_csv,
-        max_value=max(window),
+        config=config,
     )
 
     write_plot_summary(
@@ -297,6 +287,9 @@ def main() -> None:
         total_cycles=args.total_cycles,
         values=window,
         counts=counts,
+        control_level_changes=changes,
+        control_quantization=args.control_quantization,
+        thresholds=config.boundaries,
     )
 
     print(f"Control level distribution figure: {level_distribution_png}")

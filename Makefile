@@ -12,6 +12,7 @@ FAULT_PAIR_GAP_MAX ?= 80
 FAULT_CLUSTER_EVENT_COUNT ?= 0
 FAULT_CLUSTER_BIT_COUNT ?= 2
 FIXED_INTERVAL ?= 80
+CONTROL_QUANTIZATION ?= linear_max
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -39,6 +40,7 @@ PAPER_PAIR_GAP_MAX ?= 300
 PAPER_CLUSTER_EVENT_COUNT ?= 10
 PAPER_CLUSTER_BIT_COUNT ?= 2
 PAPER_CODEWORD_COUNT ?= 16
+PAPER_CONTROL_QUANTIZATION ?= percentile_tail
 
 ETA_RESULTS_DIR ?= $(PAPER_RESULTS_DIR)/eta
 ETA_FIXED_INTERVALS ?= 20,30,40,60,80,100,150,200
@@ -53,6 +55,7 @@ ETA_PAIR_GAP_MIN ?= $(PAPER_PAIR_GAP_MIN)
 ETA_PAIR_GAP_MAX ?= $(PAPER_PAIR_GAP_MAX)
 ETA_CLUSTER_EVENT_COUNT ?= 0
 ETA_CLUSTER_BIT_COUNT ?= $(PAPER_CLUSTER_BIT_COUNT)
+ETA_CONTROL_QUANTIZATION ?= $(PAPER_CONTROL_QUANTIZATION)
 
 NO_CLUSTER_SERIES_OUTPUT ?= results/tables/strategy_comparison_series_no_clusters.csv
 NO_CLUSTER_SUMMARY_CSV ?= results/tables/strategy_series_summary_no_clusters.csv
@@ -197,7 +200,8 @@ gen_fault_events:
 		--pair-gap-max $(FAULT_PAIR_GAP_MAX) \
 		--cluster-event-count $(FAULT_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(FAULT_CLUSTER_BIT_COUNT) \
-		--seed $(FAULT_SEED)
+		--seed $(FAULT_SEED) \
+		--control-quantization $(CONTROL_QUANTIZATION)
 
 test_strategy_comparison: prepare_dirs gen_fault_events
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
@@ -245,6 +249,7 @@ strategy_series: prepare_dirs
 		--pair-gap-max $(SERIES_PAIR_GAP_MAX) \
 		--cluster-event-count $(SERIES_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(SERIES_CLUSTER_BIT_COUNT) \
+		--control-quantization $(CONTROL_QUANTIZATION) \
 		--output $(SERIES_OUTPUT)
 
 analyze_strategy_series: prepare_dirs
@@ -297,6 +302,7 @@ analyze_upsets_window_paper: prepare_paper_dirs
 		--paired-event-count $(PAPER_PAIRED_EVENT_COUNT) \
 		--cluster-event-count $(PAPER_CLUSTER_EVENT_COUNT) \
 		--codeword-count $(PAPER_CODEWORD_COUNT) \
+		--control-quantization $(PAPER_CONTROL_QUANTIZATION) \
 		--summary-csv $(PAPER_RESULTS_DIR)/tables/upsets_window_summary.csv \
 		--level-csv $(PAPER_RESULTS_DIR)/tables/control_level_distribution.csv \
 		--md-output $(PAPER_RESULTS_DIR)/tables/upsets_window_summary.md
@@ -308,7 +314,8 @@ plot_control_quantization_paper: prepare_paper_dirs
 		--start-index $(FAULT_START_INDEX) \
 		--window-size $(PAPER_WINDOW_SIZE) \
 		--total-cycles $(PAPER_TOTAL_CYCLES) \
-		--output-dir $(PAPER_RESULTS_DIR)/figures
+		--output-dir $(PAPER_RESULTS_DIR)/figures \
+		--control-quantization $(PAPER_CONTROL_QUANTIZATION)
 	cat $(PAPER_RESULTS_DIR)/tables/control_quantization_summary.md
 
 strategy_modeling_report: strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios
@@ -324,6 +331,7 @@ strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper p
 		SERIES_PAIR_GAP_MAX=$(PAPER_PAIR_GAP_MAX) \
 		PAPER_CLUSTER_EVENT_COUNT=$(PAPER_CLUSTER_EVENT_COUNT) \
 		PAPER_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
 		NO_CLUSTER_SERIES_OUTPUT=$(PAPER_RESULTS_DIR)/tables/strategy_comparison_series_no_clusters.csv \
 		NO_CLUSTER_SUMMARY_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.csv \
 		NO_CLUSTER_SUMMARY_MD=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.md \
@@ -350,6 +358,7 @@ eta_verification_paper: prepare_paper_dirs
 		--pair-gap-max $(ETA_PAIR_GAP_MAX) \
 		--cluster-event-count $(ETA_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(ETA_CLUSTER_BIT_COUNT) \
+		--control-quantization $(ETA_CONTROL_QUANTIZATION) \
 		--fixed-intervals $(ETA_FIXED_INTERVALS) \
 		--output-dir $(ETA_RESULTS_DIR) \
 		--make-command $(MAKE)

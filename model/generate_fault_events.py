@@ -8,6 +8,12 @@ import random
 from pathlib import Path
 
 from upsets_series import load_full_upsets_series
+from control_quantization import (
+    add_quantization_arguments,
+    build_quantization_config,
+    quantize_value,
+    parse_percentile_boundaries,
+)
 
 
 CODEWORD_WIDTH = 39
@@ -165,13 +171,19 @@ def control_levels_from_upsets(
     start_index: int,
     window_size: int,
     total_cycles: int,
+    control_quantization: str = "linear_max",
+    control_percentiles: tuple[float, ...] | None = None,
 ) -> list[ControlLevelEvent]:
     """
-    Формирует поток управляющих уровней из того же окна upsets(t),
+    Формирует поток управляющих уровней из того же окна ν(t),
     которое используется для генерации сбойных событий.
 
     На выходе создаются только моменты изменения уровня, а не строка
     на каждый такт моделирования.
+
+    Режимы квантования:
+        linear_max      — прежняя нормировка по максимуму окна;
+        percentile_tail — пороги по перцентилям окна, выделяющие верхний хвост.
     """
     if total_cycles <= 0:
         raise ValueError("total_cycles must be positive")
@@ -179,7 +191,16 @@ def control_levels_from_upsets(
     values = read_upsets_xlsx(input_path)
     window = select_window(values, start_index, window_size)
 
-    max_value = max(window) if window else 0.0
+    if control_percentiles is None:
+        control_percentiles = ()
+
+    config = build_quantization_config(
+        values=window,
+        mode=control_quantization,
+        percentile_boundaries=control_percentiles
+        if control_percentiles
+        else (0.50, 0.70, 0.85, 0.93, 0.97, 0.99, 0.997),
+    )
 
     events: list[ControlLevelEvent] = []
     previous_level: int | None = None
@@ -190,7 +211,7 @@ def control_levels_from_upsets(
         if cycle >= total_cycles:
             cycle = total_cycles - 1
 
-        level = quantize_upset_value(value, max_value)
+        level = quantize_value(value, config)
 
         if previous_level is None or level != previous_level:
             events.append((cycle, level))
@@ -717,6 +738,8 @@ def main() -> None:
         help="Random seed for reproducible event generation.",
     )
 
+    add_quantization_arguments(parser)
+
     args = parser.parse_args()
 
     if args.scenario == "baseline":
@@ -746,6 +769,8 @@ def main() -> None:
             start_index=args.start_index,
             window_size=args.window_size,
             total_cycles=args.total_cycles,
+            control_quantization=args.control_quantization,
+            control_percentiles=parse_percentile_boundaries(args.control_percentiles),
         )
 
         validate_events(events, total_cycles=args.total_cycles)
@@ -776,6 +801,8 @@ def main() -> None:
         print(f"Cluster events: {args.cluster_event_count}")
         print(f"Cluster bit count: {args.cluster_bit_count}")
         print(f"Seed: {args.seed}")
+        print(f"Control quantization: {args.control_quantization}")
+        print(f"Control percentiles: {args.control_percentiles}")
 
 
 if __name__ == "__main__":

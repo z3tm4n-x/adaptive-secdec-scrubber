@@ -39,6 +39,7 @@ SERIES_COLUMNS = [
     "pair_gap_max",
     "cluster_event_count",
     "cluster_bit_count",
+    "control_quantization",
     *BASE_COLUMNS,
 ]
 
@@ -75,6 +76,7 @@ def append_series_rows(
     pair_gap_max: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    control_quantization: str,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -98,6 +100,7 @@ def append_series_rows(
                 "pair_gap_max": pair_gap_max,
                 "cluster_event_count": cluster_event_count,
                 "cluster_bit_count": cluster_bit_count,
+                "control_quantization": control_quantization,
             }
 
             for column in BASE_COLUMNS:
@@ -117,6 +120,7 @@ def run_one_seed(
     pair_gap_max: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    control_quantization: str,
     make_command: str,
 ) -> None:
     command = [
@@ -132,6 +136,7 @@ def run_one_seed(
         f"FAULT_CLUSTER_EVENT_COUNT={cluster_event_count}",
         f"FAULT_CLUSTER_BIT_COUNT={cluster_bit_count}",
         f"FAULT_SEED={seed}",
+        f"CONTROL_QUANTIZATION={control_quantization}",
     ]
 
     print("")
@@ -226,6 +231,13 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--control-quantization",
+        default="linear_max",
+        choices=["linear_max", "percentile_tail"],
+        help="Control-level quantization mode passed to fault generator.",
+    )
+
+    parser.add_argument(
         "--single-run-input",
         type=Path,
         default=Path("results/tables/strategy_comparison.csv"),
@@ -273,6 +285,7 @@ def main() -> None:
             pair_gap_max=args.pair_gap_max,
             cluster_event_count=args.cluster_event_count,
             cluster_bit_count=args.cluster_bit_count,
+            control_quantization=args.control_quantization,
             make_command=args.make_command,
         )
 
@@ -291,6 +304,7 @@ def main() -> None:
             pair_gap_max=args.pair_gap_max,
             cluster_event_count=args.cluster_event_count,
             cluster_bit_count=args.cluster_bit_count,
+            control_quantization=args.control_quantization,
         )
 
     print("")

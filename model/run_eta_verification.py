@@ -149,6 +149,7 @@ def run_one_configuration(
     pair_gap_max: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    control_quantization: str,
 ) -> list[dict[str, str]]:
     command = [
         make_command,
@@ -164,6 +165,7 @@ def run_one_configuration(
         f"FAULT_CLUSTER_BIT_COUNT={cluster_bit_count}",
         f"FAULT_SEED={seed}",
         f"FIXED_INTERVAL={fixed_interval}",
+        f"CONTROL_QUANTIZATION={control_quantization}",
     ]
 
     print("=" * 80)
@@ -195,6 +197,7 @@ def collect_raw_rows(args: argparse.Namespace, intervals: list[int]) -> list[Raw
                 pair_gap_max=args.pair_gap_max,
                 cluster_event_count=args.cluster_event_count,
                 cluster_bit_count=args.cluster_bit_count,
+                control_quantization=args.control_quantization,
             )
 
             for row in rows:
@@ -494,6 +497,7 @@ def write_markdown(
     lines.append(f"- Одиночных событий: {args.event_count}")
     lines.append(f"- Накопительных пар: {args.paired_event_count}")
     lines.append(f"- Мгновенных кластеров: {args.cluster_event_count}")
+    lines.append(f"- Квантование управляющего уровня: `{args.control_quantization}`")
     lines.append(f"- Sweep fixed_interval: {', '.join(str(v) for v in parse_intervals(args.fixed_intervals))}")
     lines.append("")
     lines.append("## Статистика окна ν(t)")
@@ -684,6 +688,13 @@ def main() -> None:
 
     parser.add_argument("--cluster-event-count", type=int, default=0)
     parser.add_argument("--cluster-bit-count", type=int, default=2)
+
+    parser.add_argument(
+        "--control-quantization",
+        default="linear_max",
+        choices=["linear_max", "percentile_tail"],
+        help="Control-level quantization mode passed to fault generator.",
+    )
 
     parser.add_argument(
         "--fixed-intervals",
