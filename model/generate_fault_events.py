@@ -7,7 +7,7 @@ import math
 import random
 from pathlib import Path
 
-from openpyxl import load_workbook
+from upsets_series import load_full_upsets_series
 
 
 CODEWORD_WIDTH = 39
@@ -96,47 +96,16 @@ def baseline_control_levels() -> list[ControlLevelEvent]:
 
 def read_upsets_xlsx(input_path: Path) -> list[float]:
     """
-    Читает временной ряд из Excel-файла.
+    Backward-compatible wrapper.
 
-    Ожидаемая структура файла:
-        столбец B: time
-        столбец C: upsets
+    Возвращает полный ряд ν(t), восстановленный из протонной составляющей
+    data/upsets.xlsx с учётом ТЗЧ по формуле статьи 3.
 
-    Первая строка содержит заголовки.
+    Важно:
+        до шага 3.30 эта функция возвращала только протонную составляющую νp(t).
+        Теперь все upsets-based эксперименты используют полный ряд ν(t).
     """
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
-
-    workbook = load_workbook(input_path, read_only=True, data_only=True)
-    sheet = workbook.active
-
-    values: list[float] = []
-
-    for row in sheet.iter_rows(min_row=2, values_only=True):
-        if len(row) < 3:
-            continue
-
-        raw_value = row[2]
-
-        if raw_value is None:
-            continue
-
-        value = float(raw_value)
-
-        if not math.isfinite(value):
-            continue
-
-        if value < 0.0:
-            value = 0.0
-
-        values.append(value)
-
-    workbook.close()
-
-    if not values:
-        raise ValueError(f"No usable upsets values found in {input_path}")
-
-    return values
+    return load_full_upsets_series(input_path)
 
 
 def select_window(

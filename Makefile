@@ -31,7 +31,7 @@ PAPER_RESULTS_DIR ?= results/paper
 
 PAPER_SEED_COUNT ?= 30
 PAPER_TOTAL_CYCLES ?= 50000
-PAPER_WINDOW_SIZE ?= 43676
+PAPER_WINDOW_SIZE ?= 43824
 PAPER_EVENT_COUNT ?= 400
 PAPER_PAIRED_EVENT_COUNT ?= 100
 PAPER_PAIR_GAP_MIN ?= 60
@@ -44,15 +44,15 @@ ETA_RESULTS_DIR ?= $(PAPER_RESULTS_DIR)/eta
 ETA_FIXED_INTERVALS ?= 20,30,40,60,80,100,150,200
 
 ETA_SEED_START ?= 1
-ETA_SEED_COUNT ?= 10
-ETA_TOTAL_CYCLES ?= 10000
-ETA_WINDOW_SIZE ?= 10000
-ETA_EVENT_COUNT ?= 80
-ETA_PAIRED_EVENT_COUNT ?= 20
-ETA_PAIR_GAP_MIN ?= 60
-ETA_PAIR_GAP_MAX ?= 300
+ETA_SEED_COUNT ?= $(PAPER_SEED_COUNT)
+ETA_TOTAL_CYCLES ?= $(PAPER_TOTAL_CYCLES)
+ETA_WINDOW_SIZE ?= $(PAPER_WINDOW_SIZE)
+ETA_EVENT_COUNT ?= $(PAPER_EVENT_COUNT)
+ETA_PAIRED_EVENT_COUNT ?= $(PAPER_PAIRED_EVENT_COUNT)
+ETA_PAIR_GAP_MIN ?= $(PAPER_PAIR_GAP_MIN)
+ETA_PAIR_GAP_MAX ?= $(PAPER_PAIR_GAP_MAX)
 ETA_CLUSTER_EVENT_COUNT ?= 0
-ETA_CLUSTER_BIT_COUNT ?= 2
+ETA_CLUSTER_BIT_COUNT ?= $(PAPER_CLUSTER_BIT_COUNT)
 
 NO_CLUSTER_SERIES_OUTPUT ?= results/tables/strategy_comparison_series_no_clusters.csv
 NO_CLUSTER_SUMMARY_CSV ?= results/tables/strategy_series_summary_no_clusters.csv
@@ -67,10 +67,14 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
+
+inspect_full_upsets_series: prepare_dirs
+	$(PYTHON) model/upsets_series.py \
+		--input $(UPSETS_FILE)
 
 prepare_paper_dirs:
 	mkdir -p $(PAPER_RESULTS_DIR)/tables $(PAPER_RESULTS_DIR)/figures
