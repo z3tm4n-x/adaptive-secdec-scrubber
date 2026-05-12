@@ -150,6 +150,8 @@ def run_one_configuration(
     cluster_event_count: int,
     cluster_bit_count: int,
     control_quantization: str,
+    control_source: str,
+    control_policy_schedule: str,
 ) -> list[dict[str, str]]:
     command = [
         make_command,
@@ -166,6 +168,8 @@ def run_one_configuration(
         f"FAULT_SEED={seed}",
         f"FIXED_INTERVAL={fixed_interval}",
         f"CONTROL_QUANTIZATION={control_quantization}",
+        f"CONTROL_SOURCE={control_source}",
+        f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
     ]
 
     print("=" * 80)
@@ -198,6 +202,8 @@ def collect_raw_rows(args: argparse.Namespace, intervals: list[int]) -> list[Raw
                 cluster_event_count=args.cluster_event_count,
                 cluster_bit_count=args.cluster_bit_count,
                 control_quantization=args.control_quantization,
+                control_source=args.control_source,
+                control_policy_schedule=args.control_policy_schedule,
             )
 
             for row in rows:
@@ -498,6 +504,7 @@ def write_markdown(
     lines.append(f"- Накопительных пар: {args.paired_event_count}")
     lines.append(f"- Мгновенных кластеров: {args.cluster_event_count}")
     lines.append(f"- Квантование управляющего уровня: `{args.control_quantization}`")
+    lines.append(f"- Источник управляющего потока: `{args.control_source}`")
     lines.append(f"- Sweep fixed_interval: {', '.join(str(v) for v in parse_intervals(args.fixed_intervals))}")
     lines.append("")
     lines.append("## Статистика окна ν(t)")
@@ -694,6 +701,19 @@ def main() -> None:
         default="linear_max",
         choices=["linear_max", "percentile_tail"],
         help="Control-level quantization mode passed to fault generator.",
+    )
+
+    parser.add_argument(
+        "--control-source",
+        default="quantization",
+        choices=["quantization", "risk_policy"],
+        help="Control source passed to fault generator.",
+    )
+
+    parser.add_argument(
+        "--control-policy-schedule",
+        default="results/paper/tables/risk_policy_schedule.csv",
+        help="Risk policy schedule path passed to fault generator.",
     )
 
     parser.add_argument(

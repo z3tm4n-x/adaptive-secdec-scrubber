@@ -40,6 +40,8 @@ SERIES_COLUMNS = [
     "cluster_event_count",
     "cluster_bit_count",
     "control_quantization",
+    "control_source",
+    "control_policy_schedule",
     *BASE_COLUMNS,
 ]
 
@@ -77,6 +79,8 @@ def append_series_rows(
     cluster_event_count: int,
     cluster_bit_count: int,
     control_quantization: str,
+    control_source: str,
+    control_policy_schedule: str,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -101,6 +105,8 @@ def append_series_rows(
                 "cluster_event_count": cluster_event_count,
                 "cluster_bit_count": cluster_bit_count,
                 "control_quantization": control_quantization,
+                "control_source": control_source,
+                "control_policy_schedule": control_policy_schedule,
             }
 
             for column in BASE_COLUMNS:
@@ -121,6 +127,8 @@ def run_one_seed(
     cluster_event_count: int,
     cluster_bit_count: int,
     control_quantization: str,
+    control_source: str,
+    control_policy_schedule: str,
     make_command: str,
 ) -> None:
     command = [
@@ -137,6 +145,8 @@ def run_one_seed(
         f"FAULT_CLUSTER_BIT_COUNT={cluster_bit_count}",
         f"FAULT_SEED={seed}",
         f"CONTROL_QUANTIZATION={control_quantization}",
+        f"CONTROL_SOURCE={control_source}",
+        f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
     ]
 
     print("")
@@ -238,6 +248,19 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--control-source",
+        default="quantization",
+        choices=["quantization", "risk_policy"],
+        help="Control source passed to fault generator.",
+    )
+
+    parser.add_argument(
+        "--control-policy-schedule",
+        default="results/paper/tables/risk_policy_schedule.csv",
+        help="Risk policy schedule path passed to fault generator.",
+    )
+
+    parser.add_argument(
         "--single-run-input",
         type=Path,
         default=Path("results/tables/strategy_comparison.csv"),
@@ -286,6 +309,8 @@ def main() -> None:
             cluster_event_count=args.cluster_event_count,
             cluster_bit_count=args.cluster_bit_count,
             control_quantization=args.control_quantization,
+            control_source=args.control_source,
+            control_policy_schedule=args.control_policy_schedule,
             make_command=args.make_command,
         )
 
@@ -305,6 +330,8 @@ def main() -> None:
             cluster_event_count=args.cluster_event_count,
             cluster_bit_count=args.cluster_bit_count,
             control_quantization=args.control_quantization,
+            control_source=args.control_source,
+            control_policy_schedule=args.control_policy_schedule,
         )
 
     print("")

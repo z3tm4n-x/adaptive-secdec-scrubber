@@ -15,6 +15,13 @@ from control_quantization import (
     parse_percentile_boundaries,
 )
 
+from risk_policy_control import (
+    build_policy_control_events,
+    read_policy_schedule,
+    select_schedule_window,
+    write_policy_level_map_csv,
+)
+
 
 CODEWORD_WIDTH = 39
 ADDR_WIDTH = 4
@@ -221,6 +228,48 @@ def control_levels_from_upsets(
         events.insert(0, (0, 0))
 
     return events
+
+def control_levels_from_risk_policy(
+    schedule_path: Path,
+    start_index: int,
+    window_size: int,
+    total_cycles: int,
+    level_map_output: Path | None = None,
+) -> list[ControlLevelEvent]:
+    """
+    Формирует control_levels.csv из расчётной risk-policy.
+
+    Входной файл должен быть результатом scrub_risk_policy.py:
+        risk_policy_schedule.csv
+
+    На этом шаге физические interval_seconds ещё не подставляются
+    в RTL напрямую. Они только преобразуются в ordered ctrl_level:
+        самый длинный интервал → level 0,
+        более короткие интервалы → более высокие уровни.
+    """
+    schedule = read_policy_schedule(schedule_path)
+    window = select_schedule_window(
+        rows=schedule,
+        start_index=start_index,
+        window_size=window_size,
+    )
+
+    result = build_policy_control_events(
+        rows=window,
+        total_cycles=total_cycles,
+        max_levels=8,
+    )
+
+    if level_map_output is not None:
+        write_policy_level_map_csv(
+            output_path=level_map_output,
+            level_map=result.level_map,
+        )
+
+    return [
+        (event.cycle, event.level)
+        for event in result.events
+    ]
 
 def weighted_cycle_from_series(
     rng: random.Random,
@@ -740,6 +789,31 @@ def main() -> None:
 
     add_quantization_arguments(parser)
 
+    parser.add_argument(
+        "--control-source",
+        choices=["quantization", "risk_policy"],
+        default="quantization",
+        help=(
+            "Source of control_levels.csv. "
+            "quantization builds levels directly from ν(t); "
+            "risk_policy uses risk_policy_schedule.csv."
+        ),
+    )
+
+    parser.add_argument(
+        "--control-policy-schedule",
+        type=Path,
+        default=Path("results/paper/tables/risk_policy_schedule.csv"),
+        help="Input risk_policy_schedule.csv used when --control-source=risk_policy.",
+    )
+
+    parser.add_argument(
+        "--control-policy-level-map-output",
+        type=Path,
+        default=None,
+        help="Optional output CSV with interval_seconds to ctrl_level mapping.",
+    )
+
     args = parser.parse_args()
 
     if args.scenario == "baseline":
@@ -764,14 +838,23 @@ def main() -> None:
             seed=args.seed,
         )
 
-        control_events = control_levels_from_upsets(
-            input_path=args.input,
-            start_index=args.start_index,
-            window_size=args.window_size,
-            total_cycles=args.total_cycles,
-            control_quantization=args.control_quantization,
-            control_percentiles=parse_percentile_boundaries(args.control_percentiles),
-        )
+        if args.control_source == "risk_policy":
+            control_events = control_levels_from_risk_policy(
+                schedule_path=args.control_policy_schedule,
+                start_index=args.start_index,
+                window_size=args.window_size,
+                total_cycles=args.total_cycles,
+                level_map_output=args.control_policy_level_map_output,
+            )
+        else:
+            control_events = control_levels_from_upsets(
+                input_path=args.input,
+                start_index=args.start_index,
+                window_size=args.window_size,
+                total_cycles=args.total_cycles,
+                control_quantization=args.control_quantization,
+                control_percentiles=parse_percentile_boundaries(args.control_percentiles),
+            )
 
         validate_events(events, total_cycles=args.total_cycles)
         validate_control_levels(control_events, total_cycles=args.total_cycles)
@@ -801,8 +884,14 @@ def main() -> None:
         print(f"Cluster events: {args.cluster_event_count}")
         print(f"Cluster bit count: {args.cluster_bit_count}")
         print(f"Seed: {args.seed}")
-        print(f"Control quantization: {args.control_quantization}")
-        print(f"Control percentiles: {args.control_percentiles}")
+        print(f"Control source: {args.control_source}")
+
+        if args.control_source == "risk_policy":
+            print(f"Control policy schedule: {args.control_policy_schedule}")
+            print(f"Control policy level map: {args.control_policy_level_map_output}")
+        else:
+            print(f"Control quantization: {args.control_quantization}")
+            print(f"Control percentiles: {args.control_percentiles}")
 
 
 if __name__ == "__main__":

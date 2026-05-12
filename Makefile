@@ -13,6 +13,9 @@ FAULT_CLUSTER_EVENT_COUNT ?= 0
 FAULT_CLUSTER_BIT_COUNT ?= 2
 FIXED_INTERVAL ?= 80
 CONTROL_QUANTIZATION ?= linear_max
+CONTROL_SOURCE ?= quantization
+CONTROL_POLICY_SCHEDULE ?= results/paper/tables/risk_policy_schedule.csv
+CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= results/tables/control_policy_level_map.csv
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -41,6 +44,10 @@ PAPER_CLUSTER_EVENT_COUNT ?= 10
 PAPER_CLUSTER_BIT_COUNT ?= 2
 PAPER_CODEWORD_COUNT ?= 16
 PAPER_CONTROL_QUANTIZATION ?= percentile_tail
+
+PAPER_CONTROL_SOURCE ?= quantization
+PAPER_CONTROL_POLICY_SCHEDULE ?= $(PAPER_RESULTS_DIR)/tables/risk_policy_schedule.csv
+PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= $(PAPER_RESULTS_DIR)/tables/risk_policy_level_map.csv
 
 RISK_TARGET_PMISSION ?= 0.01
 RISK_INTERVALS_SECONDS ?= 1,2,5,10,30,60,120,300,600,1200,1800,3600
@@ -73,7 +80,7 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison gen_risk_policy_control_paper build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -204,7 +211,11 @@ gen_fault_events:
 		--cluster-event-count $(FAULT_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(FAULT_CLUSTER_BIT_COUNT) \
 		--seed $(FAULT_SEED) \
-		--control-quantization $(CONTROL_QUANTIZATION)
+		--control-quantization $(CONTROL_QUANTIZATION) \
+		--control-source $(CONTROL_SOURCE) \
+		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
+		--control-policy-level-map-output $(CONTROL_POLICY_LEVEL_MAP_OUTPUT)
+
 
 test_strategy_comparison: prepare_dirs gen_fault_events
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
@@ -253,6 +264,8 @@ strategy_series: prepare_dirs
 		--cluster-event-count $(SERIES_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(SERIES_CLUSTER_BIT_COUNT) \
 		--control-quantization $(CONTROL_QUANTIZATION) \
+		--control-source $(CONTROL_SOURCE) \
+		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
 		--output $(SERIES_OUTPUT)
 
 analyze_strategy_series: prepare_dirs
@@ -331,6 +344,26 @@ build_scrub_risk_policy_paper: prepare_paper_dirs
 		--output-dir $(PAPER_RESULTS_DIR)/tables
 	cat $(PAPER_RESULTS_DIR)/tables/risk_policy_summary.md
 
+gen_risk_policy_control_paper: build_scrub_risk_policy_paper
+	$(MAKE) gen_fault_events \
+		FAULT_SCENARIO=upsets \
+		FAULT_START_INDEX=$(FAULT_START_INDEX) \
+		FAULT_WINDOW_SIZE=$(PAPER_WINDOW_SIZE) \
+		FAULT_TOTAL_CYCLES=$(PAPER_TOTAL_CYCLES) \
+		FAULT_EVENT_COUNT=$(PAPER_EVENT_COUNT) \
+		FAULT_PAIRED_EVENT_COUNT=$(PAPER_PAIRED_EVENT_COUNT) \
+		FAULT_PAIR_GAP_MIN=$(PAPER_PAIR_GAP_MIN) \
+		FAULT_PAIR_GAP_MAX=$(PAPER_PAIR_GAP_MAX) \
+		FAULT_CLUSTER_EVENT_COUNT=0 \
+		FAULT_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		FAULT_SEED=1 \
+		CONTROL_SOURCE=risk_policy \
+		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
+		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT)
+	cp tb/control_levels.csv $(PAPER_RESULTS_DIR)/tables/risk_policy_control_levels.csv
+	cat $(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT)
+	head $(PAPER_RESULTS_DIR)/tables/risk_policy_control_levels.csv
+
 strategy_modeling_report: strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios
 
 strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper plot_control_quantization_paper
@@ -345,6 +378,9 @@ strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper p
 		PAPER_CLUSTER_EVENT_COUNT=$(PAPER_CLUSTER_EVENT_COUNT) \
 		PAPER_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
 		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
+		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
+		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		NO_CLUSTER_SERIES_OUTPUT=$(PAPER_RESULTS_DIR)/tables/strategy_comparison_series_no_clusters.csv \
 		NO_CLUSTER_SUMMARY_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.csv \
 		NO_CLUSTER_SUMMARY_MD=$(PAPER_RESULTS_DIR)/tables/strategy_series_summary_no_clusters.md \
@@ -372,6 +408,8 @@ eta_verification_paper: prepare_paper_dirs
 		--cluster-event-count $(ETA_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(ETA_CLUSTER_BIT_COUNT) \
 		--control-quantization $(ETA_CONTROL_QUANTIZATION) \
+		--control-source $(CONTROL_SOURCE) \
+		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
 		--fixed-intervals $(ETA_FIXED_INTERVALS) \
 		--output-dir $(ETA_RESULTS_DIR) \
 		--make-command $(MAKE)
