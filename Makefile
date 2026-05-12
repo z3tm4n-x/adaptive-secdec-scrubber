@@ -11,6 +11,7 @@ FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 FAULT_CLUSTER_EVENT_COUNT ?= 0
 FAULT_CLUSTER_BIT_COUNT ?= 2
+FIXED_INTERVAL ?= 80
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -39,6 +40,20 @@ PAPER_CLUSTER_EVENT_COUNT ?= 10
 PAPER_CLUSTER_BIT_COUNT ?= 2
 PAPER_CODEWORD_COUNT ?= 16
 
+ETA_RESULTS_DIR ?= $(PAPER_RESULTS_DIR)/eta
+ETA_FIXED_INTERVALS ?= 20,30,40,60,80,100,150,200
+
+ETA_SEED_START ?= 1
+ETA_SEED_COUNT ?= 10
+ETA_TOTAL_CYCLES ?= 10000
+ETA_WINDOW_SIZE ?= 10000
+ETA_EVENT_COUNT ?= 80
+ETA_PAIRED_EVENT_COUNT ?= 20
+ETA_PAIR_GAP_MIN ?= 60
+ETA_PAIR_GAP_MAX ?= 300
+ETA_CLUSTER_EVENT_COUNT ?= 0
+ETA_CLUSTER_BIT_COUNT ?= 2
+
 NO_CLUSTER_SERIES_OUTPUT ?= results/tables/strategy_comparison_series_no_clusters.csv
 NO_CLUSTER_SUMMARY_CSV ?= results/tables/strategy_series_summary_no_clusters.csv
 NO_CLUSTER_SUMMARY_MD ?= results/tables/strategy_series_summary_no_clusters.md
@@ -52,7 +67,7 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -184,9 +199,9 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
 	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
-	vvp results/logs/strategy_comparison.out +STRATEGY=0 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES)
-	vvp results/logs/strategy_comparison.out +STRATEGY=1 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES)
-	vvp results/logs/strategy_comparison.out +STRATEGY=2 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES)
+	vvp results/logs/strategy_comparison.out +STRATEGY=0 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) +FIXED_INTERVAL=$(FIXED_INTERVAL)
+	vvp results/logs/strategy_comparison.out +STRATEGY=1 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) +FIXED_INTERVAL=$(FIXED_INTERVAL)
+	vvp results/logs/strategy_comparison.out +STRATEGY=2 +TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) +FIXED_INTERVAL=$(FIXED_INTERVAL)
 	cat results/tables/strategy_comparison.csv
 
 test_strategy_comparison_upsets_paired:
@@ -315,6 +330,26 @@ strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper p
 		WITH_CLUSTER_FIGURE_DIR=$(PAPER_RESULTS_DIR)/figures/series_with_clusters \
 		SCENARIO_COMPARISON_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.csv \
 		SCENARIO_COMPARISON_MD=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.md
+
+eta_verification_paper: prepare_paper_dirs
+	mkdir -p $(ETA_RESULTS_DIR)/tables $(ETA_RESULTS_DIR)/figures
+	$(PYTHON) model/run_eta_verification.py \
+		--input $(UPSETS_FILE) \
+		--start-index $(FAULT_START_INDEX) \
+		--window-size $(ETA_WINDOW_SIZE) \
+		--total-cycles $(ETA_TOTAL_CYCLES) \
+		--seed-start $(ETA_SEED_START) \
+		--seed-count $(ETA_SEED_COUNT) \
+		--event-count $(ETA_EVENT_COUNT) \
+		--paired-event-count $(ETA_PAIRED_EVENT_COUNT) \
+		--pair-gap-min $(ETA_PAIR_GAP_MIN) \
+		--pair-gap-max $(ETA_PAIR_GAP_MAX) \
+		--cluster-event-count $(ETA_CLUSTER_EVENT_COUNT) \
+		--cluster-bit-count $(ETA_CLUSTER_BIT_COUNT) \
+		--fixed-intervals $(ETA_FIXED_INTERVALS) \
+		--output-dir $(ETA_RESULTS_DIR) \
+		--make-command $(MAKE)
+	cat $(ETA_RESULTS_DIR)/tables/eta_verification.md
 
 clean:
 	rm -f results/logs/*.out

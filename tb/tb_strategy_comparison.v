@@ -122,6 +122,7 @@ reg [127:0] strategy_name;
 
 integer sim_cycle;
 integer total_run_cycles;
+integer configured_fixed_interval;
 integer i;
 integer error_count;
 integer injected_event_count;
@@ -369,7 +370,19 @@ task configure_strategy;
         threshold_medium_interval = 32'd25;
         threshold_high_interval = 32'd8;
 
-        fixed_interval = 32'd80;
+        if (!$value$plusargs("FIXED_INTERVAL=%d", configured_fixed_interval)) begin
+            configured_fixed_interval = 80;
+        end
+
+        if (configured_fixed_interval <= 0) begin
+            $display("ERROR: FIXED_INTERVAL must be positive");
+            $display("  actual = %0d", configured_fixed_interval);
+            $fatal(1);
+        end
+
+        fixed_interval = configured_fixed_interval[INTERVAL_WIDTH-1:0];
+
+        $display("Fixed interval: %0d", configured_fixed_interval);
 
         case (strategy_id)
             0: begin

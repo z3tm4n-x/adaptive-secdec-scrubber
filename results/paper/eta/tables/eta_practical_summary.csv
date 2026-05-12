@@ -1,0 +1,3 @@
+adaptive_strategy,window_cv2,eta_theory_1_plus_cv2,adaptive_scrub_cycles,adaptive_busy_percent,adaptive_unique_uncorrectable,matched_fixed_interval,matched_fixed_scrub_cycles,matched_fixed_busy_percent,matched_fixed_unique_uncorrectable,eta_practical_scrub_cycles,eta_practical_busy_percent,risk_difference
+table,27.023815994,28.023815994,300.166667,10.383333,6.666667,20,582.133333,19.520000,6.700000,1.939367,1.879936,0.033333
+threshold,27.023815994,28.023815994,300.033333,10.380000,6.700000,20,582.133333,19.520000,6.700000,1.940229,1.880539,0.000000
