@@ -123,6 +123,26 @@ reg [127:0] strategy_name;
 integer sim_cycle;
 integer total_run_cycles;
 integer configured_fixed_interval;
+integer configured_safe_interval;
+
+integer configured_level0_interval;
+integer configured_level1_interval;
+integer configured_level2_interval;
+integer configured_level3_interval;
+integer configured_level4_interval;
+integer configured_level5_interval;
+integer configured_level6_interval;
+integer configured_level7_interval;
+
+integer configured_threshold_low_to_medium;
+integer configured_threshold_medium_to_low;
+integer configured_threshold_medium_to_high;
+integer configured_threshold_high_to_medium;
+
+integer configured_threshold_low_interval;
+integer configured_threshold_medium_interval;
+integer configured_threshold_high_interval;
+
 integer i;
 integer error_count;
 integer injected_event_count;
@@ -331,44 +351,162 @@ task configure_strategy;
 
         /*
          * Общие параметры.
-         * Безопасный режим в этом сравнительном сценарии выключаться не должен,
-         * поэтому max_control_age заведомо больше длительности моделирования.
+         * По умолчанию сохраняются прежние демонстрационные значения.
+         * Paper/risk-policy конфигурация передаётся через plusargs.
          */
-        safe_interval = 32'd5;
+        configured_safe_interval = 5;
+
+        if (!$value$plusargs("SAFE_INTERVAL=%d", configured_safe_interval)) begin
+            configured_safe_interval = 5;
+        end
+
+        if (configured_safe_interval <= 0) begin
+            $display("ERROR: SAFE_INTERVAL must be positive");
+            $display("  actual = %0d", configured_safe_interval);
+            $fatal(1);
+        end
+
+        safe_interval = configured_safe_interval[INTERVAL_WIDTH-1:0];
 
         /*
-        * В сравнительном эксперименте безопасный режим не должен включаться
-        * только из-за окончания расписания управляющих уровней.
-        */
+         * В сравнительном эксперименте безопасный режим не должен включаться
+         * только из-за окончания расписания управляющих уровней.
+         */
         max_control_age = total_run_cycles + 100;
 
         /*
-         * Таблица уровень -> интервал.
+         * Таблица уровень -> model-cycle interval.
+         *
+         * Для paper/risk-policy режима эта таблица задаёт нормированное
+         * отображение расчётных физических интервалов статьи 3 в интервалы
+         * ускоренного RTL-стенда. Это не физические секунды RTL-модели.
          */
-        level0_interval = 32'd100;
-        level1_interval = 32'd80;
-        level2_interval = 32'd60;
-        level3_interval = 32'd40;
-        level4_interval = 32'd25;
-        level5_interval = 32'd15;
-        level6_interval = 32'd10;
-        level7_interval = 32'd5;
+        configured_level0_interval = 100;
+        configured_level1_interval = 80;
+        configured_level2_interval = 60;
+        configured_level3_interval = 40;
+        configured_level4_interval = 25;
+        configured_level5_interval = 15;
+        configured_level6_interval = 10;
+        configured_level7_interval = 5;
+
+        if (!$value$plusargs("LEVEL0_INTERVAL=%d", configured_level0_interval)) begin
+            configured_level0_interval = 100;
+        end
+        if (!$value$plusargs("LEVEL1_INTERVAL=%d", configured_level1_interval)) begin
+            configured_level1_interval = 80;
+        end
+        if (!$value$plusargs("LEVEL2_INTERVAL=%d", configured_level2_interval)) begin
+            configured_level2_interval = 60;
+        end
+        if (!$value$plusargs("LEVEL3_INTERVAL=%d", configured_level3_interval)) begin
+            configured_level3_interval = 40;
+        end
+        if (!$value$plusargs("LEVEL4_INTERVAL=%d", configured_level4_interval)) begin
+            configured_level4_interval = 25;
+        end
+        if (!$value$plusargs("LEVEL5_INTERVAL=%d", configured_level5_interval)) begin
+            configured_level5_interval = 15;
+        end
+        if (!$value$plusargs("LEVEL6_INTERVAL=%d", configured_level6_interval)) begin
+            configured_level6_interval = 10;
+        end
+        if (!$value$plusargs("LEVEL7_INTERVAL=%d", configured_level7_interval)) begin
+            configured_level7_interval = 5;
+        end
+
+        if ((configured_level0_interval <= 0) ||
+            (configured_level1_interval <= 0) ||
+            (configured_level2_interval <= 0) ||
+            (configured_level3_interval <= 0) ||
+            (configured_level4_interval <= 0) ||
+            (configured_level5_interval <= 0) ||
+            (configured_level6_interval <= 0) ||
+            (configured_level7_interval <= 0)) begin
+            $display("ERROR: all LEVEL*_INTERVAL values must be positive");
+            $fatal(1);
+        end
+
+        level0_interval = configured_level0_interval[INTERVAL_WIDTH-1:0];
+        level1_interval = configured_level1_interval[INTERVAL_WIDTH-1:0];
+        level2_interval = configured_level2_interval[INTERVAL_WIDTH-1:0];
+        level3_interval = configured_level3_interval[INTERVAL_WIDTH-1:0];
+        level4_interval = configured_level4_interval[INTERVAL_WIDTH-1:0];
+        level5_interval = configured_level5_interval[INTERVAL_WIDTH-1:0];
+        level6_interval = configured_level6_interval[INTERVAL_WIDTH-1:0];
+        level7_interval = configured_level7_interval[INTERVAL_WIDTH-1:0];
 
         /*
          * Пороги трёхрежимного управления.
+         *
+         * Defaults сохраняют старую демонстрационную настройку.
+         * Paper/risk-policy режим ниже задаёт coarse-аппроксимацию:
+         *   low:    спокойный хвост policy;
+         *   medium: активная область;
+         *   high:   пиковая область.
          */
-        threshold_low_to_medium = 3'd3;
-        threshold_medium_to_low = 3'd1;
-        threshold_medium_to_high = 3'd6;
-        threshold_high_to_medium = 3'd4;
+        configured_threshold_low_to_medium = 3;
+        configured_threshold_medium_to_low = 1;
+        configured_threshold_medium_to_high = 6;
+        configured_threshold_high_to_medium = 4;
+
+        if (!$value$plusargs("THRESHOLD_LOW_TO_MEDIUM=%d", configured_threshold_low_to_medium)) begin
+            configured_threshold_low_to_medium = 3;
+        end
+        if (!$value$plusargs("THRESHOLD_MEDIUM_TO_LOW=%d", configured_threshold_medium_to_low)) begin
+            configured_threshold_medium_to_low = 1;
+        end
+        if (!$value$plusargs("THRESHOLD_MEDIUM_TO_HIGH=%d", configured_threshold_medium_to_high)) begin
+            configured_threshold_medium_to_high = 6;
+        end
+        if (!$value$plusargs("THRESHOLD_HIGH_TO_MEDIUM=%d", configured_threshold_high_to_medium)) begin
+            configured_threshold_high_to_medium = 4;
+        end
+
+        if ((configured_threshold_low_to_medium < 0) ||
+            (configured_threshold_low_to_medium > 7) ||
+            (configured_threshold_medium_to_low < 0) ||
+            (configured_threshold_medium_to_low > 7) ||
+            (configured_threshold_medium_to_high < 0) ||
+            (configured_threshold_medium_to_high > 7) ||
+            (configured_threshold_high_to_medium < 0) ||
+            (configured_threshold_high_to_medium > 7)) begin
+            $display("ERROR: threshold levels must be in range 0..7");
+            $fatal(1);
+        end
+
+        threshold_low_to_medium = configured_threshold_low_to_medium[LEVEL_WIDTH-1:0];
+        threshold_medium_to_low = configured_threshold_medium_to_low[LEVEL_WIDTH-1:0];
+        threshold_medium_to_high = configured_threshold_medium_to_high[LEVEL_WIDTH-1:0];
+        threshold_high_to_medium = configured_threshold_high_to_medium[LEVEL_WIDTH-1:0];
 
         /*
-         * Интервалы трёх режимов:
-         * фоновый, промежуточный, высокий.
+         * Интервалы трёх режимов.
          */
-        threshold_low_interval = 32'd100;
-        threshold_medium_interval = 32'd25;
-        threshold_high_interval = 32'd8;
+        configured_threshold_low_interval = 100;
+        configured_threshold_medium_interval = 25;
+        configured_threshold_high_interval = 8;
+
+        if (!$value$plusargs("THRESHOLD_LOW_INTERVAL=%d", configured_threshold_low_interval)) begin
+            configured_threshold_low_interval = 100;
+        end
+        if (!$value$plusargs("THRESHOLD_MEDIUM_INTERVAL=%d", configured_threshold_medium_interval)) begin
+            configured_threshold_medium_interval = 25;
+        end
+        if (!$value$plusargs("THRESHOLD_HIGH_INTERVAL=%d", configured_threshold_high_interval)) begin
+            configured_threshold_high_interval = 8;
+        end
+
+        if ((configured_threshold_low_interval <= 0) ||
+            (configured_threshold_medium_interval <= 0) ||
+            (configured_threshold_high_interval <= 0)) begin
+            $display("ERROR: threshold intervals must be positive");
+            $fatal(1);
+        end
+
+        threshold_low_interval = configured_threshold_low_interval[INTERVAL_WIDTH-1:0];
+        threshold_medium_interval = configured_threshold_medium_interval[INTERVAL_WIDTH-1:0];
+        threshold_high_interval = configured_threshold_high_interval[INTERVAL_WIDTH-1:0];
 
         if (!$value$plusargs("FIXED_INTERVAL=%d", configured_fixed_interval)) begin
             configured_fixed_interval = 80;
@@ -383,6 +521,31 @@ task configure_strategy;
         fixed_interval = configured_fixed_interval[INTERVAL_WIDTH-1:0];
 
         $display("Fixed interval: %0d", configured_fixed_interval);
+        $display("Safe interval: %0d", configured_safe_interval);
+        $display(
+            "Level intervals: L0=%0d L1=%0d L2=%0d L3=%0d L4=%0d L5=%0d L6=%0d L7=%0d",
+            configured_level0_interval,
+            configured_level1_interval,
+            configured_level2_interval,
+            configured_level3_interval,
+            configured_level4_interval,
+            configured_level5_interval,
+            configured_level6_interval,
+            configured_level7_interval
+        );
+        $display(
+            "Threshold levels: low_to_medium=%0d medium_to_low=%0d medium_to_high=%0d high_to_medium=%0d",
+            configured_threshold_low_to_medium,
+            configured_threshold_medium_to_low,
+            configured_threshold_medium_to_high,
+            configured_threshold_high_to_medium
+        );
+        $display(
+            "Threshold intervals: low=%0d medium=%0d high=%0d",
+            configured_threshold_low_interval,
+            configured_threshold_medium_interval,
+            configured_threshold_high_interval
+        );
 
         case (strategy_id)
             0: begin

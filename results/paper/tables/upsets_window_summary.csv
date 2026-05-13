@@ -18,7 +18,7 @@ window_sum,114968.614323
 control_level_changes,2041
 event_count,80
 paired_event_count,20
-cluster_event_count,10
+cluster_event_count,2
 codeword_count,16
 injected_rows_no_clusters,120
-injected_rows_with_clusters,130
+injected_rows_with_clusters,122

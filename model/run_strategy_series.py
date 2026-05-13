@@ -129,6 +129,10 @@ def run_one_seed(
     control_quantization: str,
     control_source: str,
     control_policy_schedule: str,
+    safe_interval: int,
+    level_intervals: list[int],
+    threshold_levels: list[int],
+    threshold_intervals: list[int],
     make_command: str,
 ) -> None:
     command = [
@@ -147,6 +151,22 @@ def run_one_seed(
         f"CONTROL_QUANTIZATION={control_quantization}",
         f"CONTROL_SOURCE={control_source}",
         f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
+        f"SAFE_INTERVAL={safe_interval}",
+        f"LEVEL0_INTERVAL={level_intervals[0]}",
+        f"LEVEL1_INTERVAL={level_intervals[1]}",
+        f"LEVEL2_INTERVAL={level_intervals[2]}",
+        f"LEVEL3_INTERVAL={level_intervals[3]}",
+        f"LEVEL4_INTERVAL={level_intervals[4]}",
+        f"LEVEL5_INTERVAL={level_intervals[5]}",
+        f"LEVEL6_INTERVAL={level_intervals[6]}",
+        f"LEVEL7_INTERVAL={level_intervals[7]}",
+        f"THRESHOLD_LOW_TO_MEDIUM={threshold_levels[0]}",
+        f"THRESHOLD_MEDIUM_TO_LOW={threshold_levels[1]}",
+        f"THRESHOLD_MEDIUM_TO_HIGH={threshold_levels[2]}",
+        f"THRESHOLD_HIGH_TO_MEDIUM={threshold_levels[3]}",
+        f"THRESHOLD_LOW_INTERVAL={threshold_intervals[0]}",
+        f"THRESHOLD_MEDIUM_INTERVAL={threshold_intervals[1]}",
+        f"THRESHOLD_HIGH_INTERVAL={threshold_intervals[2]}",
     ]
 
     print("")
@@ -156,6 +176,53 @@ def run_one_seed(
     print("=" * 80)
 
     subprocess.run(command, check=True)
+
+def parse_int_list(text: str, expected_count: int, name: str) -> list[int]:
+    values: list[int] = []
+
+    for raw_part in text.replace(";", ",").split(","):
+        part = raw_part.strip()
+
+        if not part:
+            continue
+
+        value = int(part)
+
+        if value <= 0:
+            raise ValueError(f"{name} values must be positive: {value}")
+
+        values.append(value)
+
+    if len(values) != expected_count:
+        raise ValueError(
+            f"{name} must contain exactly {expected_count} values, got {len(values)}"
+        )
+
+    return values
+
+
+def parse_level_thresholds(text: str) -> list[int]:
+    values: list[int] = []
+
+    for raw_part in text.replace(";", ",").split(","):
+        part = raw_part.strip()
+
+        if not part:
+            continue
+
+        value = int(part)
+
+        if value < 0 or value > 7:
+            raise ValueError(f"threshold level must be in 0..7: {value}")
+
+        values.append(value)
+
+    if len(values) != 4:
+        raise ValueError(
+            f"threshold-levels must contain exactly 4 values, got {len(values)}"
+        )
+
+    return values
 
 
 def main() -> None:
@@ -261,6 +328,34 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--safe-interval",
+        type=int,
+        default=5,
+        help="Safe interval passed to RTL testbench.",
+    )
+
+    parser.add_argument(
+        "--level-intervals",
+        default="100,80,60,40,25,15,10,5",
+        help="Comma-separated LEVEL0..LEVEL7 model intervals.",
+    )
+
+    parser.add_argument(
+        "--threshold-levels",
+        default="3,1,6,4",
+        help=(
+            "Comma-separated threshold levels: "
+            "low_to_medium,medium_to_low,medium_to_high,high_to_medium."
+        ),
+    )
+
+    parser.add_argument(
+        "--threshold-intervals",
+        default="100,25,8",
+        help="Comma-separated threshold low,medium,high model intervals.",
+    )
+
+    parser.add_argument(
         "--single-run-input",
         type=Path,
         default=Path("results/tables/strategy_comparison.csv"),
@@ -291,6 +386,23 @@ def main() -> None:
     if args.window_size <= 0:
         raise ValueError("window-size must be positive")
 
+    level_intervals = parse_int_list(
+        args.level_intervals,
+        expected_count=8,
+        name="level-intervals",
+    )
+
+    threshold_levels = parse_level_thresholds(args.threshold_levels)
+
+    threshold_intervals = parse_int_list(
+        args.threshold_intervals,
+        expected_count=3,
+        name="threshold-intervals",
+    )
+
+    if args.safe_interval <= 0:
+        raise ValueError("safe-interval must be positive")
+
     if args.output.exists():
         args.output.unlink()
 
@@ -311,6 +423,10 @@ def main() -> None:
             control_quantization=args.control_quantization,
             control_source=args.control_source,
             control_policy_schedule=args.control_policy_schedule,
+            safe_interval=args.safe_interval,
+            level_intervals=level_intervals,
+            threshold_levels=threshold_levels,
+            threshold_intervals=threshold_intervals,
             make_command=args.make_command,
         )
 

@@ -1,7 +1,7 @@
-scenario,seed,requested_total_cycles,window_size,event_count,paired_event_count,pair_gap_min,pair_gap_max,cluster_event_count,cluster_bit_count,control_quantization,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
-upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,fixed,10000,68,1088,103,103,33,0,0,0,0,4523,1191,452,119,0
-upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,table,10000,76,1221,100,100,93,0,2040,0,0,5057,1321,505,132,0
-upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,threshold,10000,79,1268,107,107,39,0,280,0,0,5258,1375,525,137,0
-upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,fixed,10000,68,1088,95,95,122,2,0,0,0,4515,1183,451,118,0
-upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,table,10000,77,1232,107,107,36,2,2040,0,0,5112,1339,511,133,0
-upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,threshold,10000,79,1268,100,101,96,4,280,0,0,5250,1368,525,136,0
+scenario,seed,requested_total_cycles,window_size,event_count,paired_event_count,pair_gap_min,pair_gap_max,cluster_event_count,cluster_bit_count,control_quantization,control_source,control_policy_schedule,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
+upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,fixed,10000,68,1088,103,103,33,0,0,0,0,4523,1191,452,119,0
+upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,table,10000,70,1120,98,98,82,0,558,0,0,4648,1218,464,121,0
+upsets,1,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,threshold,10000,79,1270,101,101,110,0,6,0,0,5259,1371,525,137,0
+upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,fixed,10000,68,1088,95,95,122,2,0,0,0,4515,1183,451,118,0
+upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,table,10000,70,1120,97,97,111,3,558,0,0,4647,1217,464,121,0
+upsets,2,10000,10000,80,20,60,300,0,2,percentile_tail,risk_policy,results/paper/tables/risk_policy_schedule.csv,threshold,10000,79,1268,100,100,95,2,6,0,0,5248,1368,524,136,0

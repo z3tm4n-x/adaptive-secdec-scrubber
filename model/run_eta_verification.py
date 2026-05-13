@@ -91,6 +91,53 @@ def parse_intervals(text: str) -> list[int]:
 
     return result
 
+def parse_int_list(text: str, expected_count: int, name: str) -> list[int]:
+    values: list[int] = []
+
+    for raw_part in text.replace(";", ",").split(","):
+        part = raw_part.strip()
+
+        if not part:
+            continue
+
+        value = int(part)
+
+        if value <= 0:
+            raise ValueError(f"{name} values must be positive: {value}")
+
+        values.append(value)
+
+    if len(values) != expected_count:
+        raise ValueError(
+            f"{name} must contain exactly {expected_count} values, got {len(values)}"
+        )
+
+    return values
+
+
+def parse_level_thresholds(text: str) -> list[int]:
+    values: list[int] = []
+
+    for raw_part in text.replace(";", ",").split(","):
+        part = raw_part.strip()
+
+        if not part:
+            continue
+
+        value = int(part)
+
+        if value < 0 or value > 7:
+            raise ValueError(f"threshold level must be in 0..7: {value}")
+
+        values.append(value)
+
+    if len(values) != 4:
+        raise ValueError(
+            f"threshold-levels must contain exactly 4 values, got {len(values)}"
+        )
+
+    return values
+
 
 def read_strategy_result(path: Path) -> list[dict[str, str]]:
     if not path.exists():
@@ -152,6 +199,10 @@ def run_one_configuration(
     control_quantization: str,
     control_source: str,
     control_policy_schedule: str,
+    safe_interval: int,
+    level_intervals: list[int],
+    threshold_levels: list[int],
+    threshold_intervals: list[int],
 ) -> list[dict[str, str]]:
     command = [
         make_command,
@@ -170,6 +221,22 @@ def run_one_configuration(
         f"CONTROL_QUANTIZATION={control_quantization}",
         f"CONTROL_SOURCE={control_source}",
         f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
+        f"SAFE_INTERVAL={safe_interval}",
+        f"LEVEL0_INTERVAL={level_intervals[0]}",
+        f"LEVEL1_INTERVAL={level_intervals[1]}",
+        f"LEVEL2_INTERVAL={level_intervals[2]}",
+        f"LEVEL3_INTERVAL={level_intervals[3]}",
+        f"LEVEL4_INTERVAL={level_intervals[4]}",
+        f"LEVEL5_INTERVAL={level_intervals[5]}",
+        f"LEVEL6_INTERVAL={level_intervals[6]}",
+        f"LEVEL7_INTERVAL={level_intervals[7]}",
+        f"THRESHOLD_LOW_TO_MEDIUM={threshold_levels[0]}",
+        f"THRESHOLD_MEDIUM_TO_LOW={threshold_levels[1]}",
+        f"THRESHOLD_MEDIUM_TO_HIGH={threshold_levels[2]}",
+        f"THRESHOLD_HIGH_TO_MEDIUM={threshold_levels[3]}",
+        f"THRESHOLD_LOW_INTERVAL={threshold_intervals[0]}",
+        f"THRESHOLD_MEDIUM_INTERVAL={threshold_intervals[1]}",
+        f"THRESHOLD_HIGH_INTERVAL={threshold_intervals[2]}",
     ]
 
     print("=" * 80)
@@ -204,6 +271,10 @@ def collect_raw_rows(args: argparse.Namespace, intervals: list[int]) -> list[Raw
                 control_quantization=args.control_quantization,
                 control_source=args.control_source,
                 control_policy_schedule=args.control_policy_schedule,
+                safe_interval=args.safe_interval,
+                level_intervals=args.level_intervals_parsed,
+                threshold_levels=args.threshold_levels_parsed,
+                threshold_intervals=args.threshold_intervals_parsed,
             )
 
             for row in rows:
@@ -505,6 +576,18 @@ def write_markdown(
     lines.append(f"- Мгновенных кластеров: {args.cluster_event_count}")
     lines.append(f"- Квантование управляющего уровня: `{args.control_quantization}`")
     lines.append(f"- Источник управляющего потока: `{args.control_source}`")
+    lines.append(
+        "- Level intervals: "
+        + ", ".join(str(value) for value in args.level_intervals_parsed)
+    )
+    lines.append(
+        "- Threshold levels: "
+        + ", ".join(str(value) for value in args.threshold_levels_parsed)
+    )
+    lines.append(
+        "- Threshold intervals: "
+        + ", ".join(str(value) for value in args.threshold_intervals_parsed)
+    )
     lines.append(f"- Sweep fixed_interval: {', '.join(str(v) for v in parse_intervals(args.fixed_intervals))}")
     lines.append("")
     lines.append("## Статистика окна ν(t)")
@@ -717,6 +800,34 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--safe-interval",
+        type=int,
+        default=5,
+        help="Safe interval passed to RTL testbench.",
+    )
+
+    parser.add_argument(
+        "--level-intervals",
+        default="100,80,60,40,25,15,10,5",
+        help="Comma-separated LEVEL0..LEVEL7 model intervals.",
+    )
+
+    parser.add_argument(
+        "--threshold-levels",
+        default="3,1,6,4",
+        help=(
+            "Comma-separated threshold levels: "
+            "low_to_medium,medium_to_low,medium_to_high,high_to_medium."
+        ),
+    )
+
+    parser.add_argument(
+        "--threshold-intervals",
+        default="100,25,8",
+        help="Comma-separated threshold low,medium,high model intervals.",
+    )
+
+    parser.add_argument(
         "--fixed-intervals",
         type=str,
         default="20,30,40,60,80,100,150,200",
@@ -738,6 +849,23 @@ def main() -> None:
     args = parser.parse_args()
 
     intervals = parse_intervals(args.fixed_intervals)
+
+    args.level_intervals_parsed = parse_int_list(
+        args.level_intervals,
+        expected_count=8,
+        name="level-intervals",
+    )
+
+    args.threshold_levels_parsed = parse_level_thresholds(args.threshold_levels)
+
+    args.threshold_intervals_parsed = parse_int_list(
+        args.threshold_intervals,
+        expected_count=3,
+        name="threshold-intervals",
+    )
+
+    if args.safe_interval <= 0:
+        raise ValueError("safe-interval must be positive")
 
     window_mean, window_cv2, eta_theory = compute_window_stats(
         input_path=args.input,
