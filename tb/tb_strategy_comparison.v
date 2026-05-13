@@ -109,6 +109,8 @@ wire safe_mode_active;
 wire [LEVEL_WIDTH-1:0] current_level;
 wire [1:0] threshold_state;
 wire [31:0] control_age;
+wire [INTERVAL_WIDTH-1:0] effective_wait_interval;
+wire [31:0] last_pass_duration;
 
 wire [38:0] checked_corrected_codeword;
 wire [31:0] checked_data_out;
@@ -293,7 +295,9 @@ adaptive_scrub_controller #(
     .safe_mode_active(safe_mode_active),
     .current_level(current_level),
     .threshold_state(threshold_state),
-    .control_age(control_age)
+    .control_age(control_age),
+    .effective_wait_interval(effective_wait_interval),
+    .last_pass_duration(last_pass_duration)
 );
 
 initial begin
@@ -793,11 +797,13 @@ task trace_execution_event;
                 end else begin
                     $fdisplay(
                         trace_file,
-                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                         strategy_name,
                         sim_cycle,
                         scrub_cycle_count,
                         selected_interval,
+                        effective_wait_interval,
+                        last_pass_duration,
                         current_level,
                         threshold_state,
                         safe_mode_active,

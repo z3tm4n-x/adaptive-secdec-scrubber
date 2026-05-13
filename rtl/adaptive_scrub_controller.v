@@ -65,7 +65,17 @@ module adaptive_scrub_controller #(
     output wire                         safe_mode_active,
     output wire [LEVEL_WIDTH-1:0]        current_level,
     output wire [1:0]                   threshold_state,
-    output wire [31:0]                  control_age
+    output wire [31:0]                  control_age,
+
+    /*
+     * Диагностика фактической временной семантики.
+     *
+     * selected_interval задаёт целевой период между полными проходами
+     * скраббинга. effective_wait_interval — реально применяемое ожидание
+     * в STATE_WAIT после компенсации длительности предыдущего прохода.
+     */
+    output wire [INTERVAL_WIDTH-1:0]     effective_wait_interval,
+    output reg  [31:0]                  last_pass_duration
 );
 
 localparam DEPTH = (1 << ADDR_WIDTH);
@@ -86,12 +96,45 @@ reg [INTERVAL_WIDTH-1:0] previous_selected_interval;
 reg interval_initialized;
 reg previous_safe_mode_active;
 
-wire [INTERVAL_WIDTH-1:0] effective_interval;
+/*
+ * Длительность текущего активного прохода памяти.
+ *
+ * До исправления selected_interval трактовался как дополнительная пауза
+ * перед запуском прохода. Теперь selected_interval трактуется как целевой
+ * период полного скраббинга; поэтому после завершения прохода wait-интервал
+ * компенсируется на длительность прошедшего прохода.
+ */
+reg [31:0] pass_duration_counter;
+reg completed_first_pass;
 
-assign effective_interval =
+wire [INTERVAL_WIDTH-1:0] selected_interval_nonzero;
+wire [INTERVAL_WIDTH-1:0] compensated_wait_interval;
+wire [INTERVAL_WIDTH-1:0] active_wait_interval;
+
+assign selected_interval_nonzero =
     (selected_interval == {INTERVAL_WIDTH{1'b0}})
         ? {{(INTERVAL_WIDTH-1){1'b0}}, 1'b1}
         : selected_interval;
+
+/*
+ * selected_interval теперь трактуется как целевой период полного прохода.
+ * Поэтому ожидание перед следующим проходом постоянно пересчитывается
+ * из текущего selected_interval и длительности последнего завершённого прохода.
+ *
+ * Если требуемый период меньше длительности прохода, следующий проход
+ * стартует после минимального ожидания 1 такт.
+ */
+assign compensated_wait_interval =
+    (selected_interval_nonzero[31:0] <= last_pass_duration)
+        ? {{(INTERVAL_WIDTH-1){1'b0}}, 1'b1}
+        : selected_interval_nonzero - last_pass_duration[INTERVAL_WIDTH-1:0];
+
+assign effective_wait_interval =
+    completed_first_pass
+        ? compensated_wait_interval
+        : selected_interval_nonzero;
+
+assign active_wait_interval = effective_wait_interval;
 
 wire [38:0] decoder_corrected_codeword;
 wire [31:0] decoder_data_out;
@@ -183,6 +226,10 @@ always @(posedge clk) begin
         previous_selected_interval <= {INTERVAL_WIDTH{1'b0}};
         interval_initialized <= 1'b0;
         previous_safe_mode_active <= 1'b0;
+
+        pass_duration_counter <= 32'd0;
+        completed_first_pass <= 1'b0;
+        last_pass_duration <= 32'd0;
     end else begin
 
         /*
@@ -243,30 +290,38 @@ always @(posedge clk) begin
 
                 if (!enable) begin
                     interval_counter <= 32'd0;
+                    pass_duration_counter <= 32'd0;
+                    completed_first_pass <= 1'b0;
+                    state <= STATE_WAIT;
                 end else begin
-                    if ((interval_counter + 32'd1) >= effective_interval[31:0]) begin
+                    if ((interval_counter + 32'd1) >= active_wait_interval[31:0]) begin
                         interval_counter <= 32'd0;
                         scrub_active <= 1'b1;
+                        pass_duration_counter <= 32'd1;
                         state <= STATE_READ_REQ;
                     end else begin
                         interval_counter <= interval_counter + 32'd1;
+                        state <= STATE_WAIT;
                     end
                 end
             end
 
             STATE_READ_REQ: begin
                 scrub_active <= 1'b1;
+                pass_duration_counter <= pass_duration_counter + 32'd1;
                 memory_read_count <= memory_read_count + 32'd1;
                 state <= STATE_READ_WAIT;
             end
 
             STATE_READ_WAIT: begin
                 scrub_active <= 1'b1;
+                pass_duration_counter <= pass_duration_counter + 32'd1;
                 state <= STATE_DECODE;
             end
 
             STATE_DECODE: begin
                 scrub_active <= 1'b1;
+                pass_duration_counter <= pass_duration_counter + 32'd1;
 
                 if (decoder_single_error) begin
                     corrected_error_count <= corrected_error_count + 32'd1;
@@ -282,12 +337,14 @@ always @(posedge clk) begin
 
             STATE_WRITE: begin
                 scrub_active <= 1'b1;
+                pass_duration_counter <= pass_duration_counter + 32'd1;
                 memory_write_count <= memory_write_count + 32'd1;
                 state <= STATE_NEXT;
             end
 
             STATE_NEXT: begin
                 scrub_active <= 1'b1;
+                pass_duration_counter <= pass_duration_counter + 32'd1;
 
                 if (current_addr == (DEPTH - 1)) begin
                     state <= STATE_DONE;
@@ -300,6 +357,18 @@ always @(posedge clk) begin
             STATE_DONE: begin
                 scrub_active <= 1'b0;
                 scrub_cycle_count <= scrub_cycle_count + 32'd1;
+
+                /*
+                 * STATE_DONE тоже входит в длительность завершённого прохода.
+                 * selected_interval задаёт целевой период полного скраббинга,
+                 * поэтому ожидание перед следующим проходом компенсирует
+                 * длительность только что завершённого прохода.
+                 */
+                last_pass_duration <= pass_duration_counter + 32'd1;
+
+                completed_first_pass <= 1'b1;
+                pass_duration_counter <= 32'd0;
+
                 current_addr <= {ADDR_WIDTH{1'b0}};
                 state <= STATE_WAIT;
             end

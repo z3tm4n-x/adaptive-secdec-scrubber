@@ -15,6 +15,8 @@ class TraceRow:
     cycle: int
     scrub_cycle_count: int
     selected_interval: int
+    effective_wait_interval: int
+    last_pass_duration: int
     current_level: int
     threshold_state: int
     safe_mode_active: int
@@ -80,6 +82,8 @@ def read_trace(path: Path) -> list[TraceRow]:
             "threshold_state",
             "safe_mode_active",
             "control_age",
+            "effective_wait_interval",
+            "last_pass_duration",
         }
 
         if reader.fieldnames is None:
@@ -99,6 +103,8 @@ def read_trace(path: Path) -> list[TraceRow]:
                     cycle=int(row["cycle"]),
                     scrub_cycle_count=int(row["scrub_cycle_count"]),
                     selected_interval=int(row["selected_interval"]),
+                    effective_wait_interval=int(row["effective_wait_interval"]),
+                    last_pass_duration=int(row["last_pass_duration"]),
                     current_level=int(row["current_level"]),
                     threshold_state=int(row["threshold_state"]),
                     safe_mode_active=int(row["safe_mode_active"]),
@@ -212,6 +218,11 @@ def group_trace_by_strategy(rows: list[TraceRow]) -> dict[str, list[TraceRow]]:
 
     return grouped
 
+def expected_effective_wait(selected_interval: int, last_pass_duration: int) -> int:
+    if selected_interval <= last_pass_duration:
+        return 1
+
+    return selected_interval - last_pass_duration
 
 def audit_strategy(
     strategy: str,
@@ -238,6 +249,8 @@ def audit_strategy(
 
     interval_mismatches = 0
     control_level_mismatches = 0
+    wait_compensation_mismatches = 0
+    example_wait_compensation_mismatch = ""
 
     example_interval_mismatch = ""
     example_control_mismatch = ""
@@ -245,6 +258,21 @@ def audit_strategy(
     allowed_threshold_intervals = set(threshold_intervals)
 
     for row in rows:
+        expected_wait = expected_effective_wait(
+            selected_interval=row.selected_interval,
+            last_pass_duration=row.last_pass_duration,
+        )
+
+        if row.effective_wait_interval != expected_wait:
+            wait_compensation_mismatches += 1
+
+            if not example_wait_compensation_mismatch:
+                example_wait_compensation_mismatch = (
+                    f"cycle={row.cycle}, selected_interval={row.selected_interval}, "
+                    f"last_pass_duration={row.last_pass_duration}, "
+                    f"effective_wait_interval={row.effective_wait_interval}, "
+                    f"expected_wait={expected_wait}"
+                )
         expected_interval: int | None = None
 
         if strategy == "fixed":
@@ -312,6 +340,8 @@ def audit_strategy(
         "control_level_mismatches": str(control_level_mismatches),
         "example_interval_mismatch": example_interval_mismatch,
         "example_control_mismatch": example_control_mismatch,
+        "wait_compensation_mismatches": str(wait_compensation_mismatches),
+        "example_wait_compensation_mismatch": example_wait_compensation_mismatch,
     }
 
 
@@ -337,8 +367,10 @@ def write_summary_csv(path: Path, rows: list[dict[str, str]]) -> None:
         "selected_interval_max",
         "interval_mismatches",
         "control_level_mismatches",
+        "wait_compensation_mismatches",
         "example_interval_mismatch",
         "example_control_mismatch",
+        "example_wait_compensation_mismatch",
     ]
 
     with path.open("w", encoding="utf-8", newline="") as file:
@@ -368,7 +400,7 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
     lines.append(
         "| strategy | trace rows | RTL scrub cycles | trace final scrub cycles | "
         "Δ scrub | reads | expected reads | Δ reads | safe entries | "
-        "selected interval range | interval mismatches | control level mismatches |"
+        "selected interval range | interval mismatches | control level mismatches | wait compensation mismatches |"
     )
     lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
 
@@ -385,7 +417,8 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
             f"| {row['safe_entries']} "
             f"| {row['selected_interval_min']}–{row['selected_interval_max']} "
             f"| {row['interval_mismatches']} "
-            f"| {row['control_level_mismatches']} |"
+            f"| {row['control_level_mismatches']} "
+            f"| {row['wait_compensation_mismatches']} |"
         )
 
     lines.append("")
@@ -399,6 +432,7 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
     lines.append("- `safe_entries = 0` и `trace_safe_rows = 0`.")
     lines.append("- `interval_mismatches = 0`.")
     lines.append("- Для `table`: `control_level_mismatches = 0`.")
+    lines.append("- `wait_compensation_mismatches = 0`: RTL wait компенсирует длительность прохода.")
     lines.append("")
 
     failed = False
@@ -417,6 +451,8 @@ def write_markdown(path: Path, rows: list[dict[str, str]]) -> None:
         if row["interval_mismatches"] != "0":
             failed = True
         if row["strategy"] == "table" and row["control_level_mismatches"] != "0":
+            failed = True
+        if row["wait_compensation_mismatches"] != "0":
             failed = True
 
     lines.append("## Итог")
@@ -507,6 +543,8 @@ def main() -> None:
         if row["interval_mismatches"] != "0":
             failed = True
         if row["strategy"] == "table" and row["control_level_mismatches"] != "0":
+            failed = True
+        if row["wait_compensation_mismatches"] != "0":
             failed = True
 
     if failed:
