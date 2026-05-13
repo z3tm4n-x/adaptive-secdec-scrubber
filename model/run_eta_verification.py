@@ -199,6 +199,7 @@ def run_one_configuration(
     control_quantization: str,
     control_source: str,
     control_policy_schedule: str,
+    control_policy_level_map_output: str,
     safe_interval: int,
     level_intervals: list[int],
     threshold_levels: list[int],
@@ -221,6 +222,7 @@ def run_one_configuration(
         f"CONTROL_QUANTIZATION={control_quantization}",
         f"CONTROL_SOURCE={control_source}",
         f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
+        f"CONTROL_POLICY_LEVEL_MAP_OUTPUT={control_policy_level_map_output}",
         f"SAFE_INTERVAL={safe_interval}",
         f"LEVEL0_INTERVAL={level_intervals[0]}",
         f"LEVEL1_INTERVAL={level_intervals[1]}",
@@ -271,6 +273,7 @@ def collect_raw_rows(args: argparse.Namespace, intervals: list[int]) -> list[Raw
                 control_quantization=args.control_quantization,
                 control_source=args.control_source,
                 control_policy_schedule=args.control_policy_schedule,
+                control_policy_level_map_output=args.control_policy_level_map_output,
                 safe_interval=args.safe_interval,
                 level_intervals=args.level_intervals_parsed,
                 threshold_levels=args.threshold_levels_parsed,
@@ -576,6 +579,7 @@ def write_markdown(
     lines.append(f"- Мгновенных кластеров: {args.cluster_event_count}")
     lines.append(f"- Квантование управляющего уровня: `{args.control_quantization}`")
     lines.append(f"- Источник управляющего потока: `{args.control_source}`")
+    lines.append(f"- Risk-policy level map output: `{args.control_policy_level_map_output}`")
     lines.append(
         "- Level intervals: "
         + ", ".join(str(value) for value in args.level_intervals_parsed)
@@ -797,6 +801,12 @@ def main() -> None:
         "--control-policy-schedule",
         default="results/paper/tables/risk_policy_schedule.csv",
         help="Risk policy schedule path passed to fault generator.",
+    )
+
+    parser.add_argument(
+        "--control-policy-level-map-output",
+        default="results/tables/control_policy_level_map.csv",
+        help="Risk policy level-map output path passed to fault generator.",
     )
 
     parser.add_argument(

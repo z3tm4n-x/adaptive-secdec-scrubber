@@ -42,6 +42,11 @@ SERIES_COLUMNS = [
     "control_quantization",
     "control_source",
     "control_policy_schedule",
+    "control_policy_level_map_output",
+    "safe_interval",
+    "level_intervals",
+    "threshold_levels",
+    "threshold_intervals",
     *BASE_COLUMNS,
 ]
 
@@ -81,6 +86,11 @@ def append_series_rows(
     control_quantization: str,
     control_source: str,
     control_policy_schedule: str,
+    control_policy_level_map_output: str,
+    safe_interval: int,
+    level_intervals_text: str,
+    threshold_levels_text: str,
+    threshold_intervals_text: str,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -107,6 +117,11 @@ def append_series_rows(
                 "control_quantization": control_quantization,
                 "control_source": control_source,
                 "control_policy_schedule": control_policy_schedule,
+                "control_policy_level_map_output": control_policy_level_map_output,
+                "safe_interval": safe_interval,
+                "level_intervals": level_intervals_text,
+                "threshold_levels": threshold_levels_text,
+                "threshold_intervals": threshold_intervals_text,
             }
 
             for column in BASE_COLUMNS:
@@ -129,6 +144,7 @@ def run_one_seed(
     control_quantization: str,
     control_source: str,
     control_policy_schedule: str,
+    control_policy_level_map_output: str,
     safe_interval: int,
     level_intervals: list[int],
     threshold_levels: list[int],
@@ -151,6 +167,7 @@ def run_one_seed(
         f"CONTROL_QUANTIZATION={control_quantization}",
         f"CONTROL_SOURCE={control_source}",
         f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
+        f"CONTROL_POLICY_LEVEL_MAP_OUTPUT={control_policy_level_map_output}",
         f"SAFE_INTERVAL={safe_interval}",
         f"LEVEL0_INTERVAL={level_intervals[0]}",
         f"LEVEL1_INTERVAL={level_intervals[1]}",
@@ -328,6 +345,12 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--control-policy-level-map-output",
+        default="results/tables/control_policy_level_map.csv",
+        help="Risk policy level-map output path passed to fault generator.",
+    )
+
+    parser.add_argument(
         "--safe-interval",
         type=int,
         default=5,
@@ -423,6 +446,7 @@ def main() -> None:
             control_quantization=args.control_quantization,
             control_source=args.control_source,
             control_policy_schedule=args.control_policy_schedule,
+            control_policy_level_map_output=args.control_policy_level_map_output,
             safe_interval=args.safe_interval,
             level_intervals=level_intervals,
             threshold_levels=threshold_levels,
@@ -448,6 +472,11 @@ def main() -> None:
             control_quantization=args.control_quantization,
             control_source=args.control_source,
             control_policy_schedule=args.control_policy_schedule,
+            control_policy_level_map_output=args.control_policy_level_map_output,
+            safe_interval=args.safe_interval,
+            level_intervals_text=args.level_intervals,
+            threshold_levels_text=args.threshold_levels,
+            threshold_intervals_text=args.threshold_intervals,
         )
 
     print("")

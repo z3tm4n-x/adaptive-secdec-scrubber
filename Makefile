@@ -63,7 +63,7 @@ PAPER_PAIR_GAP_MAX ?= 300
 PAPER_CLUSTER_EVENT_COUNT ?= 10
 PAPER_CLUSTER_BIT_COUNT ?= 2
 PAPER_CODEWORD_COUNT ?= 16
-PAPER_CONTROL_QUANTIZATION ?= percentile_tail
+PAPER_CONTROL_QUANTIZATION ?= linear_max
 
 PAPER_CONTROL_SOURCE ?= risk_policy
 PAPER_CONTROL_POLICY_SCHEDULE ?= $(PAPER_RESULTS_DIR)/tables/risk_policy_schedule.csv
@@ -371,6 +371,7 @@ strategy_series: prepare_dirs
 		--control-quantization $(CONTROL_QUANTIZATION) \
 		--control-source $(CONTROL_SOURCE) \
 		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
+		--control-policy-level-map-output $(CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		--safe-interval $(SAFE_INTERVAL) \
 		--level-intervals $(LEVEL0_INTERVAL),$(LEVEL1_INTERVAL),$(LEVEL2_INTERVAL),$(LEVEL3_INTERVAL),$(LEVEL4_INTERVAL),$(LEVEL5_INTERVAL),$(LEVEL6_INTERVAL),$(LEVEL7_INTERVAL) \
 		--threshold-levels $(THRESHOLD_LOW_TO_MEDIUM),$(THRESHOLD_MEDIUM_TO_LOW),$(THRESHOLD_MEDIUM_TO_HIGH),$(THRESHOLD_HIGH_TO_MEDIUM) \
@@ -475,7 +476,7 @@ gen_risk_policy_control_paper: build_scrub_risk_policy_paper
 
 strategy_modeling_report: strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios
 
-strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper plot_control_quantization_paper
+strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper plot_control_quantization_paper build_scrub_risk_policy_paper
 	$(MAKE) strategy_modeling_report \
 		SERIES_SEED_COUNT=$(PAPER_SEED_COUNT) \
 		SERIES_TOTAL_CYCLES=$(PAPER_TOTAL_CYCLES) \
@@ -517,7 +518,7 @@ strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper p
 		SCENARIO_COMPARISON_CSV=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.csv \
 		SCENARIO_COMPARISON_MD=$(PAPER_RESULTS_DIR)/tables/strategy_scenario_comparison.md
 
-eta_verification_paper: prepare_paper_dirs
+eta_verification_paper: prepare_paper_dirs build_scrub_risk_policy_paper
 	mkdir -p $(ETA_RESULTS_DIR)/tables $(ETA_RESULTS_DIR)/figures
 	$(PYTHON) model/run_eta_verification.py \
 		--input $(UPSETS_FILE) \
@@ -535,6 +536,7 @@ eta_verification_paper: prepare_paper_dirs
 		--control-quantization $(ETA_CONTROL_QUANTIZATION) \
 		--control-source $(ETA_CONTROL_SOURCE) \
 		--control-policy-schedule $(ETA_CONTROL_POLICY_SCHEDULE) \
+		--control-policy-level-map-output $(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		--safe-interval $(PAPER_SAFE_INTERVAL) \
 		--level-intervals $(PAPER_LEVEL0_INTERVAL),$(PAPER_LEVEL1_INTERVAL),$(PAPER_LEVEL2_INTERVAL),$(PAPER_LEVEL3_INTERVAL),$(PAPER_LEVEL4_INTERVAL),$(PAPER_LEVEL5_INTERVAL),$(PAPER_LEVEL6_INTERVAL),$(PAPER_LEVEL7_INTERVAL) \
 		--threshold-levels $(PAPER_THRESHOLD_LOW_TO_MEDIUM),$(PAPER_THRESHOLD_MEDIUM_TO_LOW),$(PAPER_THRESHOLD_MEDIUM_TO_HIGH),$(PAPER_THRESHOLD_HIGH_TO_MEDIUM) \

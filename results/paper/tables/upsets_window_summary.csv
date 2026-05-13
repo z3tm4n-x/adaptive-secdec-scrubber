@@ -4,8 +4,8 @@ usable_series_length,43824
 start_index,0
 window_size,10000
 total_cycles,10000
-control_quantization,percentile_tail
-control_thresholds,10.8423276073;12.210661866;13.4287821337;14.7908900441;16.1129801231;18.429752348;54.6616679105
+control_quantization,linear_max
+control_thresholds,24.7743445228;74.3230335685;123.871722614;173.42041166;222.969100705;272.517789751;322.066478797
 hours_per_cycle,1.000000000
 cycles_per_hour,1.000000000
 window_min,6.30859888851
@@ -15,7 +15,7 @@ window_std,9.06335541496
 window_cv2,0.621468939654
 eta_theory_1_plus_cv2,1.62146893965
 window_sum,114968.614323
-control_level_changes,2041
+control_level_changes,14
 event_count,80
 paired_event_count,20
 cluster_event_count,2
