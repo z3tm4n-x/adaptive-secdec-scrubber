@@ -1,0 +1,5 @@
+adaptive_strategy,matching_metric,window_cv2,eta_theory_1_plus_cv2,adaptive_scrub_cycles,adaptive_busy_percent,adaptive_unique_uncorrectable,adaptive_uncorrectable_detections,matched_fixed_interval,matched_fixed_scrub_cycles,matched_fixed_busy_percent,matched_fixed_unique_uncorrectable,matched_fixed_uncorrectable_detections,eta_practical_scrub_cycles,eta_practical_busy_percent,metric_difference
+table,unique_uncorrectable_words,6.242959918,7.242959918,241.500000,8.530000,6.100000,666.600000,200,187.000000,6.680000,5.300000,711.400000,0.774327,0.783118,-0.800000
+table,uncorrectable_detections,6.242959918,7.242959918,241.500000,8.530000,6.100000,666.600000,20,582.000000,19.600000,3.500000,663.300000,2.409938,2.297773,-3.300000
+threshold,unique_uncorrectable_words,6.242959918,7.242959918,329.700000,11.450000,4.100000,674.300000,10,659.000000,22.100000,4.100000,772.600000,1.998787,1.930131,0.000000
+threshold,uncorrectable_detections,6.242959918,7.242959918,329.700000,11.450000,4.100000,674.300000,40,471.000000,16.000000,3.700000,675.900000,1.428571,1.397380,1.600000
