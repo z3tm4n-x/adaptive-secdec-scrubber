@@ -1,3 +1,5 @@
-adaptive_strategy,window_cv2,eta_theory_1_plus_cv2,adaptive_scrub_cycles,adaptive_busy_percent,adaptive_unique_uncorrectable,matched_fixed_interval,matched_fixed_scrub_cycles,matched_fixed_busy_percent,matched_fixed_unique_uncorrectable,eta_practical_scrub_cycles,eta_practical_busy_percent,risk_difference
-table,6.242959918,7.242959918,354.733333,12.246667,4.866667,80,341.000000,11.790000,4.633333,0.961285,0.962711,-0.233333
-threshold,6.242959918,7.242959918,447.300000,15.253333,3.933333,20,581.966667,19.586667,4.066667,1.301066,1.284091,0.133333
+adaptive_strategy,matching_metric,window_cv2,eta_theory_1_plus_cv2,adaptive_scrub_cycles,adaptive_busy_percent,adaptive_unique_uncorrectable,adaptive_uncorrectable_detections,matched_fixed_interval,matched_fixed_scrub_cycles,matched_fixed_busy_percent,matched_fixed_unique_uncorrectable,matched_fixed_uncorrectable_detections,eta_practical_scrub_cycles,eta_practical_busy_percent,metric_difference
+table,unique_uncorrectable_words,6.242959918,7.242959918,354.733333,12.246667,4.866667,793.566667,80,341.000000,11.790000,4.633333,786.266667,0.961285,0.962711,-0.233333
+table,uncorrectable_detections,6.242959918,7.242959918,354.733333,12.246667,4.866667,793.566667,20,581.966667,19.586667,4.066667,793.066667,1.640575,1.599347,-0.500000
+threshold,unique_uncorrectable_words,6.242959918,7.242959918,447.300000,15.253333,3.933333,808.833333,20,581.966667,19.586667,4.066667,793.066667,1.301066,1.284091,0.133333
+threshold,uncorrectable_detections,6.242959918,7.242959918,447.300000,15.253333,3.933333,808.833333,60,395.933333,13.566667,4.500000,810.233333,0.885163,0.889423,1.400000

@@ -69,6 +69,33 @@ class SummaryRow:
     uncorrectable_detections_mean: float
     uncorrectable_detections_std: float
 
+MATCHING_METRICS = (
+    "unique_uncorrectable_words",
+    "uncorrectable_detections",
+)
+
+
+@dataclass
+class PracticalEtaRow:
+    adaptive_strategy: str
+    matching_metric: str
+    window_cv2: float
+    eta_theory: float
+
+    adaptive_scrub_cycles: float
+    adaptive_busy_percent: float
+    adaptive_unique_uncorrectable: float
+    adaptive_uncorrectable_detections: float
+
+    matched_fixed_interval: int
+    matched_fixed_scrub_cycles: float
+    matched_fixed_busy_percent: float
+    matched_fixed_unique_uncorrectable: float
+    matched_fixed_uncorrectable_detections: float
+
+    eta_practical_scrub_cycles: float
+    eta_practical_busy_percent: float
+    metric_difference: float
 
 def parse_intervals(text: str) -> list[int]:
     result: list[int] = []
@@ -466,54 +493,48 @@ def adaptive_summaries(summaries: list[SummaryRow]) -> list[SummaryRow]:
     ]
 
 
-def nearest_fixed_by_risk(
+def summary_metric_value(row: SummaryRow, metric: str) -> float:
+    if metric == "unique_uncorrectable_words":
+        return row.unique_uncorrectable_mean
+
+    if metric == "uncorrectable_detections":
+        return row.uncorrectable_detections_mean
+
+    raise ValueError(f"Unsupported matching metric: {metric}")
+
+
+def nearest_fixed_by_metric(
     fixed_rows: list[SummaryRow],
-    target_unique: float,
+    target_value: float,
+    metric: str,
 ) -> SummaryRow:
     if not fixed_rows:
         raise ValueError("No fixed sweep rows available")
 
     return min(
         fixed_rows,
-        key=lambda row: abs(row.unique_uncorrectable_mean - target_unique),
+        key=lambda row: abs(summary_metric_value(row, metric) - target_value),
     )
 
 
-def write_eta_summary_csv(
+def compute_practical_eta_rows(
     summaries: list[SummaryRow],
-    output_path: Path,
     window_cv2: float,
     eta_theory: float,
-) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
+) -> list[PracticalEtaRow]:
     fixed_rows = fixed_summaries(summaries)
     adaptive_rows = adaptive_summaries(summaries)
 
-    fieldnames = [
-        "adaptive_strategy",
-        "window_cv2",
-        "eta_theory_1_plus_cv2",
-        "adaptive_scrub_cycles",
-        "adaptive_busy_percent",
-        "adaptive_unique_uncorrectable",
-        "matched_fixed_interval",
-        "matched_fixed_scrub_cycles",
-        "matched_fixed_busy_percent",
-        "matched_fixed_unique_uncorrectable",
-        "eta_practical_scrub_cycles",
-        "eta_practical_busy_percent",
-        "risk_difference",
-    ]
+    rows: list[PracticalEtaRow] = []
 
-    with output_path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
+    for adaptive in adaptive_rows:
+        for metric in MATCHING_METRICS:
+            adaptive_metric_value = summary_metric_value(adaptive, metric)
 
-        for adaptive in adaptive_rows:
-            matched = nearest_fixed_by_risk(
+            matched = nearest_fixed_by_metric(
                 fixed_rows=fixed_rows,
-                target_unique=adaptive.unique_uncorrectable_mean,
+                target_value=adaptive_metric_value,
+                metric=metric,
             )
 
             eta_scrub = (
@@ -528,26 +549,94 @@ def write_eta_summary_csv(
                 else 0.0
             )
 
-            risk_difference = (
-                matched.unique_uncorrectable_mean
-                - adaptive.unique_uncorrectable_mean
+            metric_difference = (
+                summary_metric_value(matched, metric)
+                - adaptive_metric_value
             )
 
+            if matched.fixed_interval is None:
+                raise ValueError("Matched fixed row has no fixed_interval")
+
+            rows.append(
+                PracticalEtaRow(
+                    adaptive_strategy=adaptive.strategy,
+                    matching_metric=metric,
+                    window_cv2=window_cv2,
+                    eta_theory=eta_theory,
+                    adaptive_scrub_cycles=adaptive.scrub_cycles_mean,
+                    adaptive_busy_percent=adaptive.busy_percent_mean,
+                    adaptive_unique_uncorrectable=adaptive.unique_uncorrectable_mean,
+                    adaptive_uncorrectable_detections=adaptive.uncorrectable_detections_mean,
+                    matched_fixed_interval=matched.fixed_interval,
+                    matched_fixed_scrub_cycles=matched.scrub_cycles_mean,
+                    matched_fixed_busy_percent=matched.busy_percent_mean,
+                    matched_fixed_unique_uncorrectable=matched.unique_uncorrectable_mean,
+                    matched_fixed_uncorrectable_detections=matched.uncorrectable_detections_mean,
+                    eta_practical_scrub_cycles=eta_scrub,
+                    eta_practical_busy_percent=eta_busy,
+                    metric_difference=metric_difference,
+                )
+            )
+
+    return rows
+
+
+def write_eta_summary_csv(
+    summaries: list[SummaryRow],
+    output_path: Path,
+    window_cv2: float,
+    eta_theory: float,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    practical_rows = compute_practical_eta_rows(
+        summaries=summaries,
+        window_cv2=window_cv2,
+        eta_theory=eta_theory,
+    )
+
+    fieldnames = [
+        "adaptive_strategy",
+        "matching_metric",
+        "window_cv2",
+        "eta_theory_1_plus_cv2",
+        "adaptive_scrub_cycles",
+        "adaptive_busy_percent",
+        "adaptive_unique_uncorrectable",
+        "adaptive_uncorrectable_detections",
+        "matched_fixed_interval",
+        "matched_fixed_scrub_cycles",
+        "matched_fixed_busy_percent",
+        "matched_fixed_unique_uncorrectable",
+        "matched_fixed_uncorrectable_detections",
+        "eta_practical_scrub_cycles",
+        "eta_practical_busy_percent",
+        "metric_difference",
+    ]
+
+    with output_path.open("w", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for row in practical_rows:
             writer.writerow(
                 {
-                    "adaptive_strategy": adaptive.strategy,
-                    "window_cv2": f"{window_cv2:.9f}",
-                    "eta_theory_1_plus_cv2": f"{eta_theory:.9f}",
-                    "adaptive_scrub_cycles": f"{adaptive.scrub_cycles_mean:.6f}",
-                    "adaptive_busy_percent": f"{adaptive.busy_percent_mean:.6f}",
-                    "adaptive_unique_uncorrectable": f"{adaptive.unique_uncorrectable_mean:.6f}",
-                    "matched_fixed_interval": matched.fixed_interval,
-                    "matched_fixed_scrub_cycles": f"{matched.scrub_cycles_mean:.6f}",
-                    "matched_fixed_busy_percent": f"{matched.busy_percent_mean:.6f}",
-                    "matched_fixed_unique_uncorrectable": f"{matched.unique_uncorrectable_mean:.6f}",
-                    "eta_practical_scrub_cycles": f"{eta_scrub:.6f}",
-                    "eta_practical_busy_percent": f"{eta_busy:.6f}",
-                    "risk_difference": f"{risk_difference:.6f}",
+                    "adaptive_strategy": row.adaptive_strategy,
+                    "matching_metric": row.matching_metric,
+                    "window_cv2": f"{row.window_cv2:.9f}",
+                    "eta_theory_1_plus_cv2": f"{row.eta_theory:.9f}",
+                    "adaptive_scrub_cycles": f"{row.adaptive_scrub_cycles:.6f}",
+                    "adaptive_busy_percent": f"{row.adaptive_busy_percent:.6f}",
+                    "adaptive_unique_uncorrectable": f"{row.adaptive_unique_uncorrectable:.6f}",
+                    "adaptive_uncorrectable_detections": f"{row.adaptive_uncorrectable_detections:.6f}",
+                    "matched_fixed_interval": row.matched_fixed_interval,
+                    "matched_fixed_scrub_cycles": f"{row.matched_fixed_scrub_cycles:.6f}",
+                    "matched_fixed_busy_percent": f"{row.matched_fixed_busy_percent:.6f}",
+                    "matched_fixed_unique_uncorrectable": f"{row.matched_fixed_unique_uncorrectable:.6f}",
+                    "matched_fixed_uncorrectable_detections": f"{row.matched_fixed_uncorrectable_detections:.6f}",
+                    "eta_practical_scrub_cycles": f"{row.eta_practical_scrub_cycles:.6f}",
+                    "eta_practical_busy_percent": f"{row.eta_practical_busy_percent:.6f}",
+                    "metric_difference": f"{row.metric_difference:.6f}",
                 }
             )
 
@@ -604,9 +693,10 @@ def write_markdown(
     lines.append("")
     lines.append(
         "| fixed_interval | Прогонов | scrub_cycles, mean ± σ | "
-        "busy, mean ± σ, % | unique_uncorrectable, mean ± σ |"
+        "busy, mean ± σ, % | unique_uncorrectable, mean ± σ | "
+        "uncorrectable_detections, mean ± σ |"
     )
-    lines.append("|---:|---:|---:|---:|---:|")
+    lines.append("|---:|---:|---:|---:|---:|---:|")
 
     for row in sorted(fixed_rows, key=lambda item: item.fixed_interval or 0):
         lines.append(
@@ -614,7 +704,8 @@ def write_markdown(
             f"| {row.run_count} "
             f"| {row.scrub_cycles_mean:.3f} ± {row.scrub_cycles_std:.3f} "
             f"| {row.busy_percent_mean:.3f} ± {row.busy_percent_std:.3f} "
-            f"| {row.unique_uncorrectable_mean:.3f} ± {row.unique_uncorrectable_std:.3f} |"
+            f"| {row.unique_uncorrectable_mean:.3f} ± {row.unique_uncorrectable_std:.3f} "
+            f"| {row.uncorrectable_detections_mean:.3f} ± {row.uncorrectable_detections_std:.3f} |"
         )
 
     lines.append("")
@@ -622,9 +713,10 @@ def write_markdown(
     lines.append("")
     lines.append(
         "| strategy | Прогонов | scrub_cycles, mean ± σ | "
-        "busy, mean ± σ, % | unique_uncorrectable, mean ± σ |"
+        "busy, mean ± σ, % | unique_uncorrectable, mean ± σ | "
+        "uncorrectable_detections, mean ± σ |"
     )
-    lines.append("|---|---:|---:|---:|---:|")
+    lines.append("|---|---:|---:|---:|---:|---:|")
 
     for row in adaptive_rows:
         lines.append(
@@ -632,49 +724,35 @@ def write_markdown(
             f"| {row.run_count} "
             f"| {row.scrub_cycles_mean:.3f} ± {row.scrub_cycles_std:.3f} "
             f"| {row.busy_percent_mean:.3f} ± {row.busy_percent_std:.3f} "
-            f"| {row.unique_uncorrectable_mean:.3f} ± {row.unique_uncorrectable_std:.3f} |"
+            f"| {row.unique_uncorrectable_mean:.3f} ± {row.unique_uncorrectable_std:.3f} "
+            f"| {row.uncorrectable_detections_mean:.3f} ± {row.uncorrectable_detections_std:.3f} |"
         )
 
     lines.append("")
     lines.append("## Практическая оценка η")
     lines.append("")
     lines.append(
-        "| adaptive strategy | matched fixed_interval | "
+        "| adaptive strategy | matching metric | matched fixed_interval | "
         "η_practical по scrub_cycles | η_practical по busy | "
-        "risk difference | η_theory |"
+        "metric difference | η_theory |"
     )
-    lines.append("|---|---:|---:|---:|---:|---:|")
+    lines.append("|---|---|---:|---:|---:|---:|---:|")
 
-    for adaptive in adaptive_rows:
-        matched = nearest_fixed_by_risk(
-            fixed_rows=fixed_rows,
-            target_unique=adaptive.unique_uncorrectable_mean,
-        )
+    practical_rows = compute_practical_eta_rows(
+        summaries=summaries,
+        window_cv2=window_cv2,
+        eta_theory=eta_theory,
+    )
 
-        eta_scrub = (
-            matched.scrub_cycles_mean / adaptive.scrub_cycles_mean
-            if adaptive.scrub_cycles_mean > 0.0
-            else 0.0
-        )
-
-        eta_busy = (
-            matched.busy_percent_mean / adaptive.busy_percent_mean
-            if adaptive.busy_percent_mean > 0.0
-            else 0.0
-        )
-
-        risk_difference = (
-            matched.unique_uncorrectable_mean
-            - adaptive.unique_uncorrectable_mean
-        )
-
+    for row in practical_rows:
         lines.append(
-            f"| `{adaptive.strategy}` "
-            f"| {matched.fixed_interval} "
-            f"| {eta_scrub:.3f} "
-            f"| {eta_busy:.3f} "
-            f"| {risk_difference:+.3f} "
-            f"| {eta_theory:.3f} |"
+            f"| `{row.adaptive_strategy}` "
+            f"| `{row.matching_metric}` "
+            f"| {row.matched_fixed_interval} "
+            f"| {row.eta_practical_scrub_cycles:.3f} "
+            f"| {row.eta_practical_busy_percent:.3f} "
+            f"| {row.metric_difference:+.3f} "
+            f"| {row.eta_theory:.3f} |"
         )
 
     lines.append("")
@@ -686,7 +764,8 @@ def write_markdown(
         "на одинаковом уровне риска. Данный эксперимент строит практическую "
         "оценку η на RTL-стенде: fixed_interval варьируется, а затем для "
         "каждой адаптивной стратегии выбирается ближайшая fixed-точка по "
-        "среднему числу уникальных неустранимых слов."
+        "двум метрикам риска: числу уникальных неустранимых слов и числу "
+        "обнаружений неустранимых состояний."
     )
     lines.append("")
     lines.append(
@@ -889,26 +968,38 @@ def main() -> None:
     tables_dir = args.output_dir / "tables"
     figures_dir = args.output_dir / "figures"
 
+    tables_dir = args.output_dir / "tables"
+    figures_dir = args.output_dir / "figures"
+
+    tables_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_csv = tables_dir / "eta_raw.csv"
+    summary_csv = tables_dir / "eta_summary.csv"
+    practical_csv = tables_dir / "eta_practical_summary.csv"
+    markdown_path = tables_dir / "eta_verification.md"
+    figure_path = figures_dir / "eta_curve.png"
+
     write_raw_csv(
         raw_rows=raw_rows,
-        output_path=tables_dir / "eta_verification_raw.csv",
+        output_path=raw_csv,
     )
 
     write_summary_csv(
         summaries=summaries,
-        output_path=tables_dir / "eta_verification_summary.csv",
+        output_path=summary_csv,
     )
 
     write_eta_summary_csv(
         summaries=summaries,
-        output_path=tables_dir / "eta_practical_summary.csv",
+        output_path=practical_csv,
         window_cv2=window_cv2,
         eta_theory=eta_theory,
     )
 
     write_markdown(
         summaries=summaries,
-        output_path=tables_dir / "eta_verification.md",
+        output_path=markdown_path,
         window_mean=window_mean,
         window_cv2=window_cv2,
         eta_theory=eta_theory,
@@ -917,15 +1008,14 @@ def main() -> None:
 
     plot_eta_curve(
         summaries=summaries,
-        output_path=figures_dir / "eta_cycles_vs_uncorrectable.png",
+        output_path=figure_path,
     )
 
-    print(f"Raw CSV: {tables_dir / 'eta_verification_raw.csv'}")
-    print(f"Summary CSV: {tables_dir / 'eta_verification_summary.csv'}")
-    print(f"Eta CSV: {tables_dir / 'eta_practical_summary.csv'}")
-    print(f"Markdown: {tables_dir / 'eta_verification.md'}")
-    print(f"Figure: {figures_dir / 'eta_cycles_vs_uncorrectable.png'}")
-
+    print(f"Raw CSV: {raw_csv}")
+    print(f"Summary CSV: {summary_csv}")
+    print(f"Practical eta CSV: {practical_csv}")
+    print(f"Markdown report: {markdown_path}")
+    print(f"Figure: {figure_path}")
 
 if __name__ == "__main__":
     main()
