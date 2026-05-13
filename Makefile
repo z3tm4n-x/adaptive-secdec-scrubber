@@ -130,7 +130,7 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison audit_policy_execution_paper gen_risk_policy_control_paper build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison audit_fault_policy_alignment_paper audit_policy_execution_paper gen_risk_policy_control_paper build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -607,6 +607,38 @@ audit_policy_execution_paper: prepare_paper_dirs build_scrub_risk_policy_paper
 		--summary-csv $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.csv \
 		--md-output $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.md
 	cat $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.md
+
+audit_fault_policy_alignment_paper: prepare_paper_dirs build_scrub_risk_policy_paper
+	mkdir -p $(PAPER_RESULTS_DIR)/eta/tables
+	$(MAKE) gen_fault_events \
+		FAULT_SCENARIO=upsets \
+		FAULT_START_INDEX=$(FAULT_START_INDEX) \
+		FAULT_WINDOW_SIZE=$(PAPER_WINDOW_SIZE) \
+		FAULT_TOTAL_CYCLES=$(PAPER_TOTAL_CYCLES) \
+		FAULT_EVENT_COUNT=$(PAPER_EVENT_COUNT) \
+		FAULT_PAIRED_EVENT_COUNT=$(PAPER_PAIRED_EVENT_COUNT) \
+		FAULT_PAIR_GAP_MIN=$(PAPER_PAIR_GAP_MIN) \
+		FAULT_PAIR_GAP_MAX=$(PAPER_PAIR_GAP_MAX) \
+		FAULT_CLUSTER_EVENT_COUNT=0 \
+		FAULT_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		FAULT_SEED=1 \
+		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
+		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
+		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT)
+	cp tb/fault_events.csv $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment_fault_events.csv
+	cp tb/control_levels.csv $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment_control_levels.csv
+	$(PYTHON) model/audit_fault_policy_alignment.py \
+		--fault-events $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment_fault_events.csv \
+		--control-levels $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment_control_levels.csv \
+		--total-cycles $(PAPER_TOTAL_CYCLES) \
+		--pair-gap-min $(PAPER_PAIR_GAP_MIN) \
+		--pair-gap-max $(PAPER_PAIR_GAP_MAX) \
+		--level-intervals $(PAPER_LEVEL0_INTERVAL),$(PAPER_LEVEL1_INTERVAL),$(PAPER_LEVEL2_INTERVAL),$(PAPER_LEVEL3_INTERVAL),$(PAPER_LEVEL4_INTERVAL),$(PAPER_LEVEL5_INTERVAL),$(PAPER_LEVEL6_INTERVAL),$(PAPER_LEVEL7_INTERVAL) \
+		--summary-csv $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment.csv \
+		--pairs-csv $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_candidate_pairs.csv \
+		--md-output $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment.md
+	cat $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment.md
 
 clean:
 	rm -f results/logs/*.out
