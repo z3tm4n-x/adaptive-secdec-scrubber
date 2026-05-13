@@ -143,6 +143,11 @@ integer configured_threshold_low_interval;
 integer configured_threshold_medium_interval;
 integer configured_threshold_high_interval;
 
+integer trace_execution;
+integer trace_file;
+integer previous_trace_scrub_cycle_count;
+reg [1023:0] trace_output_path;
+
 integer i;
 integer error_count;
 integer injected_event_count;
@@ -775,6 +780,39 @@ task capture_metrics_snapshot;
     end
 endtask
 
+task trace_execution_event;
+    begin
+        if (trace_execution != 0) begin
+            if (scrub_cycle_count != previous_trace_scrub_cycle_count) begin
+                trace_file = $fopen(trace_output_path, "a");
+
+                if (trace_file == 0) begin
+                    $display("ERROR: cannot open execution trace file");
+                    $display("  path = %0s", trace_output_path);
+                    error_count = error_count + 1;
+                end else begin
+                    $fdisplay(
+                        trace_file,
+                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                        strategy_name,
+                        sim_cycle,
+                        scrub_cycle_count,
+                        selected_interval,
+                        current_level,
+                        threshold_state,
+                        safe_mode_active,
+                        control_age
+                    );
+
+                    $fclose(trace_file);
+                end
+
+                previous_trace_scrub_cycle_count = scrub_cycle_count;
+            end
+        end
+    end
+endtask
+
 task write_results;
     begin
         if (snap_total_cycle_count != 0) begin
@@ -838,6 +876,18 @@ initial begin
     error_count = 0;
     injected_event_count = 0;
 
+    trace_execution = 0;
+    trace_output_path = "results/tables/strategy_execution_trace.csv";
+    previous_trace_scrub_cycle_count = 0;
+
+    if (!$value$plusargs("TRACE_EXECUTION=%d", trace_execution)) begin
+        trace_execution = 0;
+    end
+
+    if (!$value$plusargs("TRACE_OUTPUT=%s", trace_output_path)) begin
+        trace_output_path = "results/tables/strategy_execution_trace.csv";
+    end
+
     rst = 1'b1;
     enable = 1'b0;
 
@@ -882,7 +932,7 @@ initial begin
 
     rst = 1'b0;
     enable = 1'b1;
-
+    previous_trace_scrub_cycle_count = 0;
     /*
      * Основной цикл моделирования.
      */
@@ -892,7 +942,7 @@ initial begin
 
         @(posedge clk);
         #1;
-
+        trace_execution_event();
         ctrl_update = 1'b0;
         tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
     end

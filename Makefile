@@ -36,6 +36,8 @@ CONTROL_QUANTIZATION ?= linear_max
 CONTROL_SOURCE ?= quantization
 CONTROL_POLICY_SCHEDULE ?= results/paper/tables/risk_policy_schedule.csv
 CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= results/tables/control_policy_level_map.csv
+TRACE_EXECUTION ?= 0
+TRACE_OUTPUT ?= results/tables/strategy_execution_trace.csv
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -128,7 +130,7 @@ WITH_CLUSTER_FIGURE_DIR ?= results/figures/series_with_clusters
 SCENARIO_COMPARISON_CSV ?= results/tables/strategy_scenario_comparison.csv
 SCENARIO_COMPARISON_MD ?= results/tables/strategy_scenario_comparison.md
 
-.PHONY: test_counter test_memory_model test_strategy_comparison gen_risk_policy_control_paper build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
+.PHONY: test_counter test_memory_model test_strategy_comparison audit_policy_execution_paper gen_risk_policy_control_paper build_scrub_risk_policy_paper inspect_full_upsets_series eta_verification_paper plot_control_quantization_paper prepare_paper_dirs analyze_upsets_window_paper strategy_modeling_report_paper plot_strategy_series strategy_series_report_no_clusters strategy_series_report_with_clusters compare_series_scenarios strategy_modeling_report analyze_strategy_series strategy_series_report strategy_series synthesis_report analyze_synthesis_logs synth_adaptive_scrub_controller_aw21 gen_fault_events test_strategy_comparison_upsets_paired test_adaptive_metrics strategy_report test_adaptive_scrub_controller analyze_strategy_results plot_strategy_results test_adaptive_threshold_mode test_adaptive_safe_mode synth_adaptive_scrub_controller synth_fixed_scrub_controller test_interval_selector synth_interval_selector test_fixed_scrub_controller synth_counter check_secded_ref gen_secded_vectors test_secded_encoder synth_secded_encoder test_secded_decoder synth_secded_decoder test_secded_codec prepare_dirs test_all synth_all clean
 
 prepare_dirs:
 	mkdir -p results/logs results/tables results/figures
@@ -268,6 +270,10 @@ gen_fault_events:
 test_strategy_comparison: prepare_dirs gen_fault_events
 	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
+	@if [ "$(TRACE_EXECUTION)" = "1" ]; then \
+		mkdir -p $(dir $(TRACE_OUTPUT)); \
+		echo "strategy,cycle,scrub_cycle_count,selected_interval,current_level,threshold_state,safe_mode_active,control_age" > $(TRACE_OUTPUT); \
+	fi
 	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=0 \
@@ -288,7 +294,9 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_HIGH_TO_MEDIUM=$(THRESHOLD_HIGH_TO_MEDIUM) \
 		+THRESHOLD_LOW_INTERVAL=$(THRESHOLD_LOW_INTERVAL) \
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
-		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL)
+		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
+		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
+		+TRACE_OUTPUT=$(TRACE_OUTPUT)
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=1 \
 		+TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) \
@@ -308,7 +316,9 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_HIGH_TO_MEDIUM=$(THRESHOLD_HIGH_TO_MEDIUM) \
 		+THRESHOLD_LOW_INTERVAL=$(THRESHOLD_LOW_INTERVAL) \
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
-		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL)
+		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
+		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
+		+TRACE_OUTPUT=$(TRACE_OUTPUT)
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=2 \
 		+TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) \
@@ -328,7 +338,9 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_HIGH_TO_MEDIUM=$(THRESHOLD_HIGH_TO_MEDIUM) \
 		+THRESHOLD_LOW_INTERVAL=$(THRESHOLD_LOW_INTERVAL) \
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
-		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL)
+		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
+		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
+		+TRACE_OUTPUT=$(TRACE_OUTPUT)
 	cat results/tables/strategy_comparison.csv
 
 test_strategy_comparison_upsets_paired:
@@ -545,6 +557,56 @@ eta_verification_paper: prepare_paper_dirs build_scrub_risk_policy_paper
 		--output-dir $(ETA_RESULTS_DIR) \
 		--make-command $(MAKE)
 	cat $(ETA_RESULTS_DIR)/tables/eta_verification.md
+
+audit_policy_execution_paper: prepare_paper_dirs build_scrub_risk_policy_paper
+	mkdir -p $(PAPER_RESULTS_DIR)/eta/tables
+	$(MAKE) test_strategy_comparison \
+		FAULT_SCENARIO=upsets \
+		FAULT_START_INDEX=$(FAULT_START_INDEX) \
+		FAULT_WINDOW_SIZE=$(PAPER_WINDOW_SIZE) \
+		FAULT_TOTAL_CYCLES=$(PAPER_TOTAL_CYCLES) \
+		FAULT_EVENT_COUNT=$(PAPER_EVENT_COUNT) \
+		FAULT_PAIRED_EVENT_COUNT=$(PAPER_PAIRED_EVENT_COUNT) \
+		FAULT_PAIR_GAP_MIN=$(PAPER_PAIR_GAP_MIN) \
+		FAULT_PAIR_GAP_MAX=$(PAPER_PAIR_GAP_MAX) \
+		FAULT_CLUSTER_EVENT_COUNT=0 \
+		FAULT_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
+		FAULT_SEED=1 \
+		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
+		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
+		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
+		FIXED_INTERVAL=$(FIXED_INTERVAL) \
+		SAFE_INTERVAL=$(PAPER_SAFE_INTERVAL) \
+		LEVEL0_INTERVAL=$(PAPER_LEVEL0_INTERVAL) \
+		LEVEL1_INTERVAL=$(PAPER_LEVEL1_INTERVAL) \
+		LEVEL2_INTERVAL=$(PAPER_LEVEL2_INTERVAL) \
+		LEVEL3_INTERVAL=$(PAPER_LEVEL3_INTERVAL) \
+		LEVEL4_INTERVAL=$(PAPER_LEVEL4_INTERVAL) \
+		LEVEL5_INTERVAL=$(PAPER_LEVEL5_INTERVAL) \
+		LEVEL6_INTERVAL=$(PAPER_LEVEL6_INTERVAL) \
+		LEVEL7_INTERVAL=$(PAPER_LEVEL7_INTERVAL) \
+		THRESHOLD_LOW_TO_MEDIUM=$(PAPER_THRESHOLD_LOW_TO_MEDIUM) \
+		THRESHOLD_MEDIUM_TO_LOW=$(PAPER_THRESHOLD_MEDIUM_TO_LOW) \
+		THRESHOLD_MEDIUM_TO_HIGH=$(PAPER_THRESHOLD_MEDIUM_TO_HIGH) \
+		THRESHOLD_HIGH_TO_MEDIUM=$(PAPER_THRESHOLD_HIGH_TO_MEDIUM) \
+		THRESHOLD_LOW_INTERVAL=$(PAPER_THRESHOLD_LOW_INTERVAL) \
+		THRESHOLD_MEDIUM_INTERVAL=$(PAPER_THRESHOLD_MEDIUM_INTERVAL) \
+		THRESHOLD_HIGH_INTERVAL=$(PAPER_THRESHOLD_HIGH_INTERVAL) \
+		TRACE_EXECUTION=1 \
+		TRACE_OUTPUT=$(PAPER_RESULTS_DIR)/eta/tables/policy_execution_trace.csv
+	cp results/tables/strategy_comparison.csv $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_strategy_comparison.csv
+	cp tb/control_levels.csv $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_control_levels.csv
+	$(PYTHON) model/audit_policy_execution.py \
+		--trace $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_trace.csv \
+		--metrics $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_strategy_comparison.csv \
+		--control-levels $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_control_levels.csv \
+		--fixed-interval $(FIXED_INTERVAL) \
+		--level-intervals $(PAPER_LEVEL0_INTERVAL),$(PAPER_LEVEL1_INTERVAL),$(PAPER_LEVEL2_INTERVAL),$(PAPER_LEVEL3_INTERVAL),$(PAPER_LEVEL4_INTERVAL),$(PAPER_LEVEL5_INTERVAL),$(PAPER_LEVEL6_INTERVAL),$(PAPER_LEVEL7_INTERVAL) \
+		--threshold-intervals $(PAPER_THRESHOLD_LOW_INTERVAL),$(PAPER_THRESHOLD_MEDIUM_INTERVAL),$(PAPER_THRESHOLD_HIGH_INTERVAL) \
+		--summary-csv $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.csv \
+		--md-output $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.md
+	cat $(PAPER_RESULTS_DIR)/eta/tables/policy_execution_audit.md
 
 clean:
 	rm -f results/logs/*.out
