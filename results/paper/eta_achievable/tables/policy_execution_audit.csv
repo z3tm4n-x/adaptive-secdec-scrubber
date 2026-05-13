@@ -1,0 +1,4 @@
+strategy,trace_rows,rtl_scrub_cycles,trace_final_scrub_cycles,scrub_cycle_delta,reads,expected_reads_depth16,read_delta,writes,interval_switches,safe_entries,safe_cycles,trace_safe_rows,selected_interval_min,selected_interval_mean,selected_interval_max,interval_mismatches,control_level_mismatches,wait_compensation_mismatches,example_interval_mismatch,example_control_mismatch,example_wait_compensation_mismatch
+fixed,632,632,632,0,10112,10112,0,523,0,0,0,0,80,80.000000,80,0,0,0,,,
+table,246,246,246,0,3936,3936,0,426,1295,0,0,0,80,208.780488,240,0,0,0,,,
+threshold,284,284,284,0,4544,4544,0,469,776,0,0,0,70,185.176056,200,0,0,0,,,
