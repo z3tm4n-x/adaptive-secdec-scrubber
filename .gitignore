@@ -1,6 +1,31 @@
+# Python / virtual environment
 .venv/
-results/logs/*.out
-results/logs/*.vcd
-results/logs/*.log
 __pycache__/
 *.pyc
+
+# HDL simulator artifacts
+*.vcd
+*.fst
+*.gtkw
+*.out
+*.log
+
+# Windows alternate data streams / downloaded-file metadata
+*.Zone.Identifier
+*:Zone.Identifier
+
+# Generated transient testbench inputs
+tb/fault_events.csv
+tb/control_levels.csv
+
+# Generated non-paper outputs
+results/logs/
+results/tables/
+results/figures/
+
+# Keep curated publication snapshot tracked
+!results/paper/
+!results/paper/**
+
+# Do not keep logs even inside publication snapshot
+results/paper/**/*.log

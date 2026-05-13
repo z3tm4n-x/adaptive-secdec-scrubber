@@ -1,8 +1,8 @@
 mode,boundary,lower_level,upper_level,percentile,upsets_value
-linear_max,level_0_to_1,0,1,,24.7743445228
-linear_max,level_1_to_2,1,2,,74.3230335685
-linear_max,level_2_to_3,2,3,,123.871722614
-linear_max,level_3_to_4,3,4,,173.42041166
-linear_max,level_4_to_5,4,5,,222.969100705
-linear_max,level_5_to_6,5,6,,272.517789751
-linear_max,level_6_to_7,6,7,,322.066478797
+linear_max,level_0_to_1,0,1,,85.2831106846
+linear_max,level_1_to_2,1,2,,255.849332054
+linear_max,level_2_to_3,2,3,,426.415553423
+linear_max,level_3_to_4,3,4,,596.981774792
+linear_max,level_4_to_5,4,5,,767.547996161
+linear_max,level_5_to_6,5,6,,938.114217531
+linear_max,level_6_to_7,6,7,,1108.6804389

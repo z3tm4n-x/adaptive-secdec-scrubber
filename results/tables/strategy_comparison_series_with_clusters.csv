@@ -1,7 +1,0 @@
-scenario,seed,requested_total_cycles,window_size,event_count,paired_event_count,pair_gap_min,pair_gap_max,cluster_event_count,cluster_bit_count,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
-upsets,1,10000,10000,80,20,60,300,10,2,fixed,10000,68,1088,86,86,251,4,0,0,0,4506,1174,450,117,0
-upsets,1,10000,10000,80,20,60,300,10,2,table,10000,60,960,85,85,235,4,13,0,0,3985,1045,398,104,0
-upsets,1,10000,10000,80,20,60,300,10,2,threshold,10000,60,960,85,85,235,4,4,0,0,3985,1045,398,104,0
-upsets,2,10000,10000,80,20,60,300,10,2,fixed,10000,68,1088,94,94,158,4,0,0,0,4514,1182,451,118,0
-upsets,2,10000,10000,80,20,60,300,10,2,table,10000,60,960,82,82,207,6,13,0,0,3982,1042,398,104,0
-upsets,2,10000,10000,80,20,60,300,10,2,threshold,10000,60,960,82,82,207,6,4,0,0,3982,1042,398,104,0

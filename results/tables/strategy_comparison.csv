@@ -1,4 +1,0 @@
-strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
-fixed,10000,68,1088,94,94,158,4,0,0,0,4514,1182,451,118,0
-table,10000,60,960,82,82,207,6,13,0,0,3982,1042,398,104,0
-threshold,10000,60,960,82,82,207,6,4,0,0,3982,1042,398,104,0
