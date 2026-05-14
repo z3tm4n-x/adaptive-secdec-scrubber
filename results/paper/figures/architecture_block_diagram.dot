@@ -1,0 +1,83 @@
+digraph G {
+    graph [
+        rankdir=LR,
+        bgcolor="white",
+        pad="0.35",
+        nodesep="0.55",
+        ranksep="0.75",
+        splines=ortho,
+        fontname="DejaVu Sans"
+    ];
+
+    node [
+        shape=box,
+        style="rounded",
+        penwidth=1.4,
+        fontname="DejaVu Sans",
+        fontsize=12,
+        margin="0.12,0.08"
+    ];
+
+    edge [
+        fontname="DejaVu Sans",
+        fontsize=10,
+        penwidth=1.2,
+        arrowsize=0.8
+    ];
+
+    nu [
+        label="ν(t)\nряд частоты сбоев",
+        shape=box
+    ];
+
+    risk [
+        label="risk-policy\nрасчёт интервала",
+        shape=box
+    ];
+
+    level [
+        label="ctrl_level\nдискретный уровень",
+        shape=box
+    ];
+
+    selector [
+        label="interval selector\nfixed / table / threshold",
+        shape=box
+    ];
+
+    controller [
+        label="adaptive scrub controller\nFSM полного прохода",
+        shape=box
+    ];
+
+    memory [
+        label="protected memory model\nSECDED 32+7 code words",
+        shape=box
+    ];
+
+    decoder [
+        label="SECDED decoder / encoder\ncorrection + rewrite",
+        shape=box
+    ];
+
+    fault [
+        label="fault injection\nsingle / paired / cluster",
+        shape=box
+    ];
+
+    metrics [
+        label="counters / metrics\nbusy, reads, writes,\ncorrected, unique uncorrectable",
+        shape=box
+    ];
+
+    nu -> risk [label="43824 hourly samples"];
+    risk -> level [label="policy schedule"];
+    level -> selector [label="3-bit level"];
+    selector -> controller [label="selected_interval"];
+    controller -> memory [label="read / write address"];
+    memory -> decoder [label="code word"];
+    decoder -> memory [label="corrected writeback"];
+    fault -> memory [label="bit mask injection"];
+    controller -> metrics [label="execution counters"];
+    decoder -> metrics [label="ECC events"];
+}

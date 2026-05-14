@@ -1,0 +1,63 @@
+digraph G {
+    graph [
+        rankdir=TB,
+        bgcolor="white",
+        pad="0.35",
+        nodesep="0.45",
+        ranksep="0.60",
+        splines=ortho,
+        fontname="DejaVu Sans"
+    ];
+
+    node [
+        shape=box,
+        style="rounded",
+        penwidth=1.4,
+        fontname="DejaVu Sans",
+        fontsize=12,
+        margin="0.12,0.08"
+    ];
+
+    edge [
+        fontname="DejaVu Sans",
+        fontsize=10,
+        penwidth=1.2,
+        arrowsize=0.8
+    ];
+
+    theory [
+        label="Расчётная теория\nτ = период между проверками\nодного и того же кодового слова"
+    ];
+
+    rtl_period [
+        label="RTL-семантика\nselected_interval = целевой период\nполного прохода памяти"
+    ];
+
+    pass [
+        label="last_pass_duration\nненулевая длительность\nпоследовательного прохода"
+    ];
+
+    wait [
+        label="effective_wait_interval\nожидание перед следующим проходом"
+    ];
+
+    formula [
+        label="effective_wait_interval = max(1,\nselected_interval - last_pass_duration)"
+    ];
+
+    saturation [
+        label="Если selected_interval < длительности прохода,\nвозникает saturation:\nскраббер работает почти непрерывно"
+    ];
+
+    achievable [
+        label="achievable mapping\nинтервалы выбираются в достижимой области\nдля последовательного скраббера"
+    ];
+
+    theory -> rtl_period;
+    rtl_period -> pass;
+    pass -> wait;
+    rtl_period -> formula;
+    formula -> wait;
+    wait -> saturation;
+    saturation -> achievable;
+}
