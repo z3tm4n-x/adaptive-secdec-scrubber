@@ -142,6 +142,48 @@ def select_window(
 
     return values[start_index:end_index]
 
+
+def select_delayed_window(
+    values: list,
+    start_index: int,
+    window_size: int,
+    delay_points: int,
+) -> list:
+    """
+    Возвращает окно, в котором значение с индексом i заменено
+    значением i-delay_points.
+
+    Это используется только для управляющей оценки. Поток ошибок
+    не задерживается.
+    """
+    if delay_points < 0:
+        raise ValueError("delay_points must be non-negative")
+
+    if delay_points == 0:
+        return select_window(values, start_index, window_size)
+
+    if start_index < 0:
+        raise ValueError("start_index must be non-negative")
+
+    if window_size <= 0:
+        raise ValueError("window_size must be positive")
+
+    end_index = start_index + window_size
+    if end_index > len(values):
+        raise ValueError(
+            f"Requested window [{start_index}, {end_index}) exceeds "
+            f"available series length {len(values)}"
+        )
+
+    delayed = []
+    for local_index in range(window_size):
+        source_index = start_index + local_index - delay_points
+        if source_index < 0:
+            source_index = 0
+        delayed.append(values[source_index])
+
+    return delayed
+
 def quantize_upset_value(value: float, max_value: float) -> int:
     """
     Преобразует значение временного ряда upsets(t)
@@ -180,6 +222,7 @@ def control_levels_from_upsets(
     total_cycles: int,
     control_quantization: str = "linear_max",
     control_percentiles: tuple[float, ...] | None = None,
+    control_delay_points: int = 0,
 ) -> list[ControlLevelEvent]:
     """
     Формирует поток управляющих уровней из того же окна ν(t),
@@ -196,7 +239,12 @@ def control_levels_from_upsets(
         raise ValueError("total_cycles must be positive")
 
     values = read_upsets_xlsx(input_path)
-    window = select_window(values, start_index, window_size)
+    window = select_delayed_window(
+        values=values,
+        start_index=start_index,
+        window_size=window_size,
+        delay_points=control_delay_points,
+    )
 
     if control_percentiles is None:
         control_percentiles = ()
@@ -235,6 +283,7 @@ def control_levels_from_risk_policy(
     window_size: int,
     total_cycles: int,
     level_map_output: Path | None = None,
+    control_delay_points: int = 0,
 ) -> list[ControlLevelEvent]:
     """
     Формирует control_levels.csv из расчётной risk-policy.
@@ -248,10 +297,11 @@ def control_levels_from_risk_policy(
         более короткие интервалы → более высокие уровни.
     """
     schedule = read_policy_schedule(schedule_path)
-    window = select_schedule_window(
-        rows=schedule,
+    window = select_delayed_window(
+        values=schedule,
         start_index=start_index,
         window_size=window_size,
+        delay_points=control_delay_points,
     )
 
     result = build_policy_control_events(
@@ -814,6 +864,16 @@ def main() -> None:
         help="Optional output CSV with interval_seconds to ctrl_level mapping.",
     )
 
+    parser.add_argument(
+        "--control-delay-points",
+        type=int,
+        default=0,
+        help=(
+            "Delay of the control estimate in source time-series points. "
+            "For the paper data, one point corresponds to one hour."
+        ),
+    )
+
     args = parser.parse_args()
 
     if args.scenario == "baseline":
@@ -845,6 +905,7 @@ def main() -> None:
                 window_size=args.window_size,
                 total_cycles=args.total_cycles,
                 level_map_output=args.control_policy_level_map_output,
+                control_delay_points=args.control_delay_points,
             )
         else:
             control_events = control_levels_from_upsets(
@@ -854,6 +915,7 @@ def main() -> None:
                 total_cycles=args.total_cycles,
                 control_quantization=args.control_quantization,
                 control_percentiles=parse_percentile_boundaries(args.control_percentiles),
+                control_delay_points=args.control_delay_points,
             )
 
         validate_events(events, total_cycles=args.total_cycles)
@@ -885,6 +947,7 @@ def main() -> None:
         print(f"Cluster bit count: {args.cluster_bit_count}")
         print(f"Seed: {args.seed}")
         print(f"Control source: {args.control_source}")
+        print(f"Control delay points: {args.control_delay_points}")
 
         if args.control_source == "risk_policy":
             print(f"Control policy schedule: {args.control_policy_schedule}")

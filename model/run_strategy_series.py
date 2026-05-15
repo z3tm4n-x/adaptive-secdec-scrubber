@@ -43,6 +43,7 @@ SERIES_COLUMNS = [
     "control_source",
     "control_policy_schedule",
     "control_policy_level_map_output",
+    "control_delay_points",
     "safe_interval",
     "level_intervals",
     "threshold_levels",
@@ -87,6 +88,7 @@ def append_series_rows(
     control_source: str,
     control_policy_schedule: str,
     control_policy_level_map_output: str,
+    control_delay_points: int,
     safe_interval: int,
     level_intervals_text: str,
     threshold_levels_text: str,
@@ -118,6 +120,7 @@ def append_series_rows(
                 "control_source": control_source,
                 "control_policy_schedule": control_policy_schedule,
                 "control_policy_level_map_output": control_policy_level_map_output,
+                "control_delay_points": control_delay_points,
                 "safe_interval": safe_interval,
                 "level_intervals": level_intervals_text,
                 "threshold_levels": threshold_levels_text,
@@ -145,6 +148,7 @@ def run_one_seed(
     control_source: str,
     control_policy_schedule: str,
     control_policy_level_map_output: str,
+    control_delay_points: int,
     safe_interval: int,
     level_intervals: list[int],
     threshold_levels: list[int],
@@ -168,6 +172,7 @@ def run_one_seed(
         f"CONTROL_SOURCE={control_source}",
         f"CONTROL_POLICY_SCHEDULE={control_policy_schedule}",
         f"CONTROL_POLICY_LEVEL_MAP_OUTPUT={control_policy_level_map_output}",
+        f"CONTROL_DELAY_POINTS={control_delay_points}",
         f"SAFE_INTERVAL={safe_interval}",
         f"LEVEL0_INTERVAL={level_intervals[0]}",
         f"LEVEL1_INTERVAL={level_intervals[1]}",
@@ -351,6 +356,16 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--control-delay-points",
+        type=int,
+        default=0,
+        help=(
+            "Delay of the control estimate in source time-series points. "
+            "For the paper data, one point corresponds to one hour."
+        ),
+    )
+
+    parser.add_argument(
         "--safe-interval",
         type=int,
         default=5,
@@ -447,6 +462,7 @@ def main() -> None:
             control_source=args.control_source,
             control_policy_schedule=args.control_policy_schedule,
             control_policy_level_map_output=args.control_policy_level_map_output,
+            control_delay_points=args.control_delay_points,
             safe_interval=args.safe_interval,
             level_intervals=level_intervals,
             threshold_levels=threshold_levels,
@@ -473,6 +489,7 @@ def main() -> None:
             control_source=args.control_source,
             control_policy_schedule=args.control_policy_schedule,
             control_policy_level_map_output=args.control_policy_level_map_output,
+            control_delay_points=args.control_delay_points,
             safe_interval=args.safe_interval,
             level_intervals_text=args.level_intervals,
             threshold_levels_text=args.threshold_levels,

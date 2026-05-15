@@ -34,6 +34,7 @@ THRESHOLD_HIGH_INTERVAL ?= 8
 
 CONTROL_QUANTIZATION ?= linear_max
 CONTROL_SOURCE ?= quantization
+CONTROL_DELAY_POINTS ?= 0
 CONTROL_POLICY_SCHEDULE ?= results/paper/tables/risk_policy_schedule.csv
 CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= results/tables/control_policy_level_map.csv
 TRACE_EXECUTION ?= 0
@@ -52,6 +53,7 @@ SERIES_OUTPUT ?= results/tables/strategy_comparison_series.csv
 SERIES_SUMMARY_CSV ?= results/tables/strategy_series_summary.csv
 SERIES_SUMMARY_MD ?= results/tables/strategy_series_summary.md
 SERIES_FIGURE_DIR ?= results/figures/strategy_series
+SERIES_CONTROL_DELAY_POINTS ?= 0
 
 PAPER_RESULTS_DIR ?= results/paper
 
@@ -68,6 +70,7 @@ PAPER_CODEWORD_COUNT ?= 16
 PAPER_CONTROL_QUANTIZATION ?= linear_max
 
 PAPER_CONTROL_SOURCE ?= risk_policy
+PAPER_CONTROL_DELAY_POINTS ?= 0
 PAPER_CONTROL_POLICY_SCHEDULE ?= $(PAPER_RESULTS_DIR)/tables/risk_policy_schedule.csv
 PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= $(PAPER_RESULTS_DIR)/tables/risk_policy_level_map.csv
 # Нормированная RTL-таблица для risk-policy:
@@ -287,6 +290,7 @@ gen_fault_events:
 		--seed $(FAULT_SEED) \
 		--control-quantization $(CONTROL_QUANTIZATION) \
 		--control-source $(CONTROL_SOURCE) \
+		--control-delay-points $(CONTROL_DELAY_POINTS) \
 		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
 		--control-policy-level-map-output $(CONTROL_POLICY_LEVEL_MAP_OUTPUT)
 
@@ -406,6 +410,7 @@ strategy_series: prepare_dirs
 		--cluster-bit-count $(SERIES_CLUSTER_BIT_COUNT) \
 		--control-quantization $(CONTROL_QUANTIZATION) \
 		--control-source $(CONTROL_SOURCE) \
+		--control-delay-points $(SERIES_CONTROL_DELAY_POINTS) \
 		--control-policy-schedule $(CONTROL_POLICY_SCHEDULE) \
 		--control-policy-level-map-output $(CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		--safe-interval $(SAFE_INTERVAL) \
@@ -525,6 +530,7 @@ strategy_modeling_report_paper: prepare_paper_dirs analyze_upsets_window_paper p
 		PAPER_CLUSTER_BIT_COUNT=$(PAPER_CLUSTER_BIT_COUNT) \
 		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
 		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		SERIES_CONTROL_DELAY_POINTS=$(PAPER_CONTROL_DELAY_POINTS) \
 		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
 		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		SAFE_INTERVAL=$(PAPER_SAFE_INTERVAL) \
@@ -636,6 +642,7 @@ audit_policy_execution_paper: prepare_paper_dirs build_scrub_risk_policy_paper
 		FAULT_SEED=1 \
 		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
 		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		SERIES_CONTROL_DELAY_POINTS=$(PAPER_CONTROL_DELAY_POINTS) \
 		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
 		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT) \
 		FIXED_INTERVAL=$(FIXED_INTERVAL) \
@@ -701,6 +708,7 @@ audit_fault_policy_alignment_paper: prepare_paper_dirs build_scrub_risk_policy_p
 		FAULT_SEED=1 \
 		CONTROL_QUANTIZATION=$(PAPER_CONTROL_QUANTIZATION) \
 		CONTROL_SOURCE=$(PAPER_CONTROL_SOURCE) \
+		SERIES_CONTROL_DELAY_POINTS=$(PAPER_CONTROL_DELAY_POINTS) \
 		CONTROL_POLICY_SCHEDULE=$(PAPER_CONTROL_POLICY_SCHEDULE) \
 		CONTROL_POLICY_LEVEL_MAP_OUTPUT=$(PAPER_CONTROL_POLICY_LEVEL_MAP_OUTPUT)
 	cp tb/fault_events.csv $(PAPER_RESULTS_DIR)/eta/tables/fault_policy_alignment_fault_events.csv
