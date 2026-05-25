@@ -6,6 +6,7 @@ FAULT_WINDOW_SIZE ?= 1300
 FAULT_TOTAL_CYCLES ?= 1300
 FAULT_EVENT_COUNT ?= 8
 FAULT_SEED ?= 12345
+ADDR_WIDTH ?= 4
 FAULT_META_OUTPUT ?= results/tables/fault_events_meta.csv
 FAULT_SHIFT_SUMMARY_OUTPUT ?= results/tables/event_shift_summary.md
 FAULT_PAIRED_EVENT_COUNT ?= 0
@@ -286,6 +287,7 @@ gen_fault_events:
 		--start-index $(FAULT_START_INDEX) \
 		--window-size $(FAULT_WINDOW_SIZE) \
 		--total-cycles $(FAULT_TOTAL_CYCLES) \
+		--addr-width $(ADDR_WIDTH) \
 		--event-count $(FAULT_EVENT_COUNT) \
 		--paired-event-count $(FAULT_PAIRED_EVENT_COUNT) \
 		--pair-gap-min $(FAULT_PAIR_GAP_MIN) \
@@ -301,7 +303,7 @@ gen_fault_events:
 
 
 test_strategy_comparison: prepare_dirs gen_fault_events
-	iverilog -g2012 -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
+	iverilog -g2012 -Ptb_strategy_comparison.ADDR_WIDTH=$(ADDR_WIDTH) -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
 	@if [ "$(TRACE_EXECUTION)" = "1" ]; then \
 		mkdir -p $(dir $(TRACE_OUTPUT)); \

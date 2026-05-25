@@ -973,6 +973,8 @@ def print_summary(
 
 
 def main() -> None:
+    global ADDR_WIDTH, DEPTH
+
     parser = argparse.ArgumentParser(
         description="Generate fault event table for strategy comparison."
     )
@@ -1037,8 +1039,18 @@ def main() -> None:
     parser.add_argument(
         "--total-cycles",
         type=int,
-        default=DEFAULT_TOTAL_CYCLES,
-        help="Total simulation cycles.",
+        default=10000,
+        help="Total number of simulation cycles. Default: 10000",
+    )
+
+    parser.add_argument(
+        "--addr-width",
+        type=int,
+        default=ADDR_WIDTH,
+        help=(
+            "Address width of the simulated protected memory. "
+            "DEPTH is computed as 2**addr_width. Default: 4."
+        ),
     )
 
     parser.add_argument(
@@ -1134,6 +1146,12 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    if args.addr_width <= 0:
+        raise ValueError("addr-width must be positive")
+
+    ADDR_WIDTH = args.addr_width
+    DEPTH = 1 << ADDR_WIDTH
 
     if args.scenario == "baseline":
         events = baseline_events()

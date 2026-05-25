@@ -32,6 +32,7 @@ SERIES_COLUMNS = [
     "scenario",
     "seed",
     "requested_total_cycles",
+    "addr_width",
     "window_size",
     "event_count",
     "paired_event_count",
@@ -77,6 +78,7 @@ def append_series_rows(
     scenario: str,
     seed: int,
     total_cycles: int,
+    addr_width: int,
     window_size: int,
     event_count: int,
     paired_event_count: int,
@@ -109,6 +111,7 @@ def append_series_rows(
                 "scenario": scenario,
                 "seed": seed,
                 "requested_total_cycles": total_cycles,
+                "addr_width": addr_width,
                 "window_size": window_size,
                 "event_count": event_count,
                 "paired_event_count": paired_event_count,
@@ -137,6 +140,7 @@ def run_one_seed(
     seed: int,
     scenario: str,
     total_cycles: int,
+    addr_width: int,
     window_size: int,
     event_count: int,
     paired_event_count: int,
@@ -158,6 +162,7 @@ def run_one_seed(
     command = [
         make_command,
         "test_strategy_comparison",
+        f"ADDR_WIDTH={addr_width}",
         f"FAULT_SCENARIO={scenario}",
         f"FAULT_TOTAL_CYCLES={total_cycles}",
         f"FAULT_WINDOW_SIZE={window_size}",
@@ -278,6 +283,13 @@ def main() -> None:
         type=int,
         default=10000,
         help="Simulation length in model cycles.",
+    )
+
+    parser.add_argument(
+        "--addr-width",
+        type=int,
+        default=4,
+        help="Address width of the simulated protected memory.",
     )
 
     parser.add_argument(
@@ -451,6 +463,7 @@ def main() -> None:
             seed=seed,
             scenario=args.scenario,
             total_cycles=args.total_cycles,
+            addr_width=args.addr_width,
             window_size=args.window_size,
             event_count=args.event_count,
             paired_event_count=args.paired_event_count,
@@ -478,6 +491,7 @@ def main() -> None:
             scenario=args.scenario,
             seed=seed,
             total_cycles=args.total_cycles,
+            addr_width=args.addr_width,
             window_size=args.window_size,
             event_count=args.event_count,
             paired_event_count=args.paired_event_count,

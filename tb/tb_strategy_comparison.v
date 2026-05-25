@@ -2,7 +2,7 @@
 
 module tb_strategy_comparison;
 
-localparam ADDR_WIDTH = 4;
+parameter ADDR_WIDTH = 4;
 localparam CODEWORD_WIDTH = 39;
 localparam LEVEL_WIDTH = 3;
 localparam INTERVAL_WIDTH = 32;
