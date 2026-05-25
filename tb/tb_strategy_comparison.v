@@ -148,6 +148,7 @@ integer configured_threshold_high_interval;
 integer trace_execution;
 integer trace_file;
 integer previous_trace_scrub_cycle_count;
+integer dump_vcd;
 reg [1023:0] trace_output_path;
 
 integer i;
@@ -876,8 +877,16 @@ task write_results;
 endtask
 
 initial begin
-    $dumpfile("results/logs/strategy_comparison.vcd");
-    $dumpvars(0, tb_strategy_comparison);
+    dump_vcd = 0;
+
+    if (!$value$plusargs("DUMP_VCD=%d", dump_vcd)) begin
+        dump_vcd = 0;
+    end
+
+    if (dump_vcd != 0) begin
+        $dumpfile("results/logs/strategy_comparison.vcd");
+        $dumpvars(0, tb_strategy_comparison);
+    end
 
     error_count = 0;
     injected_event_count = 0;

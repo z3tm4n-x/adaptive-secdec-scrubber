@@ -37,6 +37,9 @@ reg [CODEWORD_WIDTH-1:0] memory [0:DEPTH-1];
 
 integer i;
 
+reg [CODEWORD_WIDTH-1:0] single_inject_mask;
+reg                       single_inject_valid;
+
 initial begin
     for (i = 0; i < DEPTH; i = i + 1) begin
         memory[i] = {CODEWORD_WIDTH{1'b0}};
@@ -54,27 +57,35 @@ always @(posedge clk) begin
     end
 
     /*
-     * Искусственное внесение одиночной ошибки.
-     * inject_bit задаётся в диапазоне 0..38.
+     * Искусственное внесение ошибок.
+     *
+     * Одиночная инжекция и масочная инжекция обрабатываются в одной
+     * логике, чтобы исключить неоднозначность неблокирующих присваиваний
+     * при одновременной активности inject_en и inject_mask_en.
+     *
+     * Если обе инжекции относятся к одному адресу, маски объединяются.
+     * Если адреса разные, обе инжекции выполняются независимо.
      */
+    single_inject_mask = {CODEWORD_WIDTH{1'b0}};
+    single_inject_valid = 1'b0;
+
     if (inject_en) begin
         if (inject_bit < CODEWORD_WIDTH) begin
-            memory[inject_addr][inject_bit] <= ~memory[inject_addr][inject_bit];
+            single_inject_mask[inject_bit] = 1'b1;
+            single_inject_valid = 1'b1;
         end
     end
 
-    /*
-     * Искусственное внесение ошибки по маске.
-     * Все единичные биты inject_mask инвертируются в одном кодовом слове
-     * за один такт моделирования.
-     *
-     * Если одновременно активны inject_en и inject_mask_en, результат
-     * определяется последовательностью неблокирующих присваиваний.
-     * В проверочных стендах эти два режима инжекции должны использоваться
-     * раздельно.
-     */
-    if (inject_mask_en) begin
-        memory[inject_mask_addr] <= memory[inject_mask_addr] ^ inject_mask;
+    if (single_inject_valid && inject_mask_en && (inject_addr == inject_mask_addr)) begin
+        memory[inject_addr] <= memory[inject_addr] ^ single_inject_mask ^ inject_mask;
+    end else begin
+        if (single_inject_valid) begin
+            memory[inject_addr] <= memory[inject_addr] ^ single_inject_mask;
+        end
+
+        if (inject_mask_en) begin
+            memory[inject_mask_addr] <= memory[inject_mask_addr] ^ inject_mask;
+        end
     end
 
     /*

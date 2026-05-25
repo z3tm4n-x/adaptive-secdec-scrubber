@@ -39,6 +39,7 @@ CONTROL_POLICY_SCHEDULE ?= results/paper/tables/risk_policy_schedule.csv
 CONTROL_POLICY_LEVEL_MAP_OUTPUT ?= results/tables/control_policy_level_map.csv
 TRACE_EXECUTION ?= 0
 TRACE_OUTPUT ?= results/tables/strategy_execution_trace.csv
+DUMP_VCD ?= 0
 SERIES_SEED_START ?= 1
 SERIES_SEED_COUNT ?= 10
 SERIES_TOTAL_CYCLES ?= 10000
@@ -324,7 +325,8 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
 		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
 		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
-		+TRACE_OUTPUT=$(TRACE_OUTPUT)
+		+TRACE_OUTPUT=$(TRACE_OUTPUT) \
+		+DUMP_VCD=$(DUMP_VCD)
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=1 \
 		+TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) \
@@ -346,7 +348,8 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
 		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
 		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
-		+TRACE_OUTPUT=$(TRACE_OUTPUT)
+		+TRACE_OUTPUT=$(TRACE_OUTPUT) \
+		+DUMP_VCD=$(DUMP_VCD)
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=2 \
 		+TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) \
@@ -368,7 +371,8 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		+THRESHOLD_MEDIUM_INTERVAL=$(THRESHOLD_MEDIUM_INTERVAL) \
 		+THRESHOLD_HIGH_INTERVAL=$(THRESHOLD_HIGH_INTERVAL) \
 		+TRACE_EXECUTION=$(TRACE_EXECUTION) \
-		+TRACE_OUTPUT=$(TRACE_OUTPUT)
+		+TRACE_OUTPUT=$(TRACE_OUTPUT) \
+		+DUMP_VCD=$(DUMP_VCD)
 	cat results/tables/strategy_comparison.csv
 
 test_strategy_comparison_upsets_paired:
