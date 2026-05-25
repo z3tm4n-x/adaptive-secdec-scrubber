@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import math
 import random
 from pathlib import Path
@@ -31,6 +32,62 @@ DEFAULT_TOTAL_CYCLES = 1300
 
 
 FaultEvent = tuple[int, int, int]
+EventMeta = dict[str, str | int]
+FaultMetaEvent = dict[str, object]
+
+
+def append_meta_event(
+    meta_events: list[FaultMetaEvent] | None,
+    event_type: str,
+    time_cycle: int,
+    address: int,
+    fault_mask: int,
+    preferred_cycle: int | None = None,
+    pair_id: int | str | None = None,
+    pair_role: str = "",
+) -> None:
+    if meta_events is None:
+        return
+
+    actual_cycle = time_cycle
+
+    if preferred_cycle is None:
+        preferred_cycle = actual_cycle
+
+    meta_events.append(
+        {
+            "event_id": len(meta_events),
+            "event_type": event_type,
+            "time_cycle": actual_cycle,
+            "address": address,
+            "fault_mask": f"{fault_mask:010x}",
+            "pair_id": "" if pair_id is None else pair_id,
+            "pair_role": pair_role,
+            "preferred_cycle": preferred_cycle,
+            "actual_cycle": actual_cycle,
+            "cycle_shift": actual_cycle - preferred_cycle,
+        }
+    )
+
+
+def meta_events_from_plain_events(
+    events: list[FaultEvent],
+    event_type: str = "baseline",
+) -> list[FaultMetaEvent]:
+    meta_events: list[FaultMetaEvent] = []
+
+    for time_cycle, address, fault_mask in events:
+        append_meta_event(
+            meta_events=meta_events,
+            event_type=event_type,
+            time_cycle=time_cycle,
+            address=address,
+            fault_mask=fault_mask,
+            preferred_cycle=time_cycle,
+        )
+
+    return meta_events
+
 
 def bit_to_mask(bit_index: int) -> int:
     if bit_index < 0 or bit_index >= CODEWORD_WIDTH:
@@ -67,6 +124,52 @@ def random_distinct_bit_mask(
     return mask
 
 ControlLevelEvent = tuple[int, int]
+
+
+def append_event_meta(
+    meta_events: list[EventMeta] | None,
+    *,
+    event_type: str,
+    time_cycle: int,
+    address: int,
+    fault_mask: int,
+    preferred_cycle: int,
+    pair_id: int | None = None,
+    pair_role: str = "",
+) -> None:
+    if meta_events is None:
+        return
+
+    meta_events.append(
+        {
+            "event_id": len(meta_events),
+            "event_type": event_type,
+            "time_cycle": time_cycle,
+            "address": address,
+            "fault_mask": f"{fault_mask:010x}",
+            "pair_id": "" if pair_id is None else pair_id,
+            "pair_role": pair_role,
+            "preferred_cycle": preferred_cycle,
+            "actual_cycle": time_cycle,
+            "cycle_shift": time_cycle - preferred_cycle,
+        }
+    )
+
+
+def build_baseline_meta(events: list[FaultEvent]) -> list[EventMeta]:
+    meta_events: list[EventMeta] = []
+
+    for time_cycle, address, fault_mask in events:
+        append_event_meta(
+            meta_events,
+            event_type="baseline",
+            time_cycle=time_cycle,
+            address=address,
+            fault_mask=fault_mask,
+            preferred_cycle=time_cycle,
+        )
+
+    return meta_events
 
 def baseline_events() -> list[FaultEvent]:
     """
@@ -398,6 +501,7 @@ def add_single_events(
     weights: list[float],
     total_cycles: int,
     event_count: int,
+    meta_events: list[FaultMetaEvent] | None = None,
 ) -> None:
     for _ in range(event_count):
         preferred_cycle = weighted_cycle_from_series(rng, weights, total_cycles)
@@ -410,6 +514,14 @@ def add_single_events(
         fault_mask = bit_to_mask(bit_index)
 
         events.append((cycle, address, fault_mask))
+        append_meta_event(
+            meta_events=meta_events,
+            event_type="single",
+            time_cycle=cycle,
+            address=address,
+            fault_mask=fault_mask,
+            preferred_cycle=preferred_cycle,
+        )
 
 
 def add_paired_events(
@@ -421,6 +533,7 @@ def add_paired_events(
     paired_event_count: int,
     pair_gap_min: int,
     pair_gap_max: int,
+    meta_events: list[FaultMetaEvent] | None = None,
 ) -> None:
     """
     Добавляет парные события в одно слово памяти.
@@ -481,8 +594,32 @@ def add_paired_events(
                 used_cycles.add(first_cycle)
                 used_cycles.add(second_cycle)
 
-                events.append((first_cycle, address, bit_to_mask(first_bit)))
-                events.append((second_cycle, address, bit_to_mask(second_bit)))
+                first_mask = bit_to_mask(first_bit)
+                second_mask = bit_to_mask(second_bit)
+
+                events.append((first_cycle, address, first_mask))
+                events.append((second_cycle, address, second_mask))
+
+                append_meta_event(
+                    meta_events=meta_events,
+                    event_type="paired",
+                    time_cycle=first_cycle,
+                    address=address,
+                    fault_mask=first_mask,
+                    preferred_cycle=first_cycle,
+                    pair_id=pair_index,
+                    pair_role="first",
+                )
+                append_meta_event(
+                    meta_events=meta_events,
+                    event_type="paired",
+                    time_cycle=second_cycle,
+                    address=address,
+                    fault_mask=second_mask,
+                    preferred_cycle=second_cycle,
+                    pair_id=pair_index,
+                    pair_role="second",
+                )
 
                 placed = True
                 break
@@ -502,6 +639,7 @@ def add_instant_cluster_events(
     total_cycles: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    meta_events: list[FaultMetaEvent] | None = None,
 ) -> None:
     """
     Добавляет мгновенные кластерные события.
@@ -534,6 +672,14 @@ def add_instant_cluster_events(
         fault_mask = random_distinct_bit_mask(rng, cluster_bit_count)
 
         events.append((cycle, address, fault_mask))
+        append_event_meta(
+            meta_events,
+            event_type="cluster",
+            time_cycle=cycle,
+            address=address,
+            fault_mask=fault_mask,
+            preferred_cycle=preferred_cycle,
+        )
 
 def upsets_weighted_events(
     input_path: Path,
@@ -547,7 +693,7 @@ def upsets_weighted_events(
     cluster_event_count: int,
     cluster_bit_count: int,
     seed: int,
-) -> list[FaultEvent]:
+) -> tuple[list[FaultEvent], list[EventMeta]]:
     """
     Генерирует поток сбойных событий из временного ряда upsets(t).
 
@@ -583,6 +729,7 @@ def upsets_weighted_events(
 
     used_cycles: set[int] = set()
     events: list[FaultEvent] = []
+    meta_events: list[EventMeta] = []
 
     add_single_events(
         events=events,
@@ -591,6 +738,7 @@ def upsets_weighted_events(
         weights=window,
         total_cycles=total_cycles,
         event_count=event_count,
+        meta_events=meta_events,
     )
 
     add_paired_events(
@@ -602,6 +750,7 @@ def upsets_weighted_events(
         paired_event_count=paired_event_count,
         pair_gap_min=pair_gap_min,
         pair_gap_max=pair_gap_max,
+        meta_events=meta_events,
     )
 
     add_instant_cluster_events(
@@ -612,10 +761,18 @@ def upsets_weighted_events(
         total_cycles=total_cycles,
         cluster_event_count=cluster_event_count,
         cluster_bit_count=cluster_bit_count,
+        meta_events=meta_events,
     )
 
-    events.sort(key=lambda item: item[0])
-    return events
+    combined = sorted(
+        zip(events, meta_events),
+        key=lambda item: item[0][0],
+    )
+
+    events = [item[0] for item in combined]
+    meta_events = [item[1] for item in combined]
+
+    return events, meta_events
 
 
 def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -> None:
@@ -699,6 +856,94 @@ def write_events(events: list[FaultEvent], output_path: Path) -> None:
             file.write(f"{time_cycle},{address},{fault_mask:010x}\n")
 
 
+def write_event_meta(meta_events: list[EventMeta], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fieldnames = [
+        "event_id",
+        "event_type",
+        "time_cycle",
+        "address",
+        "fault_mask",
+        "pair_id",
+        "pair_role",
+        "preferred_cycle",
+        "actual_cycle",
+        "cycle_shift",
+    ]
+
+    with output_path.open("w", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(meta_events)
+
+
+def write_event_shift_summary(meta_events: list[EventMeta], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    total = len(meta_events)
+    shifted = [
+        row for row in meta_events
+        if int(row["cycle_shift"]) != 0
+    ]
+
+    by_type: dict[str, list[EventMeta]] = {}
+    for row in meta_events:
+        by_type.setdefault(str(row["event_type"]), []).append(row)
+
+    max_abs_shift = max(
+        (abs(int(row["cycle_shift"])) for row in meta_events),
+        default=0,
+    )
+    mean_abs_shift = (
+        sum(abs(int(row["cycle_shift"])) for row in meta_events) / total
+        if total > 0
+        else 0.0
+    )
+
+    lines: list[str] = []
+    lines.append("# Сводка сдвигов событий")
+    lines.append("")
+    lines.append("## Назначение")
+    lines.append("")
+    lines.append(
+        "Проверяется, насколько часто генератор переносит событие "
+        "от предпочтительного такта к ближайшему свободному такту из-за "
+        "ограничения текущего Verilog-стенда: не более одного события "
+        "в один модельный такт."
+    )
+    lines.append("")
+    lines.append("## Сводка")
+    lines.append("")
+    lines.append(f"- Всего событий: {total}")
+    lines.append(f"- Событий со сдвигом: {len(shifted)}")
+    lines.append(
+        f"- Доля событий со сдвигом, %: "
+        f"{(len(shifted) / total * 100.0) if total else 0.0:.6f}"
+    )
+    lines.append(f"- Максимальный |сдвиг|, тактов: {max_abs_shift}")
+    lines.append(f"- Средний |сдвиг|, тактов: {mean_abs_shift:.6f}")
+    lines.append("")
+    lines.append("## По типам событий")
+    lines.append("")
+    lines.append("| Тип | Всего | Со сдвигом | Доля, % |")
+    lines.append("|---|---:|---:|---:|")
+
+    for event_type in sorted(by_type):
+        rows = by_type[event_type]
+        shifted_rows = [
+            row for row in rows
+            if int(row["cycle_shift"]) != 0
+        ]
+        fraction = len(shifted_rows) / len(rows) * 100.0 if rows else 0.0
+        lines.append(
+            f"| `{event_type}` | {len(rows)} | {len(shifted_rows)} | "
+            f"{fraction:.6f} |"
+        )
+
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def write_control_levels(
     events: list[ControlLevelEvent],
     output_path: Path,
@@ -744,6 +989,20 @@ def main() -> None:
         type=Path,
         default=Path("tb/control_levels.csv"),
         help="Output control-level CSV file without header. Default: tb/control_levels.csv",
+    )
+
+    parser.add_argument(
+        "--meta-output",
+        type=Path,
+        default=None,
+        help="Optional event metadata CSV with header.",
+    )
+
+    parser.add_argument(
+        "--shift-summary-output",
+        type=Path,
+        default=None,
+        help="Optional Markdown summary of event cycle shifts.",
     )
 
 
@@ -878,13 +1137,14 @@ def main() -> None:
 
     if args.scenario == "baseline":
         events = baseline_events()
+        meta_events = build_baseline_meta(events)
         control_events = baseline_control_levels()
 
         validate_events(events, total_cycles=args.total_cycles)
         validate_control_levels(control_events, total_cycles=args.total_cycles)
 
     elif args.scenario == "upsets":
-        events = upsets_weighted_events(
+        events, meta_events = upsets_weighted_events(
             input_path=args.input,
             start_index=args.start_index,
             window_size=args.window_size,
@@ -927,8 +1187,18 @@ def main() -> None:
     write_events(events, args.output)
     write_control_levels(control_events, args.control_output)
 
+    if args.meta_output is not None:
+        write_event_meta(meta_events, args.meta_output)
+
+    if args.shift_summary_output is not None:
+        write_event_shift_summary(meta_events, args.shift_summary_output)
+
     print(f"Generated fault events: {args.output}")
     print(f"Generated control levels: {args.control_output}")
+    if args.meta_output is not None:
+        print(f"Generated event metadata: {args.meta_output}")
+    if args.shift_summary_output is not None:
+        print(f"Generated event shift summary: {args.shift_summary_output}")
     print(f"Control level changes: {len(control_events)}")
     print_summary(
         events=events,

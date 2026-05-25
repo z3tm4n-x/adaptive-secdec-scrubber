@@ -6,6 +6,8 @@ FAULT_WINDOW_SIZE ?= 1300
 FAULT_TOTAL_CYCLES ?= 1300
 FAULT_EVENT_COUNT ?= 8
 FAULT_SEED ?= 12345
+FAULT_META_OUTPUT ?= results/tables/fault_events_meta.csv
+FAULT_SHIFT_SUMMARY_OUTPUT ?= results/tables/event_shift_summary.md
 FAULT_PAIRED_EVENT_COUNT ?= 0
 FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
@@ -279,6 +281,8 @@ gen_fault_events:
 		--input $(UPSETS_FILE) \
 		--output tb/fault_events.csv \
 		--control-output tb/control_levels.csv \
+		--meta-output $(FAULT_META_OUTPUT) \
+		--shift-summary-output $(FAULT_SHIFT_SUMMARY_OUTPUT) \
 		--start-index $(FAULT_START_INDEX) \
 		--window-size $(FAULT_WINDOW_SIZE) \
 		--total-cycles $(FAULT_TOTAL_CYCLES) \
