@@ -33,62 +33,6 @@ DEFAULT_TOTAL_CYCLES = 1300
 
 FaultEvent = tuple[int, int, int]
 EventMeta = dict[str, str | int]
-FaultMetaEvent = dict[str, object]
-
-
-def append_meta_event(
-    meta_events: list[FaultMetaEvent] | None,
-    event_type: str,
-    time_cycle: int,
-    address: int,
-    fault_mask: int,
-    preferred_cycle: int | None = None,
-    pair_id: int | str | None = None,
-    pair_role: str = "",
-) -> None:
-    if meta_events is None:
-        return
-
-    actual_cycle = time_cycle
-
-    if preferred_cycle is None:
-        preferred_cycle = actual_cycle
-
-    meta_events.append(
-        {
-            "event_id": len(meta_events),
-            "event_type": event_type,
-            "time_cycle": actual_cycle,
-            "address": address,
-            "fault_mask": f"{fault_mask:010x}",
-            "pair_id": "" if pair_id is None else pair_id,
-            "pair_role": pair_role,
-            "preferred_cycle": preferred_cycle,
-            "actual_cycle": actual_cycle,
-            "cycle_shift": actual_cycle - preferred_cycle,
-        }
-    )
-
-
-def meta_events_from_plain_events(
-    events: list[FaultEvent],
-    event_type: str = "baseline",
-) -> list[FaultMetaEvent]:
-    meta_events: list[FaultMetaEvent] = []
-
-    for time_cycle, address, fault_mask in events:
-        append_meta_event(
-            meta_events=meta_events,
-            event_type=event_type,
-            time_cycle=time_cycle,
-            address=address,
-            fault_mask=fault_mask,
-            preferred_cycle=time_cycle,
-        )
-
-    return meta_events
-
-
 def bit_to_mask(bit_index: int) -> int:
     if bit_index < 0 or bit_index >= CODEWORD_WIDTH:
         raise ValueError(
@@ -501,7 +445,7 @@ def add_single_events(
     weights: list[float],
     total_cycles: int,
     event_count: int,
-    meta_events: list[FaultMetaEvent] | None = None,
+    meta_events: list[EventMeta] | None = None,
 ) -> None:
     for _ in range(event_count):
         preferred_cycle = weighted_cycle_from_series(rng, weights, total_cycles)
@@ -514,7 +458,7 @@ def add_single_events(
         fault_mask = bit_to_mask(bit_index)
 
         events.append((cycle, address, fault_mask))
-        append_meta_event(
+        append_event_meta(
             meta_events=meta_events,
             event_type="single",
             time_cycle=cycle,
@@ -533,7 +477,7 @@ def add_paired_events(
     paired_event_count: int,
     pair_gap_min: int,
     pair_gap_max: int,
-    meta_events: list[FaultMetaEvent] | None = None,
+    meta_events: list[EventMeta] | None = None,
 ) -> None:
     """
     Добавляет парные события в одно слово памяти.
@@ -600,7 +544,7 @@ def add_paired_events(
                 events.append((first_cycle, address, first_mask))
                 events.append((second_cycle, address, second_mask))
 
-                append_meta_event(
+                append_event_meta(
                     meta_events=meta_events,
                     event_type="paired",
                     time_cycle=first_cycle,
@@ -610,7 +554,7 @@ def add_paired_events(
                     pair_id=pair_index,
                     pair_role="first",
                 )
-                append_meta_event(
+                append_event_meta(
                     meta_events=meta_events,
                     event_type="paired",
                     time_cycle=second_cycle,
@@ -639,7 +583,7 @@ def add_instant_cluster_events(
     total_cycles: int,
     cluster_event_count: int,
     cluster_bit_count: int,
-    meta_events: list[FaultMetaEvent] | None = None,
+    meta_events: list[EventMeta] | None = None,
 ) -> None:
     """
     Добавляет мгновенные кластерные события.
