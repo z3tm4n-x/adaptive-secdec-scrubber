@@ -411,6 +411,7 @@ strategy_series: prepare_dirs
 		--seed-start $(SERIES_SEED_START) \
 		--seed-count $(SERIES_SEED_COUNT) \
 		--total-cycles $(SERIES_TOTAL_CYCLES) \
+		--addr-width $(ADDR_WIDTH) \
 		--window-size $(SERIES_WINDOW_SIZE) \
 		--event-count $(SERIES_EVENT_COUNT) \
 		--paired-event-count $(SERIES_PAIRED_EVENT_COUNT) \
