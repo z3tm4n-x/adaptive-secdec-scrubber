@@ -798,7 +798,7 @@ task trace_execution_event;
                 end else begin
                     $fdisplay(
                         trace_file,
-                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                         strategy_name,
                         sim_cycle,
                         scrub_cycle_count,
@@ -808,7 +808,11 @@ task trace_execution_event;
                         current_level,
                         threshold_state,
                         safe_mode_active,
-                        control_age
+                        control_age,
+                        corrected_error_count,
+                        uncorrectable_error_count,
+                        memory_read_count,
+                        memory_write_count
                     );
 
                     $fclose(trace_file);

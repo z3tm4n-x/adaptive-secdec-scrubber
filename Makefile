@@ -307,7 +307,7 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 	rm -f results/tables/strategy_comparison.csv
 	@if [ "$(TRACE_EXECUTION)" = "1" ]; then \
 		mkdir -p $(dir $(TRACE_OUTPUT)); \
-		echo "strategy,cycle,scrub_cycle_count,selected_interval,effective_wait_interval,last_pass_duration,current_level,threshold_state,safe_mode_active,control_age" > $(TRACE_OUTPUT); \
+		echo "strategy,cycle,scrub_cycle_count,selected_interval,effective_wait_interval,last_pass_duration,current_level,threshold_state,safe_mode_active,control_age,corrected_error_count,uncorrectable_error_count,memory_read_count,memory_write_count" > $(TRACE_OUTPUT); \
 	fi
 	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
 	vvp results/logs/strategy_comparison.out \
