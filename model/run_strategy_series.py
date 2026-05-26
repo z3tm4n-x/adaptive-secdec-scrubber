@@ -46,6 +46,7 @@ SERIES_COLUMNS = [
     "control_policy_level_map_output",
     "control_delay_points",
     "safe_interval",
+    "fixed_interval",
     "level_intervals",
     "threshold_levels",
     "threshold_intervals",
@@ -92,6 +93,7 @@ def append_series_rows(
     control_policy_level_map_output: str,
     control_delay_points: int,
     safe_interval: int,
+    fixed_interval: int,
     level_intervals_text: str,
     threshold_levels_text: str,
     threshold_intervals_text: str,
@@ -125,6 +127,7 @@ def append_series_rows(
                 "control_policy_level_map_output": control_policy_level_map_output,
                 "control_delay_points": control_delay_points,
                 "safe_interval": safe_interval,
+                "fixed_interval": fixed_interval,
                 "level_intervals": level_intervals_text,
                 "threshold_levels": threshold_levels_text,
                 "threshold_intervals": threshold_intervals_text,
@@ -154,6 +157,7 @@ def run_one_seed(
     control_policy_level_map_output: str,
     control_delay_points: int,
     safe_interval: int,
+    fixed_interval: int,
     level_intervals: list[int],
     threshold_levels: list[int],
     threshold_intervals: list[int],
@@ -179,6 +183,7 @@ def run_one_seed(
         f"CONTROL_POLICY_LEVEL_MAP_OUTPUT={control_policy_level_map_output}",
         f"CONTROL_DELAY_POINTS={control_delay_points}",
         f"SAFE_INTERVAL={safe_interval}",
+        f"FIXED_INTERVAL={fixed_interval}",
         f"LEVEL0_INTERVAL={level_intervals[0]}",
         f"LEVEL1_INTERVAL={level_intervals[1]}",
         f"LEVEL2_INTERVAL={level_intervals[2]}",
@@ -385,6 +390,13 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--fixed-interval",
+        type=int,
+        default=80,
+        help="Fixed interval passed to RTL testbench.",
+    )
+
+    parser.add_argument(
         "--level-intervals",
         default="100,80,60,40,25,15,10,5",
         help="Comma-separated LEVEL0..LEVEL7 model intervals.",
@@ -453,6 +465,9 @@ def main() -> None:
     if args.safe_interval <= 0:
         raise ValueError("safe-interval must be positive")
 
+    if args.fixed_interval <= 0:
+        raise ValueError("fixed-interval must be positive")
+
     if args.output.exists():
         args.output.unlink()
 
@@ -477,6 +492,7 @@ def main() -> None:
             control_policy_level_map_output=args.control_policy_level_map_output,
             control_delay_points=args.control_delay_points,
             safe_interval=args.safe_interval,
+            fixed_interval=args.fixed_interval,
             level_intervals=level_intervals,
             threshold_levels=threshold_levels,
             threshold_intervals=threshold_intervals,
@@ -505,6 +521,7 @@ def main() -> None:
             control_policy_level_map_output=args.control_policy_level_map_output,
             control_delay_points=args.control_delay_points,
             safe_interval=args.safe_interval,
+            fixed_interval=args.fixed_interval,
             level_intervals_text=args.level_intervals,
             threshold_levels_text=args.threshold_levels,
             threshold_intervals_text=args.threshold_intervals,
