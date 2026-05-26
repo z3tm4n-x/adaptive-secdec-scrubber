@@ -322,7 +322,7 @@ def main() -> None:
 
     lines.append("## Сдвиги событий")
     lines.append("")
-    lines.append("| Сценарий | Всего событий | Со сдвигом | Доля, % | Максимальный |сдвиг|, тактов |")
+    lines.append("| Сценарий | Всего событий | Со сдвигом | Доля, % | Максимальный модуль сдвига, тактов |")
     lines.append("|---|---:|---:|---:|---:|")
     lines.append(
         f"| `no_clusters` | {no_shift['total']} | {no_shift['shifted']} | "
