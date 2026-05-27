@@ -14,6 +14,7 @@ FAULT_PAIR_GAP_MIN ?= 10
 FAULT_PAIR_GAP_MAX ?= 80
 FAULT_CLUSTER_EVENT_COUNT ?= 0
 FAULT_CLUSTER_BIT_COUNT ?= 2
+FAULT_CLUSTER_INTERLEAVE_DEPTH ?= 1
 FIXED_INTERVAL ?= 80
 SAFE_INTERVAL ?= 5
 
@@ -294,6 +295,7 @@ gen_fault_events:
 		--pair-gap-max $(FAULT_PAIR_GAP_MAX) \
 		--cluster-event-count $(FAULT_CLUSTER_EVENT_COUNT) \
 		--cluster-bit-count $(FAULT_CLUSTER_BIT_COUNT) \
+		--cluster-interleave-depth $(FAULT_CLUSTER_INTERLEAVE_DEPTH) \
 		--seed $(FAULT_SEED) \
 		--control-quantization $(CONTROL_QUANTIZATION) \
 		--control-source $(CONTROL_SOURCE) \

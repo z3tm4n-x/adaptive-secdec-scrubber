@@ -80,6 +80,10 @@ def append_event_meta(
     preferred_cycle: int,
     pair_id: int | None = None,
     pair_role: str = "",
+    cluster_id: int | None = None,
+    cluster_role: str = "",
+    cluster_interleave_depth: int | None = None,
+    cluster_injection_skew: int | None = None,
 ) -> None:
     if meta_events is None:
         return
@@ -93,6 +97,10 @@ def append_event_meta(
             "fault_mask": f"{fault_mask:010x}",
             "pair_id": "" if pair_id is None else pair_id,
             "pair_role": pair_role,
+            "cluster_id": "" if cluster_id is None else cluster_id,
+            "cluster_role": cluster_role,
+            "cluster_interleave_depth": "" if cluster_interleave_depth is None else cluster_interleave_depth,
+            "cluster_injection_skew": "" if cluster_injection_skew is None else cluster_injection_skew,
             "preferred_cycle": preferred_cycle,
             "actual_cycle": time_cycle,
             "cycle_shift": time_cycle - preferred_cycle,
@@ -583,16 +591,22 @@ def add_instant_cluster_events(
     total_cycles: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    cluster_interleave_depth: int,
     meta_events: list[EventMeta] | None = None,
 ) -> None:
     """
-    Добавляет мгновенные кластерные события.
+    Добавляет мгновенные кластерные события с параметром перемежения.
 
-    Каждое событие имеет вид:
-        t, address A, mask
+    D=1:
+        все биты кластера попадают в одно кодовое слово и записываются
+        одной масочной инжекцией.
 
-    В отличие от накопительной пары, здесь несколько битов
-    одного кодового слова повреждаются в один и тот же модельный такт.
+    D>1:
+        биты кластера распределяются по нескольким кодовым словам.
+        Так как текущий Verilog-стенд поддерживает не более одного fault event
+        за такт, группы кодовых слов сериализуются по соседним тактам.
+        Физическая одномоментность сохраняется в cluster_id, а техническая
+        сериализация явно фиксируется в cluster_injection_skew.
     """
     if cluster_event_count < 0:
         raise ValueError("cluster_event_count must be non-negative")
@@ -606,24 +620,55 @@ def add_instant_cluster_events(
             f"codeword width {CODEWORD_WIDTH}"
         )
 
-    for _ in range(cluster_event_count):
-        preferred_cycle = weighted_cycle_from_series(rng, weights, total_cycles)
-        cycle = find_free_cycle_near(preferred_cycle, used_cycles, total_cycles)
+    if cluster_interleave_depth <= 0:
+        raise ValueError("cluster_interleave_depth must be positive")
 
-        used_cycles.add(cycle)
-
-        address = rng.randrange(DEPTH)
-        fault_mask = random_distinct_bit_mask(rng, cluster_bit_count)
-
-        events.append((cycle, address, fault_mask))
-        append_event_meta(
-            meta_events,
-            event_type="cluster",
-            time_cycle=cycle,
-            address=address,
-            fault_mask=fault_mask,
-            preferred_cycle=preferred_cycle,
+    for cluster_index in range(cluster_event_count):
+        cluster_preferred_cycle = weighted_cycle_from_series(
+            rng,
+            weights,
+            total_cycles,
         )
+
+        base_address = rng.randrange(DEPTH)
+        selected_bits = rng.sample(range(CODEWORD_WIDTH), cluster_bit_count)
+
+        grouped_masks: dict[int, int] = {}
+
+        for bit_order, bit_index in enumerate(selected_bits):
+            group_index = bit_order % cluster_interleave_depth
+            grouped_masks[group_index] = grouped_masks.get(group_index, 0) | bit_to_mask(bit_index)
+
+        group_items = sorted(grouped_masks.items())
+
+        for group_order, (group_index, fault_mask) in enumerate(group_items):
+            preferred_injection_cycle = cluster_preferred_cycle + group_order
+
+            if preferred_injection_cycle >= total_cycles:
+                preferred_injection_cycle = total_cycles - 1
+
+            cycle = find_free_cycle_near(
+                preferred_injection_cycle,
+                used_cycles,
+                total_cycles,
+            )
+            used_cycles.add(cycle)
+
+            address = (base_address + group_index) % DEPTH
+
+            events.append((cycle, address, fault_mask))
+            append_event_meta(
+                meta_events,
+                event_type="cluster",
+                time_cycle=cycle,
+                address=address,
+                fault_mask=fault_mask,
+                preferred_cycle=preferred_injection_cycle,
+                cluster_id=cluster_index,
+                cluster_role=f"group_{group_order}_of_{len(group_items)}",
+                cluster_interleave_depth=cluster_interleave_depth,
+                cluster_injection_skew=cycle - cluster_preferred_cycle,
+            )
 
 def upsets_weighted_events(
     input_path: Path,
@@ -636,6 +681,7 @@ def upsets_weighted_events(
     pair_gap_max: int,
     cluster_event_count: int,
     cluster_bit_count: int,
+    cluster_interleave_depth: int,
     seed: int,
 ) -> tuple[list[FaultEvent], list[EventMeta]]:
     """
@@ -658,7 +704,12 @@ def upsets_weighted_events(
     if event_count < 0:
         raise ValueError("event_count must be non-negative")
 
-    total_injections = event_count + 2 * paired_event_count + cluster_event_count
+    cluster_rows_per_event = min(cluster_bit_count, cluster_interleave_depth)
+    total_injections = (
+        event_count
+        + 2 * paired_event_count
+        + cluster_event_count * cluster_rows_per_event
+    )
 
     if total_injections > total_cycles:
         raise ValueError(
@@ -705,6 +756,7 @@ def upsets_weighted_events(
         total_cycles=total_cycles,
         cluster_event_count=cluster_event_count,
         cluster_bit_count=cluster_bit_count,
+        cluster_interleave_depth=cluster_interleave_depth,
         meta_events=meta_events,
     )
 
@@ -811,6 +863,10 @@ def write_event_meta(meta_events: list[EventMeta], output_path: Path) -> None:
         "fault_mask",
         "pair_id",
         "pair_role",
+        "cluster_id",
+        "cluster_role",
+        "cluster_interleave_depth",
+        "cluster_injection_skew",
         "preferred_cycle",
         "actual_cycle",
         "cycle_shift",
@@ -1032,6 +1088,17 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--cluster-interleave-depth",
+        type=int,
+        default=1,
+        help=(
+            "Interleaving depth for instantaneous clusters. "
+            "D=1 keeps all cluster bits in one codeword; D>1 spreads them "
+            "across D codewords and serializes injections across adjacent cycles."
+        ),
+    )
+
+    parser.add_argument(
         "--pair-gap-min",
         type=int,
         default=10,
@@ -1117,6 +1184,7 @@ def main() -> None:
             pair_gap_max=args.pair_gap_max,
             cluster_event_count=args.cluster_event_count,
             cluster_bit_count=args.cluster_bit_count,
+            cluster_interleave_depth=args.cluster_interleave_depth,
             seed=args.seed,
         )
 
