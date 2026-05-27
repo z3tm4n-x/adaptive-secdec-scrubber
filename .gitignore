@@ -28,4 +28,4 @@ results/figures/
 !results/paper/**
 
 # Do not keep logs even inside publication snapshot
-results/paper/**/*.log
+results/paper/**/*.logresults/logs/*.out
