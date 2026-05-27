@@ -1,0 +1,6 @@
+kind,name,scrub_cycles,corrected,uncorrectable_detections,unique_uncorrectable_words,busy_percent,interval_switches
+reference,risk_policy_fixed,401,474,39,1,20.6,0
+reference,risk_policy_table,276,459,856,4,14.2,1295
+reference,risk_policy_threshold,248,470,585,1,12.7,42
+measured_replay,measured_table_w0p00,311,466,471,3,16.0,17
+measured_replay,measured_table_w0p50,400,480,0,0,20.5,12
