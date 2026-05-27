@@ -44,12 +44,14 @@ def append_replay_rows(
     replay_name: str,
     replay_strategy: str,
     measured_control: Path,
+    fault_seed: int,
     rows: list[dict[str, str]],
 ) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
 
     fieldnames = [
         "replay_name",
+        "fault_seed",
         "replay_strategy",
         "measured_control",
         "strategy",
@@ -81,6 +83,7 @@ def append_replay_rows(
         for row in rows:
             out = {
                 "replay_name": replay_name,
+                "fault_seed": fault_seed,
                 "replay_strategy": replay_strategy,
                 "measured_control": str(measured_control),
             }
@@ -109,15 +112,16 @@ def build_markdown(csv_path: Path, md_path: Path) -> None:
     lines.append("## Результаты")
     lines.append("")
     lines.append(
-        "| replay | replay strategy | RTL strategy | scrub cycles | corrected | "
+        "| replay | seed | replay strategy | RTL strategy | scrub cycles | corrected | "
         "uncorrectable detections | unique uncorrectable words | busy, % | interval switches |"
     )
-    lines.append("|---|---|---|---:|---:|---:|---:|---:|---:|")
+    lines.append("|---|---:|---|---|---:|---:|---:|---:|---:|---:|")
 
     for row in rows:
         busy = float(row["busy_per_mille"]) / 10.0
         lines.append(
             f"| `{row['replay_name']}` | "
+            f"{row.get('fault_seed', '')} | "
             f"`{row['replay_strategy']}` | "
             f"`{row['strategy']}` | "
             f"{row['scrub_cycles']} | "
@@ -274,6 +278,7 @@ def main() -> None:
         replay_name=args.replay_name,
         replay_strategy=args.replay_strategy,
         measured_control=args.measured_control,
+        fault_seed=args.fault_seed,
         rows=rows,
     )
     build_markdown(args.output, args.md_output)
