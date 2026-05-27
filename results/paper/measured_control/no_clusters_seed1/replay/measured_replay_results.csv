@@ -1,0 +1,3 @@
+replay_name,replay_strategy,measured_control,strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
+measured_table_weighted,table,results/paper/measured_control/no_clusters_seed1/control_levels_measured_table.csv,table,500000,345,88320,478,478,11,1,16,0,0,354103,88798,708,177,0
+measured_table_corrected_only,table,results/paper/measured_control/no_clusters_seed1/control_levels_measured_table_corrected_only.csv,table,500000,311,79729,466,466,471,3,17,0,0,319692,80195,639,160,0
