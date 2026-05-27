@@ -228,8 +228,8 @@ def add_schedule_section(lines: list[str], weighted: dict[str, object], correcte
 
     lines.append("")
     lines.append(
-        "Для одиночного seed добавление DED-индикатора переводит часть окон в уровни 6–7, "
-        "тогда как `corrected-only` вообще не достигает уровня 7."
+        "Для одиночного seed выбранный вес `w=0.50` переводит большую часть окон "
+        "в уровни 6–7, тогда как `corrected-only` не достигает уровня 7."
     )
     lines.append("")
 
@@ -260,8 +260,9 @@ def add_single_replay_section(lines: list[str], path: Path) -> None:
 
     lines.append("")
     lines.append(
-        "На одном seed `weighted` дал заметное улучшение относительно `corrected-only`, "
-        "но этот результат далее проверяется на серии seed и не используется как самостоятельное доказательство."
+        "На одном seed выбранный `w=0.50` демонстрирует ожидаемую реакцию measured-control: "
+        "увеличивает частоту проходов и снижает риск-метрики относительно corrected-only. "
+        "Основной вывод далее делается не по этому seed, а по multi-seed sweep."
     )
     lines.append("")
 
