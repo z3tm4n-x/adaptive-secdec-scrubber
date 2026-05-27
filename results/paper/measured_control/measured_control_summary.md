@@ -31,7 +31,7 @@ level = round(score / rate_max · 7)
 
 | schedule | windows | mean score | max score | level 0 | level 1 | level 2 | level 3 | level 4 | level 5 | level 6 | level 7 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `weighted w0.25` | 20 | 134.600 | 212.000 | 0 | 0 | 1 | 3 | 6 | 5 | 2 | 3 |
+| `selected weighted w0.50` | 20 | 177.400 | 264.000 | 0 | 0 | 0 | 0 | 2 | 3 | 7 | 8 |
 | `corrected-only w0.00` | 20 | 91.800 | 180.000 | 0 | 2 | 5 | 7 | 2 | 1 | 3 | 0 |
 
 Для одиночного seed добавление DED-индикатора переводит часть окон в уровни 6–7, тогда как `corrected-only` вообще не достигает уровня 7.
@@ -45,8 +45,8 @@ level = round(score / rate_max · 7)
 | `reference` | `risk_policy_fixed` | 401 | 474 | 39 | 1 | 20.600 | 0 |
 | `reference` | `risk_policy_table` | 276 | 459 | 856 | 4 | 14.200 | 1295 |
 | `reference` | `risk_policy_threshold` | 248 | 470 | 585 | 1 | 12.700 | 42 |
-| `measured_replay` | `measured_table_weighted` | 345 | 478 | 11 | 1 | 17.700 | 16 |
-| `measured_replay` | `measured_table_corrected_only` | 311 | 466 | 471 | 3 | 16.000 | 17 |
+| `measured_replay` | `measured_table_w0p00` | 311 | 466 | 471 | 3 | 16.000 | 17 |
+| `measured_replay` | `measured_table_w0p50` | 400 | 480 | 0 | 0 | 20.500 | 12 |
 
 На одном seed `weighted` дал заметное улучшение относительно `corrected-only`, но этот результат далее проверяется на серии seed и не используется как самостоятельное доказательство.
 

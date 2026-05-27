@@ -416,12 +416,12 @@ def main() -> None:
     )
 
     weighted_schedule = summarize_measured_schedule(
-        Path("results/paper/measured_control/no_clusters_seed1/measured_level_windows_table.csv"),
-        "weighted w0.25",
+        Path("results/paper/measured_control/no_clusters_weight_sweep/seed_0001/w0p50/measured_level_windows_table_w0p50.csv"),
+        "selected weighted w0.50",
     )
 
     corrected_schedule = summarize_measured_schedule(
-        Path("results/paper/measured_control/no_clusters_seed1/measured_level_windows_table_corrected_only.csv"),
+        Path("results/paper/measured_control/no_clusters_weight_sweep/seed_0001/w0p00/measured_level_windows_table_w0p00.csv"),
         "corrected-only w0.00",
     )
 
@@ -461,7 +461,7 @@ def main() -> None:
     add_schedule_section(lines, weighted_schedule, corrected_schedule)
     add_single_replay_section(
         lines,
-        Path("results/paper/measured_control/no_clusters_seed1/replay/measured_replay_comparison.csv"),
+        Path("results/paper/measured_control/no_clusters_weight_sweep/seed1_selected_replay_comparison.csv"),
     )
     add_multiseed_section(lines, multiseed)
     add_weight_sweep_section(lines, weight_summary, deltas)
