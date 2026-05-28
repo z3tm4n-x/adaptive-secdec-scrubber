@@ -76,7 +76,7 @@
 | `observable_signal/no_clusters_multiseed/seed_*/` | Per-seed observable windows |
 | `measured_control/no_clusters_weight_sweep/seed_*/` | Per-seed measured schedules для разных весов |
 | `measured_control/no_clusters_multiseed/seed_*/` | Per-seed measured replay |
-| `unsaturated_control/pilot_no_clusters/` | Пилотная серия перед основной серией |
+| `unsaturated_control/no_clusters/` | Пилотная серия перед основной серией |
 
 Эти директории могут содержать много однотипных файлов:
 
