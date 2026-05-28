@@ -157,6 +157,7 @@ integer configured_threshold_high_interval;
 integer trace_execution;
 integer trace_file;
 integer previous_trace_scrub_cycle_count;
+integer previous_trace_selected_interval;
 integer dump_vcd;
 reg [1023:0] trace_output_path;
 
@@ -812,7 +813,9 @@ endtask
 task trace_execution_event;
     begin
         if (trace_execution != 0) begin
-            if (scrub_cycle_count != previous_trace_scrub_cycle_count) begin
+            if ((scrub_cycle_count != previous_trace_scrub_cycle_count) ||
+                (selected_interval != previous_trace_selected_interval[INTERVAL_WIDTH-1:0]) ||
+                measured_ctrl_update) begin
                 trace_file = $fopen(trace_output_path, "a");
 
                 if (trace_file == 0) begin
@@ -850,6 +853,7 @@ task trace_execution_event;
                 end
 
                 previous_trace_scrub_cycle_count = scrub_cycle_count;
+                previous_trace_selected_interval = selected_interval;
             end
         end
     end
@@ -929,6 +933,7 @@ initial begin
     trace_execution = 0;
     trace_output_path = "results/tables/strategy_execution_trace.csv";
     previous_trace_scrub_cycle_count = 0;
+    previous_trace_selected_interval = -1;
 
     if (!$value$plusargs("TRACE_EXECUTION=%d", trace_execution)) begin
         trace_execution = 0;
@@ -983,6 +988,7 @@ initial begin
     rst = 1'b0;
     enable = 1'b1;
     previous_trace_scrub_cycle_count = 0;
+    previous_trace_selected_interval = -1;
     /*
      * Основной цикл моделирования.
      */
