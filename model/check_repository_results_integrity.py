@@ -89,6 +89,8 @@ def check_required_files(root: Path, issues: list[Issue]) -> list[dict[str, str]
 
         ("results/paper/tables/efficiency_scale_verification.md", "efficiency scale report"),
         ("results/paper/tables/efficiency_scale_verification.csv", "efficiency scale csv"),
+        ("results/paper/tables/risk_regression_report.md", "risk regression report"),
+        ("results/paper/tables/risk_regression_report.csv", "risk regression report csv"),
 
         ("results/paper/unsaturated_control/unsaturated_control_summary.md", "unsaturated control summary"),
         ("results/paper/unsaturated_control/no_clusters/strategy_series_summary.md", "no-clusters strategy summary"),

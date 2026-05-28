@@ -131,6 +131,18 @@ def write_md(path: Path, results: list[dict[str, object]], passed: bool) -> None
     lines.append(f"- Проверок: {len(results)}")
     lines.append(f"- Ошибок: {sum(1 for row in results if not row['ok'])}")
     lines.append("")
+    lines.append("## Использование результатов")
+    lines.append("")
+    lines.append("Этот отчёт фиксирует, что каноническая расчётная цепочка на базе `risk_core.py` воспроизводит численные результаты, используемые для шкалы эффективности.")
+    lines.append("")
+    lines.append("Для текста диссертации следует использовать:")
+    lines.append("")
+    lines.append("- `results/paper/tables/efficiency_scale_verification.md` — основной отчёт по шкале эффективности;")
+    lines.append("- `results/paper/tables/efficiency_scale_verification.csv` — машинно-читаемая таблица тех же расчётов;")
+    lines.append("- `results/paper/tables/risk_regression_report.md` — регрессионное подтверждение воспроизводимости чисел.")
+    lines.append("")
+    lines.append("Старые или промежуточные риск-таблицы не следует цитировать напрямую, если они не включены в `doc/dissertation_mapping.md`.")
+    lines.append("")
     lines.append("## Таблица проверок")
     lines.append("")
     lines.append(
@@ -186,12 +198,12 @@ def main() -> None:
     parser.add_argument(
         "--csv-output",
         type=Path,
-        default=Path("results/paper/tables/risk_output_regression_check.csv"),
+        default=Path("results/paper/tables/risk_regression_report.csv"),
     )
     parser.add_argument(
         "--md-output",
         type=Path,
-        default=Path("results/paper/tables/risk_output_regression_check.md"),
+        default=Path("results/paper/tables/risk_regression_report.md"),
     )
 
     args = parser.parse_args()

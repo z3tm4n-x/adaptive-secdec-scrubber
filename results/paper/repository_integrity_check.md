@@ -3,7 +3,7 @@
 ## Status
 
 - Status: `PASS`
-- Checked at UTC: `2026-05-28T15:47:06+00:00`
+- Checked at UTC: `2026-05-28T15:52:00+00:00`
 - Failures: 0
 - Warnings: 6
 - Repository root: `/home/z3tm4n/adaptive_scrubbing`
@@ -28,6 +28,8 @@
 | `results/paper/final_results_summary.md` | final results summary | `ok` | 13508 |
 | `results/paper/tables/efficiency_scale_verification.md` | efficiency scale report | `ok` | 3165 |
 | `results/paper/tables/efficiency_scale_verification.csv` | efficiency scale csv | `ok` | 1001 |
+| `results/paper/tables/risk_regression_report.md` | risk regression report | `ok` | 6820 |
+| `results/paper/tables/risk_regression_report.csv` | risk regression report csv | `ok` | 3772 |
 | `results/paper/unsaturated_control/unsaturated_control_summary.md` | unsaturated control summary | `ok` | 5721 |
 | `results/paper/unsaturated_control/no_clusters/strategy_series_summary.md` | no-clusters strategy summary | `ok` | 2858 |
 | `results/paper/unsaturated_control/no_clusters/paired_delta_analysis.md` | no-clusters paired delta | `ok` | 2797 |
@@ -46,8 +48,8 @@
 
 | Metric | Value |
 |---|---:|
-| `md_files` | 342 |
-| `csv_files` | 740 |
+| `md_files` | 343 |
+| `csv_files` | 741 |
 | `empty_files` | 0 |
 | `bad_csv_files` | 0 |
 
@@ -76,7 +78,9 @@
 
 ```
 M model/check_repository_results_integrity.py
-?? doc/prior_art_measured_control.md
+ M model/regression_check_risk_outputs.py
+?? results/paper/tables/risk_regression_report.csv
+?? results/paper/tables/risk_regression_report.md
 ```
 
 ## Failures
