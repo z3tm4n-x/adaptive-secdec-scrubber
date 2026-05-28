@@ -74,6 +74,18 @@ reg tb_inject_en;
 reg [ADDR_WIDTH-1:0] tb_inject_addr;
 reg [CODEWORD_WIDTH-1:0] tb_inject_mask;
 
+reg tb_inject1_en;
+reg [ADDR_WIDTH-1:0] tb_inject1_addr;
+reg [CODEWORD_WIDTH-1:0] tb_inject1_mask;
+
+reg tb_inject2_en;
+reg [ADDR_WIDTH-1:0] tb_inject2_addr;
+reg [CODEWORD_WIDTH-1:0] tb_inject2_mask;
+
+reg tb_inject3_en;
+reg [ADDR_WIDTH-1:0] tb_inject3_addr;
+reg [CODEWORD_WIDTH-1:0] tb_inject3_mask;
+
 wire mem_read_en;
 wire [ADDR_WIDTH-1:0] mem_read_addr;
 
@@ -182,6 +194,12 @@ integer fault_time_value;
 integer fault_addr_value;
 reg [CODEWORD_WIDTH-1:0] fault_mask_value;
 
+integer simultaneous_fault_slot_count;
+integer simultaneous_fault_slot_index;
+integer simultaneous_fault_found_slot;
+integer simultaneous_fault_addr_value;
+reg [CODEWORD_WIDTH-1:0] simultaneous_fault_mask_value;
+
 integer control_event_time [0:MAX_CONTROL_EVENTS-1];
 integer control_event_level [0:MAX_CONTROL_EVENTS-1];
 
@@ -239,7 +257,19 @@ protected_memory_model #(
 
     .inject_mask_en(tb_inject_en),
     .inject_mask_addr(tb_inject_addr),
-    .inject_mask(tb_inject_mask)
+    .inject_mask(tb_inject_mask),
+
+    .inject_mask1_en(tb_inject1_en),
+    .inject_mask1_addr(tb_inject1_addr),
+    .inject_mask1(tb_inject1_mask),
+
+    .inject_mask2_en(tb_inject2_en),
+    .inject_mask2_addr(tb_inject2_addr),
+    .inject_mask2(tb_inject2_mask),
+
+    .inject_mask3_en(tb_inject3_en),
+    .inject_mask3_addr(tb_inject3_addr),
+    .inject_mask3(tb_inject3_mask)
 );
 
 adaptive_scrub_controller #(
@@ -737,33 +767,99 @@ task apply_error_schedule;
         tb_inject_addr = {ADDR_WIDTH{1'b0}};
         tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
 
+        tb_inject1_en = 1'b0;
+        tb_inject1_addr = {ADDR_WIDTH{1'b0}};
+        tb_inject1_mask = {CODEWORD_WIDTH{1'b0}};
+
+        tb_inject2_en = 1'b0;
+        tb_inject2_addr = {ADDR_WIDTH{1'b0}};
+        tb_inject2_mask = {CODEWORD_WIDTH{1'b0}};
+
+        tb_inject3_en = 1'b0;
+        tb_inject3_addr = {ADDR_WIDTH{1'b0}};
+        tb_inject3_mask = {CODEWORD_WIDTH{1'b0}};
+
+        simultaneous_fault_slot_count = 0;
+
         /*
          * События сбоев читаются из tb/fault_events.csv.
          *
-         * Текущая версия поддерживает не более одного события
-         * на один такт моделирования. Для кластерных одномоментных
-         * событий позже будет добавлен отдельный интерфейс.
+         * Несколько событий с одним cycle_index считаются истинно
+         * одновременными. Они группируются по адресу. До четырёх разных
+         * адресов могут быть переданы в memory model за один такт.
          */
-        if (fault_event_index < fault_event_count) begin
-            if (fault_event_time[fault_event_index] < cycle_index) begin
-                $display("ERROR: missed fault event at time %0d", fault_event_time[fault_event_index]);
-                error_count = error_count + 1;
-                fault_event_index = fault_event_index + 1;
-            end else if (fault_event_time[fault_event_index] == cycle_index) begin
-                tb_inject_en = 1'b1;
-                tb_inject_addr = fault_event_addr[fault_event_index][ADDR_WIDTH-1:0];
-                tb_inject_mask = fault_event_mask[fault_event_index];
+        while ((fault_event_index < fault_event_count) &&
+               (fault_event_time[fault_event_index] < cycle_index)) begin
+            $display("ERROR: missed fault event at time %0d", fault_event_time[fault_event_index]);
+            error_count = error_count + 1;
+            fault_event_index = fault_event_index + 1;
+        end
 
-                injected_event_count = injected_event_count + 1;
-                fault_event_index = fault_event_index + 1;
+        while ((fault_event_index < fault_event_count) &&
+               (fault_event_time[fault_event_index] == cycle_index)) begin
+            simultaneous_fault_addr_value = fault_event_addr[fault_event_index][ADDR_WIDTH-1:0];
+            simultaneous_fault_mask_value = fault_event_mask[fault_event_index];
+            simultaneous_fault_found_slot = -1;
 
-                if ((fault_event_index < fault_event_count) &&
-                    (fault_event_time[fault_event_index] == cycle_index)) begin
-                    $display("ERROR: multiple fault events in one cycle are not supported yet");
-                    $display("  cycle = %0d", cycle_index);
+            for (simultaneous_fault_slot_index = 0;
+                 simultaneous_fault_slot_index < simultaneous_fault_slot_count;
+                 simultaneous_fault_slot_index = simultaneous_fault_slot_index + 1) begin
+                if ((simultaneous_fault_slot_index == 0) &&
+                    tb_inject_en &&
+                    (tb_inject_addr == simultaneous_fault_addr_value[ADDR_WIDTH-1:0])) begin
+                    simultaneous_fault_found_slot = 0;
+                end else if ((simultaneous_fault_slot_index == 1) &&
+                    tb_inject1_en &&
+                    (tb_inject1_addr == simultaneous_fault_addr_value[ADDR_WIDTH-1:0])) begin
+                    simultaneous_fault_found_slot = 1;
+                end else if ((simultaneous_fault_slot_index == 2) &&
+                    tb_inject2_en &&
+                    (tb_inject2_addr == simultaneous_fault_addr_value[ADDR_WIDTH-1:0])) begin
+                    simultaneous_fault_found_slot = 2;
+                end else if ((simultaneous_fault_slot_index == 3) &&
+                    tb_inject3_en &&
+                    (tb_inject3_addr == simultaneous_fault_addr_value[ADDR_WIDTH-1:0])) begin
+                    simultaneous_fault_found_slot = 3;
+                end
+            end
+
+            if (simultaneous_fault_found_slot == 0) begin
+                tb_inject_mask = tb_inject_mask ^ simultaneous_fault_mask_value;
+            end else if (simultaneous_fault_found_slot == 1) begin
+                tb_inject1_mask = tb_inject1_mask ^ simultaneous_fault_mask_value;
+            end else if (simultaneous_fault_found_slot == 2) begin
+                tb_inject2_mask = tb_inject2_mask ^ simultaneous_fault_mask_value;
+            end else if (simultaneous_fault_found_slot == 3) begin
+                tb_inject3_mask = tb_inject3_mask ^ simultaneous_fault_mask_value;
+            end else begin
+                if (simultaneous_fault_slot_count == 0) begin
+                    tb_inject_en = 1'b1;
+                    tb_inject_addr = simultaneous_fault_addr_value[ADDR_WIDTH-1:0];
+                    tb_inject_mask = simultaneous_fault_mask_value;
+                    simultaneous_fault_slot_count = 1;
+                end else if (simultaneous_fault_slot_count == 1) begin
+                    tb_inject1_en = 1'b1;
+                    tb_inject1_addr = simultaneous_fault_addr_value[ADDR_WIDTH-1:0];
+                    tb_inject1_mask = simultaneous_fault_mask_value;
+                    simultaneous_fault_slot_count = 2;
+                end else if (simultaneous_fault_slot_count == 2) begin
+                    tb_inject2_en = 1'b1;
+                    tb_inject2_addr = simultaneous_fault_addr_value[ADDR_WIDTH-1:0];
+                    tb_inject2_mask = simultaneous_fault_mask_value;
+                    simultaneous_fault_slot_count = 3;
+                end else if (simultaneous_fault_slot_count == 3) begin
+                    tb_inject3_en = 1'b1;
+                    tb_inject3_addr = simultaneous_fault_addr_value[ADDR_WIDTH-1:0];
+                    tb_inject3_mask = simultaneous_fault_mask_value;
+                    simultaneous_fault_slot_count = 4;
+                end else begin
+                    $display("ERROR: too many simultaneous fault addresses in cycle %0d", cycle_index);
                     error_count = error_count + 1;
                 end
             end
+
+            injected_event_count = injected_event_count + 1;
+            fault_event_index = fault_event_index + 1;
         end
     end
 endtask

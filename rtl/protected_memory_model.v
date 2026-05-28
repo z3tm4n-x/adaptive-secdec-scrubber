@@ -28,7 +28,24 @@ module protected_memory_model #(
      */
     input  wire                         inject_mask_en,
     input  wire [ADDR_WIDTH-1:0]         inject_mask_addr,
-    input  wire [CODEWORD_WIDTH-1:0]     inject_mask
+    input  wire [CODEWORD_WIDTH-1:0]     inject_mask,
+
+    /*
+     * Дополнительные масочные инжекции для моделирования истинно
+     * одновременных кластеров, поражающих несколько кодовых слов
+     * за один такт моделирования.
+     */
+    input  wire                         inject_mask1_en,
+    input  wire [ADDR_WIDTH-1:0]         inject_mask1_addr,
+    input  wire [CODEWORD_WIDTH-1:0]     inject_mask1,
+
+    input  wire                         inject_mask2_en,
+    input  wire [ADDR_WIDTH-1:0]         inject_mask2_addr,
+    input  wire [CODEWORD_WIDTH-1:0]     inject_mask2,
+
+    input  wire                         inject_mask3_en,
+    input  wire [ADDR_WIDTH-1:0]         inject_mask3_addr,
+    input  wire [CODEWORD_WIDTH-1:0]     inject_mask3
 );
 
 localparam DEPTH = (1 << ADDR_WIDTH);
@@ -39,6 +56,7 @@ integer i;
 
 reg [CODEWORD_WIDTH-1:0] single_inject_mask;
 reg                       single_inject_valid;
+reg [CODEWORD_WIDTH-1:0] combined_inject_mask;
 
 initial begin
     for (i = 0; i < DEPTH; i = i + 1) begin
@@ -59,12 +77,10 @@ always @(posedge clk) begin
     /*
      * Искусственное внесение ошибок.
      *
-     * Одиночная инжекция и масочная инжекция обрабатываются в одной
-     * логике, чтобы исключить неоднозначность неблокирующих присваиваний
-     * при одновременной активности inject_en и inject_mask_en.
-     *
-     * Если обе инжекции относятся к одному адресу, маски объединяются.
-     * Если адреса разные, обе инжекции выполняются независимо.
+     * Все активные инжекции текущего такта объединяются по адресу.
+     * Это позволяет моделировать одномоментный кластер, который поражает
+     * несколько кодовых слов в один такт. Если несколько масок относятся
+     * к одному адресу, они объединяются XOR до записи в память.
      */
     single_inject_mask = {CODEWORD_WIDTH{1'b0}};
     single_inject_valid = 1'b0;
@@ -76,15 +92,31 @@ always @(posedge clk) begin
         end
     end
 
-    if (single_inject_valid && inject_mask_en && (inject_addr == inject_mask_addr)) begin
-        memory[inject_addr] <= memory[inject_addr] ^ single_inject_mask ^ inject_mask;
-    end else begin
-        if (single_inject_valid) begin
-            memory[inject_addr] <= memory[inject_addr] ^ single_inject_mask;
+    for (i = 0; i < DEPTH; i = i + 1) begin
+        combined_inject_mask = {CODEWORD_WIDTH{1'b0}};
+
+        if (single_inject_valid && (inject_addr == i[ADDR_WIDTH-1:0])) begin
+            combined_inject_mask = combined_inject_mask ^ single_inject_mask;
         end
 
-        if (inject_mask_en) begin
-            memory[inject_mask_addr] <= memory[inject_mask_addr] ^ inject_mask;
+        if (inject_mask_en && (inject_mask_addr == i[ADDR_WIDTH-1:0])) begin
+            combined_inject_mask = combined_inject_mask ^ inject_mask;
+        end
+
+        if (inject_mask1_en && (inject_mask1_addr == i[ADDR_WIDTH-1:0])) begin
+            combined_inject_mask = combined_inject_mask ^ inject_mask1;
+        end
+
+        if (inject_mask2_en && (inject_mask2_addr == i[ADDR_WIDTH-1:0])) begin
+            combined_inject_mask = combined_inject_mask ^ inject_mask2;
+        end
+
+        if (inject_mask3_en && (inject_mask3_addr == i[ADDR_WIDTH-1:0])) begin
+            combined_inject_mask = combined_inject_mask ^ inject_mask3;
+        end
+
+        if (combined_inject_mask != {CODEWORD_WIDTH{1'b0}}) begin
+            memory[i] <= memory[i] ^ combined_inject_mask;
         end
     end
 
