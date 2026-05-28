@@ -72,7 +72,7 @@ endtask
 task check_eq32;
     input [31:0] actual;
     input [31:0] expected;
-    input [255:0] name;
+    input [511:0] name;
 begin
     if (actual !== expected) begin
         $display("FAIL: %0s expected=%0d actual=%0d", name, expected, actual);
@@ -86,7 +86,7 @@ endtask
 task check_eq3;
     input [2:0] actual;
     input [2:0] expected;
-    input [255:0] name;
+    input [511:0] name;
 begin
     if (actual !== expected) begin
         $display("FAIL: %0s expected=%0d actual=%0d", name, expected, actual);
@@ -100,7 +100,7 @@ endtask
 task check_eq1;
     input actual;
     input expected;
-    input [255:0] name;
+    input [511:0] name;
 begin
     if (actual !== expected) begin
         $display("FAIL: %0s expected=%0d actual=%0d", name, expected, actual);
@@ -124,6 +124,14 @@ initial begin
 
     rst = 1'b0;
     enable = 1'b1;
+
+    /*
+     * Reset state before the first measured window.
+     */
+    check_eq1(measured_ctrl_valid, 1'b0, "valid cleared after reset");
+    check_eq1(measured_ctrl_update, 1'b0, "update cleared after reset");
+    check_eq3(measured_ctrl_level, 3'd0, "initial level after reset");
+    check_eq32(measured_window_count, 32'd0, "window count after reset");
 
     /*
      * Window 1: no errors.
@@ -166,9 +174,24 @@ initial begin
     tick();
 
     /*
-     * Window 4: large DED delta saturates at level 7.
+     * Window 4: combined corrected and DED deltas.
+     * corrected delta = 10, uncorrectable delta = 16.
+     * raw_score = 2*10 + 16 = 36 -> level 3.
      */
-    uncorrectable_error_count = 32'd115;
+    corrected_error_count = 32'd14;
+    uncorrectable_error_count = 32'd38;
+    wait_window();
+    check_eq32(measured_corrected_delta, 32'd10, "combined corrected delta 10");
+    check_eq32(measured_uncorrectable_delta, 32'd16, "combined uncorrectable delta 16");
+    check_eq32(measured_raw_score, 32'd36, "combined raw score 36");
+    check_eq3(measured_ctrl_level, 3'd3, "combined threshold level 3");
+
+    tick();
+
+    /*
+     * Window 5: large DED delta saturates at level 7.
+     */
+    uncorrectable_error_count = 32'd131;
     wait_window();
     check_eq32(measured_uncorrectable_delta, 32'd93, "uncorrectable delta 93");
     check_eq32(measured_raw_score, 32'd93, "raw score 93");
@@ -198,7 +221,8 @@ initial begin
      * at the next window boundary.
      */
     wait_window();
-    check_eq1(measured_ctrl_update, 1'b1, "update after re-enable");
+    check_eq32(measured_corrected_delta, 32'd986, "post-enable corrected delta 986");
+    check_eq32(measured_uncorrectable_delta, 32'd869, "post-enable uncorrectable delta 869");
     check_eq3(measured_ctrl_level, 3'd7, "large post-enable delta saturates");
 
     if (failures != 0) begin
