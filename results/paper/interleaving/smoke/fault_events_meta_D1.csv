@@ -1,6 +1,6 @@
 event_id,event_type,time_cycle,address,fault_mask,pair_id,pair_role,cluster_id,cluster_role,cluster_interleave_depth,cluster_injection_skew,preferred_cycle,actual_cycle,cycle_shift
-4,cluster,350,110,0208000002,,,4,group_0_of_1,1,0,350,350,0
-0,cluster,4408,130,0090000080,,,0,group_0_of_1,1,0,4408,4408,0
-3,cluster,7986,52,0400100002,,,3,group_0_of_1,1,0,7986,7986,0
-1,cluster,15380,107,0080000042,,,1,group_0_of_1,1,0,15380,15380,0
-2,cluster,45172,221,4010000001,,,2,group_0_of_1,1,0,45172,45172,0
+4,cluster,35,6,0208000002,,,4,group_0_of_1,1,0,35,35,0
+0,cluster,440,8,0090000080,,,0,group_0_of_1,1,0,440,440,0
+3,cluster,798,3,0400100002,,,3,group_0_of_1,1,0,798,798,0
+1,cluster,1538,6,0080000042,,,1,group_0_of_1,1,0,1538,1538,0
+2,cluster,4517,13,4010000001,,,2,group_0_of_1,1,0,4517,4517,0
