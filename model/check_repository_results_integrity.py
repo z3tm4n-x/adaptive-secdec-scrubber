@@ -71,6 +71,7 @@ def check_required_files(root: Path, issues: list[Issue]) -> list[dict[str, str]
         ("README.md", "root README"),
         ("REPRODUCE.md", "reproduce instructions"),
         ("Makefile", "top-level build/run entrypoint"),
+        ("doc/prior_art_measured_control.md", "measured-control prior-art boundary"),
 
         ("model/risk_core.py", "canonical risk model"),
         ("model/verify_efficiency_scale.py", "efficiency verification"),

@@ -3,7 +3,7 @@
 ## Status
 
 - Status: `PASS`
-- Checked at UTC: `2026-05-28T15:42:30+00:00`
+- Checked at UTC: `2026-05-28T15:47:06+00:00`
 - Failures: 0
 - Warnings: 6
 - Repository root: `/home/z3tm4n/adaptive_scrubbing`
@@ -15,6 +15,7 @@
 | `README.md` | root README | `ok` | 3313 |
 | `REPRODUCE.md` | reproduce instructions | `ok` | 7050 |
 | `Makefile` | top-level build/run entrypoint | `ok` | 36428 |
+| `doc/prior_art_measured_control.md` | measured-control prior-art boundary | `ok` | 11216 |
 | `model/risk_core.py` | canonical risk model | `ok` | 12607 |
 | `model/verify_efficiency_scale.py` | efficiency verification | `ok` | 11867 |
 | `model/build_measured_control_summary.py` | measured-control summary builder | `ok` | 21425 |
@@ -74,21 +75,8 @@
 ## Git status
 
 ```
-M results/paper/README.md
-?? model/check_repository_results_integrity.py
-?? results/paper/repository_integrity_check.md
-?? results/paper/true_pair_alignment/no_clusters/seed_0001/
-?? results/paper/true_pair_alignment/no_clusters/seed_0002/
-?? results/paper/true_pair_alignment/no_clusters/seed_0003/
-?? results/paper/true_pair_alignment/no_clusters/seed_0004/
-?? results/paper/true_pair_alignment/no_clusters/seed_0005/
-?? results/paper/true_pair_alignment/no_clusters/seed_0006/
-?? results/paper/true_pair_alignment/no_clusters/seed_0007/
-?? results/paper/true_pair_alignment/no_clusters/seed_0008/
-?? results/paper/true_pair_alignment/no_clusters/seed_0009/
-?? results/paper/true_pair_alignment/no_clusters/seed_0010/
-?? results/paper/true_pair_alignment/true_pair_alignment_pairs.csv
-?? results/paper/true_pair_alignment/true_pair_alignment_summary.md
+M model/check_repository_results_integrity.py
+?? doc/prior_art_measured_control.md
 ```
 
 ## Failures
