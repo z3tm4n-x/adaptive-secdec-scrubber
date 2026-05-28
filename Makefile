@@ -183,6 +183,7 @@ test_all: prepare_dirs \
 	test_memory_model \
 	test_fixed_scrub_controller \
 	test_interval_selector \
+	test_measured_control_estimator \
 	test_adaptive_scrub_controller \
 	test_adaptive_safe_mode \
 	test_adaptive_threshold_mode \
@@ -261,7 +262,7 @@ synth_interval_selector: prepare_dirs
 	yosys -s synth/interval_selector.ys > results/logs/interval_selector_synth.log
 
 test_adaptive_scrub_controller: prepare_dirs
-	iverilog -g2012 -o results/logs/adaptive_scrub_controller.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_scrub_controller.v
+	iverilog -g2012 -o results/logs/adaptive_scrub_controller.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_scrub_controller.v
 	vvp results/logs/adaptive_scrub_controller.out
 
 synth_adaptive_scrub_controller: prepare_dirs
@@ -271,15 +272,15 @@ synth_adaptive_scrub_controller_aw21: prepare_dirs
 	yosys -s synth/adaptive_scrub_controller_aw21.ys > results/logs/adaptive_scrub_controller_aw21_synth.log
 
 test_adaptive_safe_mode: prepare_dirs
-	iverilog -g2012 -o results/logs/adaptive_safe_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_safe_mode.v
+	iverilog -g2012 -o results/logs/adaptive_safe_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_safe_mode.v
 	vvp results/logs/adaptive_safe_mode.out
 
 test_adaptive_threshold_mode: prepare_dirs
-	iverilog -g2012 -o results/logs/adaptive_threshold_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_threshold_mode.v
+	iverilog -g2012 -o results/logs/adaptive_threshold_mode.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_threshold_mode.v
 	vvp results/logs/adaptive_threshold_mode.out
 
 test_adaptive_metrics: prepare_dirs
-	iverilog -g2012 -o results/logs/adaptive_metrics.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_metrics.v
+	iverilog -g2012 -o results/logs/adaptive_metrics.out rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v tb/tb_adaptive_metrics.v
 	vvp results/logs/adaptive_metrics.out
 
 gen_fault_events:
@@ -310,11 +311,11 @@ gen_fault_events:
 
 
 test_strategy_comparison: prepare_dirs gen_fault_events
-	iverilog -g2012 -Ptb_strategy_comparison.ADDR_WIDTH=$(ADDR_WIDTH) -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
+	iverilog -g2012 -Ptb_strategy_comparison.ADDR_WIDTH=$(ADDR_WIDTH) -o results/logs/strategy_comparison.out rtl/secded_32_39_encoder.v rtl/secded_32_39_decoder.v rtl/protected_memory_model.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v tb/tb_strategy_comparison.v
 	rm -f results/tables/strategy_comparison.csv
 	@if [ "$(TRACE_EXECUTION)" = "1" ]; then \
 		mkdir -p $(dir $(TRACE_OUTPUT)); \
-		echo "strategy,cycle,scrub_cycle_count,selected_interval,effective_wait_interval,last_pass_duration,current_level,threshold_state,safe_mode_active,control_age,corrected_error_count,uncorrectable_error_count,memory_read_count,memory_write_count" > $(TRACE_OUTPUT); \
+		echo "strategy,cycle,scrub_cycle_count,selected_interval,effective_wait_interval,last_pass_duration,current_level,threshold_state,safe_mode_active,control_age,corrected_error_count,uncorrectable_error_count,memory_read_count,memory_write_count,measured_ctrl_level,measured_ctrl_valid,measured_ctrl_update,measured_window_count,measured_corrected_delta,measured_uncorrectable_delta,measured_raw_score" > $(TRACE_OUTPUT); \
 	fi
 	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
 	vvp results/logs/strategy_comparison.out \

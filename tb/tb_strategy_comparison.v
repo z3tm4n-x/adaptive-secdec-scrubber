@@ -15,6 +15,7 @@ localparam MAX_CONTROL_EVENTS = 100000;
 localparam MODE_FIXED     = 2'd0;
 localparam MODE_TABLE     = 2'd1;
 localparam MODE_THRESHOLD = 2'd2;
+localparam MODE_MEASURED  = 2'd3;
 
 reg clk;
 reg rst;
@@ -111,6 +112,14 @@ wire [1:0] threshold_state;
 wire [31:0] control_age;
 wire [INTERVAL_WIDTH-1:0] effective_wait_interval;
 wire [31:0] last_pass_duration;
+
+wire [LEVEL_WIDTH-1:0] measured_ctrl_level;
+wire measured_ctrl_valid;
+wire measured_ctrl_update;
+wire [31:0] measured_window_count;
+wire [31:0] measured_corrected_delta;
+wire [31:0] measured_uncorrectable_delta;
+wire [31:0] measured_raw_score;
 
 wire [38:0] checked_corrected_codeword;
 wire [31:0] checked_data_out;
@@ -298,7 +307,15 @@ adaptive_scrub_controller #(
     .threshold_state(threshold_state),
     .control_age(control_age),
     .effective_wait_interval(effective_wait_interval),
-    .last_pass_duration(last_pass_duration)
+    .last_pass_duration(last_pass_duration),
+
+    .measured_ctrl_level(measured_ctrl_level),
+    .measured_ctrl_valid(measured_ctrl_valid),
+    .measured_ctrl_update(measured_ctrl_update),
+    .measured_window_count(measured_window_count),
+    .measured_corrected_delta(measured_corrected_delta),
+    .measured_uncorrectable_delta(measured_uncorrectable_delta),
+    .measured_raw_score(measured_raw_score)
 );
 
 initial begin
@@ -573,6 +590,11 @@ task configure_strategy;
                 mode = MODE_THRESHOLD;
             end
 
+            3: begin
+                strategy_name = "measured";
+                mode = MODE_MEASURED;
+            end
+
             default: begin
                 strategy_name = "fixed";
                 mode = MODE_FIXED;
@@ -674,33 +696,35 @@ endtask
 
 task apply_level_schedule;
     input integer cycle_index;
+    integer applied_count;
     begin
         ctrl_update = 1'b0;
+        applied_count = 0;
 
         /*
          * Управляющие уровни читаются из tb/control_levels.csv.
          * Формат строки: time_cycle,level.
+         *
+         * Несколько событий в один такт допустимы: они являются результатом
+         * квантования/сжатия управляющего ряда. В таком случае применяем
+         * последний уровень этого такта и выдаём один update pulse.
          */
-        if (control_event_index < control_event_count) begin
-            if (control_event_time[control_event_index] < cycle_index) begin
-                $display("ERROR: missed control level event at time %0d",
-                         control_event_time[control_event_index]);
-                error_count = error_count + 1;
-                control_event_index = control_event_index + 1;
-            end else if (control_event_time[control_event_index] == cycle_index) begin
-                ctrl_level = control_event_level[control_event_index][LEVEL_WIDTH-1:0];
-                ctrl_valid = 1'b1;
-                ctrl_update = 1'b1;
+        while ((control_event_index < control_event_count) &&
+               (control_event_time[control_event_index] < cycle_index)) begin
+            $display("ERROR: missed control level event at time %0d",
+                     control_event_time[control_event_index]);
+            error_count = error_count + 1;
+            control_event_index = control_event_index + 1;
+        end
 
-                control_event_index = control_event_index + 1;
+        while ((control_event_index < control_event_count) &&
+               (control_event_time[control_event_index] == cycle_index)) begin
+            ctrl_level = control_event_level[control_event_index][LEVEL_WIDTH-1:0];
+            ctrl_valid = 1'b1;
+            ctrl_update = 1'b1;
 
-                if ((control_event_index < control_event_count) &&
-                    (control_event_time[control_event_index] == cycle_index)) begin
-                    $display("ERROR: multiple control level events in one cycle are not supported");
-                    $display("  cycle = %0d", cycle_index);
-                    error_count = error_count + 1;
-                end
-            end
+            applied_count = applied_count + 1;
+            control_event_index = control_event_index + 1;
         end
     end
 endtask
@@ -798,7 +822,7 @@ task trace_execution_event;
                 end else begin
                     $fdisplay(
                         trace_file,
-                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                        "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                         strategy_name,
                         sim_cycle,
                         scrub_cycle_count,
@@ -812,7 +836,14 @@ task trace_execution_event;
                         corrected_error_count,
                         uncorrectable_error_count,
                         memory_read_count,
-                        memory_write_count
+                        memory_write_count,
+                        measured_ctrl_level,
+                        measured_ctrl_valid,
+                        measured_ctrl_update,
+                        measured_window_count,
+                        measured_corrected_delta,
+                        measured_uncorrectable_delta,
+                        measured_raw_score
                     );
 
                     $fclose(trace_file);

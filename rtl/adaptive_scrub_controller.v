@@ -2,7 +2,25 @@ module adaptive_scrub_controller #(
     parameter ADDR_WIDTH = 4,
     parameter CODEWORD_WIDTH = 39,
     parameter LEVEL_WIDTH = 3,
-    parameter INTERVAL_WIDTH = 32
+    parameter INTERVAL_WIDTH = 32,
+
+    /*
+     * Parameters of the measured-control estimator.
+     *
+     * Default values correspond to the selected dissertation calibration:
+     *   raw_score = 2 * corrected_delta + uncorrectable_delta
+     *   raw_score -> level 0..7
+     */
+    parameter MEASURED_WINDOW_CYCLES = 25000,
+    parameter MEASURED_CORRECTED_WEIGHT = 2,
+    parameter MEASURED_UNCORRECTABLE_WEIGHT = 1,
+    parameter MEASURED_THRESHOLD_LEVEL1 = 8,
+    parameter MEASURED_THRESHOLD_LEVEL2 = 22,
+    parameter MEASURED_THRESHOLD_LEVEL3 = 36,
+    parameter MEASURED_THRESHOLD_LEVEL4 = 50,
+    parameter MEASURED_THRESHOLD_LEVEL5 = 65,
+    parameter MEASURED_THRESHOLD_LEVEL6 = 79,
+    parameter MEASURED_THRESHOLD_LEVEL7 = 93
 )(
     input  wire                         clk,
     input  wire                         rst,
@@ -75,10 +93,29 @@ module adaptive_scrub_controller #(
      * в STATE_WAIT после компенсации длительности предыдущего прохода.
      */
     output wire [INTERVAL_WIDTH-1:0]     effective_wait_interval,
-    output reg  [31:0]                  last_pass_duration
+    output reg  [31:0]                  last_pass_duration,
+
+    /*
+     * Measured-control diagnostics.
+     *
+     * They are meaningful when mode == MODE_MEASURED, but are always exported
+     * to simplify tracing and closed-loop smoke tests.
+     */
+    output wire [LEVEL_WIDTH-1:0]        measured_ctrl_level,
+    output wire                         measured_ctrl_valid,
+    output wire                         measured_ctrl_update,
+    output wire [31:0]                  measured_window_count,
+    output wire [31:0]                  measured_corrected_delta,
+    output wire [31:0]                  measured_uncorrectable_delta,
+    output wire [31:0]                  measured_raw_score
 );
 
 localparam DEPTH = (1 << ADDR_WIDTH);
+
+localparam MODE_FIXED     = 2'd0;
+localparam MODE_TABLE     = 2'd1;
+localparam MODE_THRESHOLD = 2'd2;
+localparam MODE_MEASURED  = 2'd3;
 
 localparam STATE_WAIT      = 3'd0;
 localparam STATE_READ_REQ  = 3'd1;
@@ -110,6 +147,23 @@ reg completed_first_pass;
 wire [INTERVAL_WIDTH-1:0] selected_interval_nonzero;
 wire [INTERVAL_WIDTH-1:0] compensated_wait_interval;
 wire [INTERVAL_WIDTH-1:0] active_wait_interval;
+
+wire [1:0] selector_mode;
+wire [LEVEL_WIDTH-1:0] selector_ctrl_level;
+wire selector_ctrl_valid;
+wire selector_ctrl_update;
+
+assign selector_mode =
+    (mode == MODE_MEASURED) ? MODE_TABLE : mode;
+
+assign selector_ctrl_level =
+    (mode == MODE_MEASURED) ? measured_ctrl_level : ctrl_level;
+
+assign selector_ctrl_valid =
+    (mode == MODE_MEASURED) ? measured_ctrl_valid : ctrl_valid;
+
+assign selector_ctrl_update =
+    (mode == MODE_MEASURED) ? measured_ctrl_update : ctrl_update;
 
 assign selected_interval_nonzero =
     (selected_interval == {INTERVAL_WIDTH{1'b0}})
@@ -143,6 +197,39 @@ wire        decoder_double_error;
 wire        decoder_uncorrectable;
 wire [5:0]  decoder_error_position;
 
+measured_control_estimator #(
+    .LEVEL_WIDTH(LEVEL_WIDTH),
+    .COUNTER_WIDTH(32),
+    .SCORE_WIDTH(32),
+    .WINDOW_CYCLES(MEASURED_WINDOW_CYCLES),
+    .CORRECTED_WEIGHT(MEASURED_CORRECTED_WEIGHT),
+    .UNCORRECTABLE_WEIGHT(MEASURED_UNCORRECTABLE_WEIGHT),
+    .THRESHOLD_LEVEL1(MEASURED_THRESHOLD_LEVEL1),
+    .THRESHOLD_LEVEL2(MEASURED_THRESHOLD_LEVEL2),
+    .THRESHOLD_LEVEL3(MEASURED_THRESHOLD_LEVEL3),
+    .THRESHOLD_LEVEL4(MEASURED_THRESHOLD_LEVEL4),
+    .THRESHOLD_LEVEL5(MEASURED_THRESHOLD_LEVEL5),
+    .THRESHOLD_LEVEL6(MEASURED_THRESHOLD_LEVEL6),
+    .THRESHOLD_LEVEL7(MEASURED_THRESHOLD_LEVEL7),
+    .INITIAL_LEVEL(0)
+) measured_control_estimator_inst (
+    .clk(clk),
+    .rst(rst),
+    .enable(enable && (mode == MODE_MEASURED)),
+
+    .corrected_error_count(corrected_error_count),
+    .uncorrectable_error_count(uncorrectable_error_count),
+
+    .measured_ctrl_level(measured_ctrl_level),
+    .measured_ctrl_valid(measured_ctrl_valid),
+    .measured_ctrl_update(measured_ctrl_update),
+
+    .measured_window_count(measured_window_count),
+    .measured_corrected_delta(measured_corrected_delta),
+    .measured_uncorrectable_delta(measured_uncorrectable_delta),
+    .measured_raw_score(measured_raw_score)
+);
+
 interval_selector #(
     .LEVEL_WIDTH(LEVEL_WIDTH),
     .INTERVAL_WIDTH(INTERVAL_WIDTH)
@@ -151,11 +238,11 @@ interval_selector #(
     .rst(rst),
     .enable(enable),
 
-    .mode(mode),
+    .mode(selector_mode),
 
-    .ctrl_level(ctrl_level),
-    .ctrl_valid(ctrl_valid),
-    .ctrl_update(ctrl_update),
+    .ctrl_level(selector_ctrl_level),
+    .ctrl_valid(selector_ctrl_valid),
+    .ctrl_update(selector_ctrl_update),
 
     .fixed_interval(fixed_interval),
     .safe_interval(safe_interval),
