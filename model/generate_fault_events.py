@@ -603,10 +603,9 @@ def add_instant_cluster_events(
 
     D>1:
         биты кластера распределяются по нескольким кодовым словам.
-        Так как текущий Verilog-стенд поддерживает не более одного fault event
-        за такт, группы кодовых слов сериализуются по соседним тактам.
-        Физическая одномоментность сохраняется в cluster_id, а техническая
-        сериализация явно фиксируется в cluster_injection_skew.
+        Все группы одного физического кластера получают один и тот же
+        time_cycle. Одновременность затем реализуется Verilog-стендом через
+        несколько fault-injection slots за один такт.
     """
     if cluster_event_count < 0:
         raise ValueError("cluster_event_count must be non-negative")
@@ -630,6 +629,13 @@ def add_instant_cluster_events(
             total_cycles,
         )
 
+        cluster_cycle = find_free_cycle_near(
+            cluster_preferred_cycle,
+            used_cycles,
+            total_cycles,
+        )
+        used_cycles.add(cluster_cycle)
+
         base_address = rng.randrange(DEPTH)
         selected_bits = rng.sample(range(CODEWORD_WIDTH), cluster_bit_count)
 
@@ -642,32 +648,20 @@ def add_instant_cluster_events(
         group_items = sorted(grouped_masks.items())
 
         for group_order, (group_index, fault_mask) in enumerate(group_items):
-            preferred_injection_cycle = cluster_preferred_cycle + group_order
-
-            if preferred_injection_cycle >= total_cycles:
-                preferred_injection_cycle = total_cycles - 1
-
-            cycle = find_free_cycle_near(
-                preferred_injection_cycle,
-                used_cycles,
-                total_cycles,
-            )
-            used_cycles.add(cycle)
-
             address = (base_address + group_index) % DEPTH
 
-            events.append((cycle, address, fault_mask))
+            events.append((cluster_cycle, address, fault_mask))
             append_event_meta(
                 meta_events,
                 event_type="cluster",
-                time_cycle=cycle,
+                time_cycle=cluster_cycle,
                 address=address,
                 fault_mask=fault_mask,
-                preferred_cycle=preferred_injection_cycle,
+                preferred_cycle=cluster_preferred_cycle,
                 cluster_id=cluster_index,
                 cluster_role=f"group_{group_order}_of_{len(group_items)}",
                 cluster_interleave_depth=cluster_interleave_depth,
-                cluster_injection_skew=cycle - cluster_preferred_cycle,
+                cluster_injection_skew=0,
             )
 
 def upsets_weighted_events(
@@ -704,16 +698,11 @@ def upsets_weighted_events(
     if event_count < 0:
         raise ValueError("event_count must be non-negative")
 
-    cluster_rows_per_event = min(cluster_bit_count, cluster_interleave_depth)
-    total_injections = (
-        event_count
-        + 2 * paired_event_count
-        + cluster_event_count * cluster_rows_per_event
-    )
+    required_distinct_cycles = event_count + 2 * paired_event_count + cluster_event_count
 
-    if total_injections > total_cycles:
+    if required_distinct_cycles > total_cycles:
         raise ValueError(
-            f"Too many injections: {total_injections} for "
+            f"Too many scheduled event cycles: {required_distinct_cycles} for "
             f"total_cycles={total_cycles}"
         )
 
@@ -773,8 +762,6 @@ def upsets_weighted_events(
 
 def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -> None:
     previous_time = -1
-    used_times: set[int] = set()
-
     for index, (time_cycle, address, fault_mask) in enumerate(events):
         if time_cycle < 0:
             raise ValueError(f"Event {index}: negative time_cycle={time_cycle}")
@@ -791,12 +778,6 @@ def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -
                 f"({time_cycle} after {previous_time})"
             )
 
-        if time_cycle in used_times:
-            raise ValueError(
-                f"Event {index}: more than one event in cycle {time_cycle} "
-                "is not supported by the current Verilog testbench"
-            )
-
         if address < 0 or address >= DEPTH:
             raise ValueError(
                 f"Event {index}: address={address} is outside memory depth {DEPTH}"
@@ -811,7 +792,6 @@ def validate_events(events: list[FaultEvent], total_cycles: int | None = None) -
                 f"codeword width {CODEWORD_WIDTH}"
             )
 
-        used_times.add(time_cycle)
         previous_time = time_cycle
 
 
