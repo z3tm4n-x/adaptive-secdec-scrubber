@@ -756,3 +756,7 @@ clean:
 	rm -f results/logs/*.out
 	rm -f results/logs/*.vcd
 	rm -f results/logs/*.log
+
+.PHONY: dissertation_check
+dissertation_check:
+	python3 model/run_dissertation_checks.py
