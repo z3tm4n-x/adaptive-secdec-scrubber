@@ -13,7 +13,7 @@
 | 1 | `final_results_summary.md` | Главная сводка результатов, ограничений и корректных формулировок |
 | 2 | `tables/efficiency_scale_verification.md` | Проверка аналитической шкалы эффективности `ηmax = 1 + CV²` |
 | 3 | `unsaturated_control/unsaturated_control_summary.md` | Контрольная RTL-серия вне насыщения на `DEPTH=256` |
-| 4 | `measured_control/measured_control_summary.md` | Observable signal, measured-control replay и weight sweep |
+| 4 | `measured_control/measured_control_summary.md` | Observable signal, measured-control replay, weight sweep и closed-loop RTL |
 | 5 | `interleaving/interleaving_summary.md` | Перемежение D=1/2/3 и границы применимости скраббинга |
 | 6 | `true_pair_alignment/true_pair_alignment_summary.md` | Проверка накопительных пар по истинным `pair_id` |
 
@@ -52,9 +52,11 @@
 
 | Файл | Содержание |
 |---|---|
-| `measured_control/measured_control_summary.md` | Главный отчёт блока |
+| `measured_control/measured_control_summary.md` | Главный отчёт блока: offline replay calibration и closed-loop RTL |
 | `measured_control/no_clusters_weight_sweep/measured_weight_sweep_summary.md` | Sweep по весу DED-индикатора |
 | `measured_control/no_clusters_weight_sweep/measured_weight_sweep_deltas.md` | Paired-delta анализ sweep |
+| `measured_control/closed_loop_smoke/closed_loop_smoke_summary.md` | Smoke-проверка RTL `MODE_MEASURED` |
+| `measured_control/closed_loop/closed_loop_measured_summary.md` | Multi-seed серия closed-loop RTL `MODE_MEASURED` |
 | `observable_signal/no_clusters_seed1/observable_signal_summary.md` | Диагностика наблюдаемого сигнала на одном seed |
 
 ### Перемежение
@@ -94,13 +96,13 @@
 
 Например:
 
-- для measured-control используйте `measured_control/measured_control_summary.md`, а не только один seed;
+- для measured-control используйте `measured_control/measured_control_summary.md`; для closed-loop RTL дополнительно доступны `closed_loop_smoke/closed_loop_smoke_summary.md` и `closed_loop/closed_loop_measured_summary.md`;
 - для interleaving используйте `interleaving/interleaving_summary.md` и paired-delta отчёт;
 - для unsaturated-control используйте `unsaturated_control/unsaturated_control_summary.md`.
 
 ## Ограничения интерпретации
 
-1. `measured-control` является offline replay, а не полностью замкнутым RTL-контуром.
+1. Ранний `measured-control` является offline replay и используется как калибровка; дополнительно реализован closed-loop RTL-режим `MODE_MEASURED`, который формирует уровень внутри контроллера.
 2. Adaptive-стратегии вне насыщения дают компромисс busy/risk, а не безусловное превосходство.
 3. Проверка Pareto выполнена относительно выбранной fixed-сетки, а не относительно всех возможных политик.
 4. Для D>1 кластерные инжекции сериализуются по соседним тактам из-за ограничения testbench: одна fault-инжекция за такт.
