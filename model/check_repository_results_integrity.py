@@ -80,9 +80,11 @@ def check_required_files(root: Path, issues: list[Issue]) -> list[dict[str, str]
 
         ("rtl/adaptive_scrub_controller.v", "main scrub controller"),
         ("rtl/interval_selector.v", "interval selector"),
+        ("rtl/measured_control_estimator.v", "measured-control estimator"),
         ("rtl/protected_memory_model.v", "protected memory model"),
 
         ("tb/tb_strategy_comparison.v", "strategy comparison testbench"),
+        ("tb/tb_measured_control_estimator.v", "measured-control estimator testbench"),
 
         ("results/paper/README.md", "paper results navigation"),
         ("results/paper/final_results_summary.md", "final results summary"),

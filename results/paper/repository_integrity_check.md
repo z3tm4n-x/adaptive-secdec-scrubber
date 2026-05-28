@@ -3,7 +3,7 @@
 ## Status
 
 - Status: `PASS`
-- Checked at UTC: `2026-05-28T15:52:00+00:00`
+- Checked at UTC: `2026-05-28T16:00:20+00:00`
 - Failures: 0
 - Warnings: 6
 - Repository root: `/home/z3tm4n/adaptive_scrubbing`
@@ -14,7 +14,7 @@
 |---|---|---:|---:|
 | `README.md` | root README | `ok` | 3313 |
 | `REPRODUCE.md` | reproduce instructions | `ok` | 7050 |
-| `Makefile` | top-level build/run entrypoint | `ok` | 36428 |
+| `Makefile` | top-level build/run entrypoint | `ok` | 36689 |
 | `doc/prior_art_measured_control.md` | measured-control prior-art boundary | `ok` | 11216 |
 | `model/risk_core.py` | canonical risk model | `ok` | 12607 |
 | `model/verify_efficiency_scale.py` | efficiency verification | `ok` | 11867 |
@@ -22,8 +22,10 @@
 | `model/build_interleaving_summary.py` | interleaving summary builder | `ok` | 14910 |
 | `rtl/adaptive_scrub_controller.v` | main scrub controller | `ok` | 15022 |
 | `rtl/interval_selector.v` | interval selector | `ok` | 6001 |
+| `rtl/measured_control_estimator.v` | measured-control estimator | `ok` | 5192 |
 | `rtl/protected_memory_model.v` | protected memory model | `ok` | 3400 |
 | `tb/tb_strategy_comparison.v` | strategy comparison testbench | `ok` | 35010 |
+| `tb/tb_measured_control_estimator.v` | measured-control estimator testbench | `ok` | 5405 |
 | `results/paper/README.md` | paper results navigation | `ok` | 8336 |
 | `results/paper/final_results_summary.md` | final results summary | `ok` | 13508 |
 | `results/paper/tables/efficiency_scale_verification.md` | efficiency scale report | `ok` | 3165 |
@@ -77,10 +79,10 @@
 ## Git status
 
 ```
-M model/check_repository_results_integrity.py
- M model/regression_check_risk_outputs.py
-?? results/paper/tables/risk_regression_report.csv
-?? results/paper/tables/risk_regression_report.md
+M Makefile
+ M model/check_repository_results_integrity.py
+?? rtl/measured_control_estimator.v
+?? tb/tb_measured_control_estimator.v
 ```
 
 ## Failures
