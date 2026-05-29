@@ -1,0 +1,65 @@
+m,D,h_D,value_status,source,comment
+1,1,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,2,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,3,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,4,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,5,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,6,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,7,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+1,8,0.0,logical_round_robin,deterministic_logical_mapping,single-bit event is SECDED-correctable
+2,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(2/1) >= 2
+2,2,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/2) < 2
+2,3,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/3) < 2
+2,4,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/4) < 2
+2,5,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/5) < 2
+2,6,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/6) < 2
+2,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/7) < 2
+2,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(2/8) < 2
+3,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(3/1) >= 2
+3,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(3/2) >= 2
+3,3,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/3) < 2
+3,4,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/4) < 2
+3,5,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/5) < 2
+3,6,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/6) < 2
+3,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/7) < 2
+3,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(3/8) < 2
+4,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(4/1) >= 2
+4,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(4/2) >= 2
+4,3,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(4/3) >= 2
+4,4,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(4/4) < 2
+4,5,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(4/5) < 2
+4,6,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(4/6) < 2
+4,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(4/7) < 2
+4,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(4/8) < 2
+5,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(5/1) >= 2
+5,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(5/2) >= 2
+5,3,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(5/3) >= 2
+5,4,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(5/4) >= 2
+5,5,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(5/5) < 2
+5,6,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(5/6) < 2
+5,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(5/7) < 2
+5,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(5/8) < 2
+6,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(6/1) >= 2
+6,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(6/2) >= 2
+6,3,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(6/3) >= 2
+6,4,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(6/4) >= 2
+6,5,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(6/5) >= 2
+6,6,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(6/6) < 2
+6,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(6/7) < 2
+6,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(6/8) < 2
+7,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/1) >= 2
+7,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/2) >= 2
+7,3,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/3) >= 2
+7,4,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/4) >= 2
+7,5,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/5) >= 2
+7,6,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(7/6) >= 2
+7,7,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(7/7) < 2
+7,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(7/8) < 2
+8,1,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/1) >= 2
+8,2,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/2) >= 2
+8,3,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/3) >= 2
+8,4,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/4) >= 2
+8,5,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/5) >= 2
+8,6,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/6) >= 2
+8,7,1.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split leaves at least one group with >=2 bits; ceil(8/7) >= 2
+8,8,0.0,logical_round_robin,deterministic_logical_mapping,logical round-robin split puts at most one bit per codeword; ceil(8/8) < 2

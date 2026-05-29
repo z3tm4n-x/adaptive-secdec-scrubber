@@ -1,0 +1,10 @@
+technology_node,layout_or_mapping,m,D,h_D,value_status,source,figure_or_table,comment
+generic,logical_round_robin_reference,2,1,1.0,logical_round_robin,deterministic_logical_mapping,not_applicable,no interleaving: 2-bit event maps to one codeword
+generic,logical_round_robin_reference,2,2,0.0,logical_round_robin,deterministic_logical_mapping,not_applicable,ideal 1+1 split
+generic,logical_round_robin_reference,3,2,1.0,logical_round_robin,deterministic_logical_mapping,not_applicable,2+1 split leaves one double-bit codeword
+generic,logical_round_robin_reference,3,3,0.0,logical_round_robin,deterministic_logical_mapping,not_applicable,ideal 1+1+1 split
+generic,logical_round_robin_reference,4,3,1.0,logical_round_robin,deterministic_logical_mapping,not_applicable,2+1+1 split leaves one double-bit codeword
+65nm SRAM,source_required_interleaving_distance,2,2,,source_required,Baeg_2009_TNS_interleaving_distance,source_required,derive from the source failure/interleaving model or bitmap data
+65nm SRAM,source_required_interleaving_distance,3,3,,source_required,Reviriego_2010_TNS_optimal_interleaving,source_required,derive from the source failure/interleaving model or bitmap data
+domestic SRAM,source_required_layout,2,2,,source_required,Boruzdina_2014_Microelectronics_layout_multibit_upsets,source_required,Russian-language anchor for topology/layout influence on logical multiplicity
+domestic/statistical,source_required_bitmap_method,3,3,,source_required,Zebrev_Gorbunov_2015_NIMA_MCU_statistics,source_required,candidate method for extracting MCU multiplicity and mapping statistics

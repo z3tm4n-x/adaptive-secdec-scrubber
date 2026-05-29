@@ -1,0 +1,8 @@
+technology_node,radiation_condition,LET_MeV_cm2_mg,m,p_m,value_status,source,figure_or_table,comment
+65nm bulk CMOS SRAM,heavy_ion,source_required,1,,source_required,Giot_2008_TNS_65nm_SRAM,source_required,extract SBU fraction from the selected LET/ion condition
+65nm bulk CMOS SRAM,heavy_ion,source_required,2,,source_required,Giot_2008_TNS_65nm_SRAM,source_required,extract MCU2 fraction from the selected LET/ion condition
+65nm bulk CMOS SRAM,heavy_ion,source_required,3,,source_required,Giot_2008_TNS_65nm_SRAM,source_required,extract MCU3 fraction from the selected LET/ion condition
+65nm bulk CMOS SRAM,heavy_ion,source_required,4,,source_required,Giot_2008_TNS_65nm_SRAM,source_required,extract MCU4 fraction from the selected LET/ion condition
+65nm bulk CMOS SRAM,heavy_ion,source_required,5,,source_required,Giot_2008_TNS_65nm_SRAM,source_required,extract MCU>=5 fraction or split according to the source data
+65nm space SRAM,heavy_ion/proton,source_required,1,,source_required,Roche_2010_TNS_65nm_space_CMOS,source_required,candidate source for technology-specific p_m
+65nm domestic SRAM,heavy_ion,source_required,1,,source_required,Gorbunov_Zebrev_2014_TNS_65nm_space_SRAM,source_required,candidate domestic/literature anchor

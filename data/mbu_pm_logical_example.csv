@@ -1,0 +1,6 @@
+m,p_m,value_status,source,comment
+1,0.9945,illustrative,internal_model_example,single-bit physical events dominate in this soft illustrative point
+2,0.005,illustrative,internal_model_example,illustrative 2-bit MCU fraction used for criterion demonstrations
+3,0.0005,illustrative,internal_model_example,illustrative 3-bit MCU fraction used for criterion demonstrations
+4,0,illustrative,internal_model_example,not enabled in the soft illustrative point
+5,0,illustrative,internal_model_example,not enabled in the soft illustrative point
