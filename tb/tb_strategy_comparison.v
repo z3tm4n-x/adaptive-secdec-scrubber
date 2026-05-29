@@ -182,6 +182,25 @@ integer scrub_per_mille;
 integer safe_per_mille;
 integer unique_uncorrectable_word_count;
 
+/*
+ * Runtime DUE latch metrics.
+ *
+ * uncorrectable_error_count is a diagnostic detection counter: the same
+ * persistent DED word can be detected again on later scrub passes. The
+ * probability model counts the first transition of a word into an
+ * uncorrectable state. due_seen/new_due_count provide this latched runtime
+ * metric without changing controller behavior.
+ */
+reg due_seen [0:DEPTH-1];
+integer new_due_count;
+integer repeated_due_detection_count;
+integer previous_runtime_uncorrectable_error_count;
+integer due_metric_addr;
+integer due_metric_index;
+
+integer snap_new_due_count;
+integer snap_repeated_due_detection_count;
+
 integer fault_event_time [0:MAX_FAULT_EVENTS-1];
 integer fault_event_addr [0:MAX_FAULT_EVENTS-1];
 reg [CODEWORD_WIDTH-1:0] fault_event_mask [0:MAX_FAULT_EVENTS-1];
@@ -864,6 +883,35 @@ task apply_error_schedule;
     end
 endtask
 
+task reset_due_latch_metrics;
+    begin
+        new_due_count = 0;
+        repeated_due_detection_count = 0;
+        previous_runtime_uncorrectable_error_count = 0;
+
+        for (due_metric_index = 0; due_metric_index < DEPTH; due_metric_index = due_metric_index + 1) begin
+            due_seen[due_metric_index] = 1'b0;
+        end
+    end
+endtask
+
+task update_runtime_due_metrics;
+    begin
+        if (uncorrectable_error_count != previous_runtime_uncorrectable_error_count[31:0]) begin
+            due_metric_addr = ctrl_read_addr;
+
+            if (due_seen[due_metric_addr]) begin
+                repeated_due_detection_count = repeated_due_detection_count + 1;
+            end else begin
+                due_seen[due_metric_addr] = 1'b1;
+                new_due_count = new_due_count + 1;
+            end
+
+            previous_runtime_uncorrectable_error_count = uncorrectable_error_count;
+        end
+    end
+endtask
+
 task audit_final_memory;
     integer addr_index;
     begin
@@ -903,6 +951,8 @@ task capture_metrics_snapshot;
         snap_safe_mode_cycle_count = safe_mode_cycle_count;
         snap_scrub_active_cycle_count = scrub_active_cycle_count;
         snap_memory_busy_cycle_count = memory_busy_cycle_count;
+        snap_new_due_count = new_due_count;
+        snap_repeated_due_detection_count = repeated_due_detection_count;
     end
 endtask
 
@@ -975,7 +1025,7 @@ task write_results;
         end else begin
             $fdisplay(
                 csv_file,
-                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                 strategy_name,
                 snap_total_cycle_count,
                 snap_scrub_cycle_count,
@@ -984,6 +1034,8 @@ task write_results;
                 snap_corrected_error_count,
                 snap_uncorrectable_error_count,
                 unique_uncorrectable_word_count,
+                snap_new_due_count,
+                snap_repeated_due_detection_count,
                 snap_interval_switch_count,
                 snap_safe_mode_entry_count,
                 snap_safe_mode_cycle_count,
@@ -1005,6 +1057,8 @@ task write_results;
         $display("  corrected_error_count     = %0d", snap_corrected_error_count);
         $display("  uncorrectable_detections  = %0d", snap_uncorrectable_error_count);
         $display("  unique_uncorrectable_words = %0d", unique_uncorrectable_word_count);
+        $display("  new_due_count             = %0d", snap_new_due_count);
+        $display("  repeated_due_detections   = %0d", snap_repeated_due_detection_count);
         $display("  interval_switch_count     = %0d", snap_interval_switch_count);
         $display("  memory_busy_cycle_count   = %0d", snap_memory_busy_cycle_count);
         $display("  busy_per_mille            = %0d", busy_per_mille);
@@ -1025,6 +1079,8 @@ initial begin
 
     error_count = 0;
     injected_event_count = 0;
+
+    reset_due_latch_metrics();
 
     trace_execution = 0;
     trace_output_path = "results/tables/strategy_execution_trace.csv";
@@ -1094,6 +1150,7 @@ initial begin
 
         @(posedge clk);
         #1;
+        update_runtime_due_metrics();
         trace_execution_event();
         ctrl_update = 1'b0;
         tb_inject_mask = {CODEWORD_WIDTH{1'b0}};
