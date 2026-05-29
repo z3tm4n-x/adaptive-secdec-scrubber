@@ -1,0 +1,2 @@
+strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,new_due_count,repeated_due_detections,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
+measured,100000,78,20203,82,82,768,15,16,752,1,0,0,80969,20285,809,202,0

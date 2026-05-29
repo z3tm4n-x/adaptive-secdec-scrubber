@@ -1,0 +1,31 @@
+config,config_description,corrected_weight,uncorrectable_weight,window_cycles,seed,strategy_id,strategy,total_cycles,corrected,uncorrectable_detections,unique_uncorrectable_words,new_due_count,repeated_due_detections,interval_switches,scrub_active_cycles,memory_busy_cycles,busy_per_mille,busy_percent
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,1,0,fixed,100000,82,652,16,17,635,0,56457,14162,141,14.1
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,1,3,measured,100000,80,1101,17,17,1084,1,80967,20283,202,20.2
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,2,0,fixed,100000,87,459,13,15,444,0,56462,14167,141,14.1
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,2,3,measured,100000,83,780,15,17,763,1,80969,20285,202,20.2
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,3,0,fixed,100000,83,549,17,18,531,0,56458,14163,141,14.1
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,3,3,measured,100000,88,676,15,16,660,1,80975,20291,202,20.2
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,4,0,fixed,100000,82,524,15,16,508,0,56457,14162,141,14.1
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,4,3,measured,100000,82,768,15,16,752,1,80969,20285,202,20.2
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,5,0,fixed,100000,80,504,16,17,487,0,56455,14160,141,14.1
+default_2c_1d,Default dissertation calibration: raw_score = 2*Cdelta + 1*Ddelta.,2,1,25000,5,3,measured,100000,76,921,17,18,903,1,80963,20279,202,20.2
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,1,0,fixed,100000,82,652,16,17,635,0,56457,14162,141,14.1
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,1,3,measured,100000,78,741,18,18,723,3,53378,13390,133,13.3
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,2,0,fixed,100000,87,459,13,15,444,0,56462,14167,141,14.1
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,2,3,measured,100000,85,447,14,16,431,3,53385,13397,133,13.3
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,3,0,fixed,100000,83,549,17,18,531,0,56458,14163,141,14.1
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,3,3,measured,100000,88,431,15,16,415,3,57488,14424,144,14.4
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,4,0,fixed,100000,82,524,15,16,508,0,56457,14162,141,14.1
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,4,3,measured,100000,83,529,15,17,512,3,55885,14020,140,14.0
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,5,0,fixed,100000,80,504,16,17,487,0,56455,14160,141,14.1
+corrected_only_2c_0d,Ablation that removes DED detections from the estimator input.,2,0,25000,5,3,measured,100000,78,565,16,19,546,3,53378,13390,133,13.3
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,1,0,fixed,100000,82,652,16,17,635,0,56457,14162,141,14.1
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,1,3,measured,100000,80,1101,17,17,1084,1,80967,20283,202,20.2
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,2,0,fixed,100000,87,459,13,15,444,0,56462,14167,141,14.1
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,2,3,measured,100000,83,780,15,17,763,1,80969,20285,202,20.2
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,3,0,fixed,100000,83,549,17,18,531,0,56458,14163,141,14.1
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,3,3,measured,100000,88,676,15,16,660,1,80975,20291,202,20.2
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,4,0,fixed,100000,82,524,15,16,508,0,56457,14162,141,14.1
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,4,3,measured,100000,82,768,15,16,752,1,80969,20285,202,20.2
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,5,0,fixed,100000,80,504,16,17,487,0,56455,14160,141,14.1
+ded_heavy_1c_2d,Diagnostic DED-heavy estimator input.,1,2,25000,5,3,measured,100000,76,921,17,18,903,1,80963,20279,202,20.2
