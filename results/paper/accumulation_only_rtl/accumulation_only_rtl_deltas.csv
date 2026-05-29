@@ -1,0 +1,7 @@
+comparison,metric,n,delta_mean,delta_std,ci95_low,ci95_high
+interval_2400_minus_1089,corrected,10,-3.500000,3.205897,-5.487036,-1.512964
+interval_2400_minus_1089,uncorrectable_detections,10,4.000000,9.660918,-1.987899,9.987899
+interval_2400_minus_1089,new_due_count,10,0.400000,0.843274,-0.122667,0.922667
+interval_2400_minus_1089,repeated_due_detections,10,3.600000,8.934328,-1.937554,9.137554
+interval_2400_minus_1089,unique_uncorrectable_words,10,0.400000,0.843274,-0.122667,0.922667
+interval_2400_minus_1089,busy_per_mille,10,-128.000000,0.000000,-128.000000,-128.000000

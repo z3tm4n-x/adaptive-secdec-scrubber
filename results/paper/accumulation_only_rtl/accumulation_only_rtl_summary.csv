@@ -1,0 +1,3 @@
+interleave_depth,fixed_interval,runs,busy_percent_mean,busy_percent_std,corrected_mean,corrected_std,uncorrectable_detections_mean,uncorrectable_detections_std,new_due_count_mean,new_due_count_std,repeated_due_detections_mean,repeated_due_detections_std,unique_uncorrectable_words_mean,unique_uncorrectable_words_std
+3,1089,10,23.100000,0.000000,59.700000,0.948683,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+3,2400,10,10.300000,0.000000,56.200000,2.973961,4.000000,9.660918,0.400000,0.843274,3.600000,8.934328,0.400000,0.843274
