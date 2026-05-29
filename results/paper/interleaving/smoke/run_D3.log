@@ -1,0 +1,23 @@
+Total run cycles: 5000
+Fixed interval: 80
+Safe interval: 5
+Level intervals: L0=100 L1=80 L2=60 L3=40 L4=25 L5=15 L6=10 L7=5
+Threshold levels: low_to_medium=3 medium_to_low=1 medium_to_high=6 high_to_medium=4
+Threshold intervals: low=100 medium=25 high=8
+Loaded fault events: 15
+Loaded control level events: 44
+STRATEGY RESULT: fixed
+  total_cycle_count         = 5000
+  scrub_cycle_count         = 62
+  memory_read_count         = 998
+  memory_write_count        = 15
+  corrected_error_count     = 15
+  uncorrectable_detections  = 0
+  unique_uncorrectable_words = 0
+  new_due_count             = 0
+  repeated_due_detections   = 0
+  interval_switch_count     = 0
+  memory_busy_cycle_count   = 1013
+  busy_per_mille            = 202
+Strategy comparison run passed for strategy fixed.
+tb/tb_strategy_comparison.v:1205: $finish called at 50376000 (1ps)

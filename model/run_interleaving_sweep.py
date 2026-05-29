@@ -28,6 +28,8 @@ class RunRow:
     corrected: int
     uncorrectable_detections: int
     unique_uncorrectable_words: int
+    new_due_count: int
+    repeated_due_detections: int
     interval_switches: int
     memory_busy_cycles: int
     busy_per_mille: int
@@ -74,7 +76,8 @@ def write_strategy_header(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "strategy,total_cycles,scrub_cycles,reads,writes,corrected,"
-        "uncorrectable_detections,unique_uncorrectable_words,interval_switches,"
+        "uncorrectable_detections,unique_uncorrectable_words,new_due_count,"
+        "repeated_due_detections,interval_switches,"
         "safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,"
         "scrub_per_mille,busy_per_mille,safe_per_mille\n",
         encoding="utf-8",
@@ -144,6 +147,8 @@ def run_strategy(args: argparse.Namespace, compiled_out: Path, interval: int, ru
         corrected=int(row["corrected"]),
         uncorrectable_detections=int(row["uncorrectable_detections"]),
         unique_uncorrectable_words=int(row["unique_uncorrectable_words"]),
+        new_due_count=int(row["new_due_count"]),
+        repeated_due_detections=int(row["repeated_due_detections"]),
         interval_switches=int(row["interval_switches"]),
         memory_busy_cycles=int(row["memory_busy_cycles"]),
         busy_per_mille=int(row["busy_per_mille"]),
@@ -183,6 +188,8 @@ def write_runs_csv(path: Path, rows: list[RunRow]) -> None:
         "corrected",
         "uncorrectable_detections",
         "unique_uncorrectable_words",
+        "new_due_count",
+        "repeated_due_detections",
         "interval_switches",
         "memory_busy_cycles",
         "busy_per_mille",
@@ -204,6 +211,8 @@ def write_runs_csv(path: Path, rows: list[RunRow]) -> None:
                 "corrected": r.corrected,
                 "uncorrectable_detections": r.uncorrectable_detections,
                 "unique_uncorrectable_words": r.unique_uncorrectable_words,
+                "new_due_count": r.new_due_count,
+                "repeated_due_detections": r.repeated_due_detections,
                 "interval_switches": r.interval_switches,
                 "memory_busy_cycles": r.memory_busy_cycles,
                 "busy_per_mille": r.busy_per_mille,
@@ -230,6 +239,10 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
         "uncorrectable_detections_std",
         "unique_uncorrectable_words_mean",
         "unique_uncorrectable_words_std",
+        "new_due_count_mean",
+        "new_due_count_std",
+        "repeated_due_detections_mean",
+        "repeated_due_detections_std",
     ]
 
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -242,6 +255,8 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
             corr_m, corr_s = mean_std([r.corrected for r in rs])
             ded_m, ded_s = mean_std([r.uncorrectable_detections for r in rs])
             unique_m, unique_s = mean_std([r.unique_uncorrectable_words for r in rs])
+            new_due_m, new_due_s = mean_std([r.new_due_count for r in rs])
+            repeated_m, repeated_s = mean_std([r.repeated_due_detections for r in rs])
             w.writerow({
                 "interleave_depth": depth,
                 "fixed_interval": interval,
@@ -256,6 +271,10 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
                 "uncorrectable_detections_std": f"{ded_s:.6f}",
                 "unique_uncorrectable_words_mean": f"{unique_m:.6f}",
                 "unique_uncorrectable_words_std": f"{unique_s:.6f}",
+                "new_due_count_mean": f"{new_due_m:.6f}",
+                "new_due_count_std": f"{new_due_s:.6f}",
+                "repeated_due_detections_mean": f"{repeated_m:.6f}",
+                "repeated_due_detections_std": f"{repeated_s:.6f}",
             })
 
 
@@ -289,6 +308,8 @@ def write_deltas_csv(path: Path, rows: list[RunRow], intervals: list[int]) -> No
         "corrected",
         "uncorrectable_detections",
         "unique_uncorrectable_words",
+        "new_due_count",
+        "repeated_due_detections",
     ]
 
     with path.open("w", newline="", encoding="utf-8") as f:

@@ -1,0 +1,46 @@
+python3 model/generate_fault_events.py \
+	--scenario upsets \
+	--input data/upsets.xlsx \
+	--output tb/fault_events.csv \
+	--control-output tb/control_levels.csv \
+	--meta-output /home/z3tm4n/adaptive_scrubbing/results/paper/interleaving/interval_sweep/D1/interval_2021/seed_003/fault_events_meta.csv \
+	--shift-summary-output /home/z3tm4n/adaptive_scrubbing/results/paper/interleaving/interval_sweep/D1/interval_2021/seed_003/event_shift_summary.md \
+	--start-index 0 \
+	--window-size 43824 \
+	--total-cycles 50000 \
+	--addr-width 8 \
+	--event-count 0 \
+	--paired-event-count 0 \
+	--pair-gap-min 10 \
+	--pair-gap-max 80 \
+	--cluster-event-count 20 \
+	--cluster-bit-count 3 \
+	--cluster-interleave-depth 1 \
+	--seed 3 \
+	--control-quantization linear_max \
+	--control-source quantization \
+	--control-delay-points 0 \
+	--control-policy-schedule results/paper/tables/risk_policy_schedule.csv \
+	--control-policy-level-map-output results/tables/control_policy_level_map.csv
+Generated fault events: tb/fault_events.csv
+Generated control levels: tb/control_levels.csv
+Generated event metadata: /home/z3tm4n/adaptive_scrubbing/results/paper/interleaving/interval_sweep/D1/interval_2021/seed_003/fault_events_meta.csv
+Generated event shift summary: /home/z3tm4n/adaptive_scrubbing/results/paper/interleaving/interval_sweep/D1/interval_2021/seed_003/event_shift_summary.md
+Control level changes: 44
+Generated 20 fault injections
+Scenario: upsets
+Paired events: 0
+Addresses with repeated injections: 0
+Input: data/upsets.xlsx
+Start index: 0
+Window size: 43824
+Total cycles: 50000
+Single events: 0
+Paired events: 0
+Cluster events: 20
+Cluster bit count: 3
+Seed: 3
+Control source: quantization
+Control delay points: 0
+Control quantization: linear_max
+Control percentiles: 0.5,0.7,0.85,0.93,0.97,0.99,0.997
