@@ -1,0 +1,5 @@
+policy,description,trials,g_D,analytic_E_inst,analytic_E_acc,analytic_E_total,empirical_mean_total,empirical_mean_inst,empirical_mean_acc,empirical_std_total,ci95_low_total,ci95_high_total,rel_error_total_percent,within_95ci
+fixed_3600_g0,"Fixed one-hour scrub interval, accumulated risk only.",300,0,0,3.87794237021,3.87794237021,3.92666666667,0,3.92666666667,1.84552850799,3.71782545601,4.13550787732,1.25644715164,yes
+fixed_600_g0,"Fixed ten-minute scrub interval, accumulated risk only.",300,0,0,0.682396422118,0.682396422118,0.69,0,0.69,0.789076764623,0.600707558237,0.779292441763,1.11424644606,yes
+adaptive_quantile_g0,"Simple quantile adaptive interval schedule, accumulated risk only.",300,0,0,0.463726252216,0.463726252216,0.49,0,0.49,0.729158584125,0.407487938654,0.572512061346,5.66578830911,yes
+adaptive_quantile_gpos,Same adaptive schedule with a nonzero instant-MBU floor.,300,1e-06,0.309956953914,0.463725325048,0.773682278962,0.716666666667,0.313333333333,0.403333333333,0.882601556336,0.616790898424,0.81654243491,-7.36938325272,yes
