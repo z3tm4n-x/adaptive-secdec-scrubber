@@ -104,22 +104,22 @@ TEXT_MUST_CONTAIN = {
         "mbu_interleaving_criterion_examples.md",
         "risk_sensitivity_summary.md",
         "closed_loop_measured_summary.md",
-
         "run_theory_consistency_checks.py",
         "run_risk_budget_handoff.py",
         "run_accumulation_only_rtl_series.py",
         "run_measured_weight_sweep.py",
-        "new_due_count",    ],
+        "new_due_count",
+    ],
     "results/paper/measured_control/measured_control_summary.md": [
         "closed-loop RTL",
         "MODE_MEASURED",
         "offline replay",
         "unique DUE",
-
         "Measured-control status: demonstration, not a net resource win.",
         "runtime first-arrival",
         "post-run audit",
-        "not a net resource win",    ],
+        "not a net resource win",
+    ],
     "results/paper/final_results_summary.md": [
         "closed-loop",
         "MODE_MEASURED",
@@ -128,21 +128,20 @@ TEXT_MUST_CONTAIN = {
         "Current interleaving note",
         "cluster_injection_skew = 0",
         "Measured-control status: demonstration",
-
         "Theory-aligned repository update",
         "run_risk_budget_handoff.py",
         "new_due_count",
         "measured-control не следует описывать как net resource win",
         "g_D = 0",
-        "measured-control net win",    ],
+    ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
         "cluster_injection_skew = 0",
         "Частичное перемежение D=2",
-
         "new_due_count",
         "repeated DED",
-        "diagnostic counter",    ],
+        "diagnostic counter",
+    ],
     "results/paper/tables/risk_sensitivity_summary.md": [
         "1 + CV",
         "discrete_gain_vs_fixed",
@@ -154,10 +153,46 @@ TEXT_MUST_CONTAIN = {
         "g_D <= E* / N_events",
         "subbudget_3bit_clusters",
         "positive residual budget",
-
         "Suppression requirements",
-        "h_m^(D) <= g_crit / p_m",    ],
+        "h_m^(D) <= g_crit / p_m",
+    ],
+    "doc/mbu_parameter_sources.md": [
+        "logical_round_robin",
+        "illustrative",
+        "source_required",
+        "Giot",
+        "Baeg",
+        "mu = 1",
+    ],
+    "results/paper/theory_consistency/theory_consistency_summary.md": [
+        "exact vs quadratic",
+        "Mission-level instant-risk floor",
+        "g_D = 0",
+    ],
+    "results/paper/theory_consistency/poisson_accumulation_validation.md": [
+        "Poisson accumulation validation",
+        "within CI",
+        "device-level radiation validation",
+    ],
+    "results/paper/risk_budget_handoff/risk_budget_handoff_summary.md": [
+        "E_inst = N_events * g_D",
+        "E_residual = E* - E_inst",
+        "policy_budget_slack",
+        "budget chain",
+    ],
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md": [
+        "g_D = 0",
+        "new_due_count",
+        "not a device-level radiation validation",
+    ],
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md": [
+        "Measured-control status: demonstration, not a net resource win.",
+        "new_due_count",
+        "runtime first-arrival",
+        "post-run memory audit",
+    ],
 }
+
 
 
 TEXT_MUST_NOT_CONTAIN = {
@@ -181,6 +216,7 @@ TEXT_MUST_NOT_CONTAIN = {
         "measured-control net win",
     ],
 }
+
 
 
 PYTHON_SCRIPTS = [

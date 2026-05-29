@@ -1,14 +1,14 @@
 # Dissertation repository check
 
-- Total checks: 154
-- Passed: 153
+- Total checks: 176
+- Passed: 175
 - Failed: 1
 
 ## Failed checks
 
 | check | details |
 |---|---|
-| `text_contains:results/paper/final_results_summary.md:measured-control net win` | not found |
+| `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:exact vs quadratic` | not found |
 
 ## Passed checks
 
@@ -137,6 +137,28 @@
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:positive residual budget` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:Suppression requirements` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:h_m^(D) <= g_crit / p_m` | found |
+| `text_contains:doc/mbu_parameter_sources.md:logical_round_robin` | found |
+| `text_contains:doc/mbu_parameter_sources.md:illustrative` | found |
+| `text_contains:doc/mbu_parameter_sources.md:source_required` | found |
+| `text_contains:doc/mbu_parameter_sources.md:Giot` | found |
+| `text_contains:doc/mbu_parameter_sources.md:Baeg` | found |
+| `text_contains:doc/mbu_parameter_sources.md:mu = 1` | found |
+| `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:Mission-level instant-risk floor` | found |
+| `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:g_D = 0` | found |
+| `text_contains:results/paper/theory_consistency/poisson_accumulation_validation.md:Poisson accumulation validation` | found |
+| `text_contains:results/paper/theory_consistency/poisson_accumulation_validation.md:within CI` | found |
+| `text_contains:results/paper/theory_consistency/poisson_accumulation_validation.md:device-level radiation validation` | found |
+| `text_contains:results/paper/risk_budget_handoff/risk_budget_handoff_summary.md:E_inst = N_events * g_D` | found |
+| `text_contains:results/paper/risk_budget_handoff/risk_budget_handoff_summary.md:E_residual = E* - E_inst` | found |
+| `text_contains:results/paper/risk_budget_handoff/risk_budget_handoff_summary.md:policy_budget_slack` | found |
+| `text_contains:results/paper/risk_budget_handoff/risk_budget_handoff_summary.md:budget chain` | found |
+| `text_contains:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md:g_D = 0` | found |
+| `text_contains:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md:new_due_count` | found |
+| `text_contains:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md:not a device-level radiation validation` | found |
+| `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:Measured-control status: demonstration, not a net resource win.` | found |
+| `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:new_due_count` | found |
+| `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:runtime first-arrival` | found |
+| `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:post-run memory audit` | found |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:Техническое ограничение текущего Verilog-стенда` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:физически одномоментный кластер сериализуется` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:по соседним тактам` | absent |
