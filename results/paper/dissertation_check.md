@@ -1,14 +1,12 @@
 # Dissertation repository check
 
 - Total checks: 176
-- Passed: 175
-- Failed: 1
+- Passed: 176
+- Failed: 0
 
 ## Failed checks
 
-| check | details |
-|---|---|
-| `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:exact vs quadratic` | not found |
+No failed checks.
 
 ## Passed checks
 
@@ -143,6 +141,7 @@
 | `text_contains:doc/mbu_parameter_sources.md:Giot` | found |
 | `text_contains:doc/mbu_parameter_sources.md:Baeg` | found |
 | `text_contains:doc/mbu_parameter_sources.md:mu = 1` | found |
+| `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:Exact vs quadratic` | found |
 | `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:Mission-level instant-risk floor` | found |
 | `text_contains:results/paper/theory_consistency/theory_consistency_summary.md:g_D = 0` | found |
 | `text_contains:results/paper/theory_consistency/poisson_accumulation_validation.md:Poisson accumulation validation` | found |

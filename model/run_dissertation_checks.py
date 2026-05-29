@@ -165,7 +165,7 @@ TEXT_MUST_CONTAIN = {
         "mu = 1",
     ],
     "results/paper/theory_consistency/theory_consistency_summary.md": [
-        "exact vs quadratic",
+        "Exact vs quadratic",
         "Mission-level instant-risk floor",
         "g_D = 0",
     ],
