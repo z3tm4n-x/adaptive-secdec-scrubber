@@ -48,6 +48,32 @@ REQUIRED_FILES = [
     "results/paper/tables/risk_sensitivity.csv",
     "results/paper/tables/mbu_interleaving_criterion_examples.md",
     "results/paper/tables/mbu_interleaving_criterion_examples.csv",
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_deltas.csv",
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_runs.csv",
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.csv",
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md",
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_deltas.csv",
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_runs.csv",
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.csv",
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md",
+    "results/paper/risk_budget_handoff/risk_budget_handoff_cases.csv",
+    "results/paper/risk_budget_handoff/risk_budget_handoff_summary.md",
+    "results/paper/tables/mbu_suppression_requirements.csv",
+    "results/paper/tables/mbu_suppression_requirements.md",
+    "results/paper/theory_consistency/poisson_accumulation_validation.csv",
+    "results/paper/theory_consistency/poisson_accumulation_validation.md",
+    "results/paper/theory_consistency/theory_consistency.csv",
+    "results/paper/theory_consistency/theory_consistency_summary.md",
+    "model/run_measured_weight_sweep.py",
+    "model/run_accumulation_only_rtl_series.py",
+    "model/run_risk_budget_handoff.py",
+    "model/run_poisson_accumulation_validation.py",
+    "model/run_theory_consistency_checks.py",
+    "data/mbu_hmd_literature_template.csv",
+    "data/mbu_pm_literature_template.csv",
+    "data/mbu_hmd_logical_round_robin.csv",
+    "data/mbu_pm_logical_example.csv",
+    "doc/mbu_parameter_sources.md",
 ]
 
 
@@ -59,6 +85,16 @@ CSV_MIN_ROWS = {
     "results/paper/tables/risk_sensitivity.csv": 19,
     "results/paper/tables/mbu_interleaving_criterion_examples.csv": 24,
     "results/paper/tables/efficiency_scale_verification.csv": 5,
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_deltas.csv": 18,
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.csv": 6,
+    "results/paper/measured_control/weight_sweep/measured_weight_sweep_runs.csv": 30,
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_deltas.csv": 6,
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.csv": 2,
+    "results/paper/accumulation_only_rtl/accumulation_only_rtl_runs.csv": 20,
+    "results/paper/risk_budget_handoff/risk_budget_handoff_cases.csv": 10,
+    "results/paper/tables/mbu_suppression_requirements.csv": 20,
+    "results/paper/theory_consistency/poisson_accumulation_validation.csv": 4,
+    "results/paper/theory_consistency/theory_consistency.csv": 31,
 }
 
 
@@ -68,13 +104,22 @@ TEXT_MUST_CONTAIN = {
         "mbu_interleaving_criterion_examples.md",
         "risk_sensitivity_summary.md",
         "closed_loop_measured_summary.md",
-    ],
+
+        "run_theory_consistency_checks.py",
+        "run_risk_budget_handoff.py",
+        "run_accumulation_only_rtl_series.py",
+        "run_measured_weight_sweep.py",
+        "new_due_count",    ],
     "results/paper/measured_control/measured_control_summary.md": [
         "closed-loop RTL",
         "MODE_MEASURED",
         "offline replay",
         "unique DUE",
-    ],
+
+        "Measured-control status: demonstration, not a net resource win.",
+        "runtime first-arrival",
+        "post-run audit",
+        "not a net resource win",    ],
     "results/paper/final_results_summary.md": [
         "closed-loop",
         "MODE_MEASURED",
@@ -83,12 +128,21 @@ TEXT_MUST_CONTAIN = {
         "Current interleaving note",
         "cluster_injection_skew = 0",
         "Measured-control status: demonstration",
-    ],
+
+        "Theory-aligned repository update",
+        "run_risk_budget_handoff.py",
+        "new_due_count",
+        "measured-control не следует описывать как net resource win",
+        "g_D = 0",
+        "measured-control net win",    ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
         "cluster_injection_skew = 0",
         "Частичное перемежение D=2",
-    ],
+
+        "new_due_count",
+        "repeated DED",
+        "diagnostic counter",    ],
     "results/paper/tables/risk_sensitivity_summary.md": [
         "1 + CV",
         "discrete_gain_vs_fixed",
@@ -100,7 +154,9 @@ TEXT_MUST_CONTAIN = {
         "g_D <= E* / N_events",
         "subbudget_3bit_clusters",
         "positive residual budget",
-    ],
+
+        "Suppression requirements",
+        "h_m^(D) <= g_crit / p_m",    ],
 }
 
 
@@ -121,6 +177,8 @@ TEXT_MUST_NOT_CONTAIN = {
         "+6.400 [4.399; 8.401]",
         "статистически значимый рост unique",
         "Это не полностью аппаратно замкнутый контур",
+        "measured-control is a net win",
+        "measured-control net win",
     ],
 }
 
@@ -271,12 +329,27 @@ def check_no_debug_artifacts() -> list[CheckResult]:
             detail += f" ... and {len(matches) - 20} more"
         results.append(CheckResult(f"debug_artifacts:{pattern}", ok, detail))
 
-    old_seed_dirs = sorted((REPO_ROOT / "results/paper/interleaving/interval_sweep").glob("D*/interval_*/seed_*"))
-    ok = len(old_seed_dirs) == 0
-    detail = "none" if ok else ", ".join(rel(p) for p in old_seed_dirs[:20])
-    if len(old_seed_dirs) > 20:
-        detail += f" ... and {len(old_seed_dirs) - 20} more"
-    results.append(CheckResult("old_interleaving_seed_dirs", ok, detail))
+    interleaving_seed_dirs = sorted((REPO_ROOT / "results/paper/interleaving/interval_sweep").glob("D*/interval_*/seed_*"))
+    stale_tables: list[Path] = []
+
+    for seed_dir in interleaving_seed_dirs:
+        table = seed_dir / "strategy_comparison.csv"
+        if table.exists():
+            header = table.read_text(encoding="utf-8").splitlines()[0]
+            if "new_due_count" not in header or "repeated_due_detections" not in header:
+                stale_tables.append(table)
+
+    ok = len(stale_tables) == 0
+    if not interleaving_seed_dirs:
+        detail = "no per-seed directories present; aggregated tables are authoritative"
+    elif ok:
+        detail = f"per-seed dirs present and latched DUE columns verified: {len(interleaving_seed_dirs)}"
+    else:
+        detail = ", ".join(rel(p) for p in stale_tables[:20])
+        if len(stale_tables) > 20:
+            detail += f" ... and {len(stale_tables) - 20} more"
+
+    results.append(CheckResult("interleaving_seed_dirs_latched_due_columns", ok, detail))
 
     return results
 

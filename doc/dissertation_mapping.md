@@ -26,9 +26,13 @@ The dissertation is organized around the following chain:
 
 | Artifact | Use in dissertation | Status | Limitation |
 |---|---|---|---|
-| `model/evaluate_mbu_interleaving_criterion.py` | Generates numerical examples for the go/no-go criterion | cite as reproducibility artifact | Example probabilities are illustrative |
+| `model/evaluate_mbu_interleaving_criterion.py` | Generates numerical examples for the go/no-go criterion and now consumes explicit `p_m/h_m` tables | cite as reproducibility artifact | Example probabilities are illustrative unless source-backed |
+| `doc/mbu_parameter_sources.md` | Defines status and literature anchors for `p_m` and `h_m^(D)` | cite in Chapter 2 parameter discussion | Templates are not measured values until marked source-backed |
+| `data/mbu_pm_literature_template.csv` | Template for literature-backed physical multiplicity values | support | Empty/source_required rows are placeholders |
+| `data/mbu_hmd_literature_template.csv` | Template for literature-backed mapping probabilities | support | `h_m^(D)` depends on layout and codeword mapping |
 | `results/paper/tables/mbu_interleaving_criterion_examples.md` | Main table for g_D, E_inst, residual risk, pass/fail | cite in Chapter 2 | Replace illustrative p_m by literature-supported h_m^(D) in final dissertation text |
 | `results/paper/tables/mbu_interleaving_criterion_examples.csv` | Machine-readable criterion table | cite for exact values | Same illustrative-input limitation |
+| `results/paper/tables/mbu_suppression_requirements.md` | Shows required `h_m <= g_crit / p_m` bounds | cite for applicability threshold intuition | Per-class diagnostic bound; full criterion is summed `g_D` |
 | `model/generate_fault_events.py` | Generates simultaneous MBU/interleaving events | cite as validation support | Not a physical radiation transport model |
 | `rtl/protected_memory_model.v` | Memory/ECC model receiving simultaneous injection slots | use in Chapter 4 validation | Behavioral model, not vendor SRAM macro |
 | `tb/tb_strategy_comparison.v` | Fault-injection RTL testbench, including simultaneous event grouping | use in Chapters 2 and 4 | Simulation environment, not flight qualification |
@@ -45,6 +49,10 @@ The dissertation is organized around the following chain:
 | Artifact | Use in dissertation | Status | Limitation |
 |---|---|---|---|
 | `model/risk_core.py` | Core analytical risk functions, eta scale, tau selection | cite as implementation of formulas | Assumes quadratic rare-event accumulated model |
+| `model/run_theory_consistency_checks.py` | Checks exact-vs-quadratic, slope 1/2 behavior, and instant-risk floor | cite as internal consistency evidence | Not device validation |
+| `model/run_poisson_accumulation_validation.py` | Monte Carlo validation of accumulated Poisson DUE expectation | cite as model validation support | Uses synthetic assumptions |
+| `results/paper/theory_consistency/theory_consistency_summary.md` | Main theory consistency report | cite in Chapter 3 | Confirms formulas, not hardware |
+| `results/paper/theory_consistency/poisson_accumulation_validation.md` | Poisson accumulation validation report | cite in Chapter 3 | Monte Carlo only |
 | `model/verify_efficiency_scale.py` | Verifies eta = 1 + CV^2 numerically | cite | RTL not involved |
 | `results/paper/tables/efficiency_scale_verification.md` | Main eta verification report | cite in Chapter 3 | Valid under stated assumptions only |
 | `results/paper/tables/efficiency_scale_verification.csv` | Machine-readable eta verification table | cite for exact numbers | Same assumptions |
@@ -52,6 +60,8 @@ The dissertation is organized around the following chain:
 | `results/paper/tables/risk_sensitivity_summary.md` | Main risk sensitivity report | cite in Chapter 3 | Discrete grid effects must be explained separately |
 | `results/paper/tables/risk_sensitivity.csv` | Machine-readable sensitivity table | cite for exact values | Some cases saturate at tau_max |
 | `results/paper/unsaturated_control/unsaturated_control_summary.md` | Shows unsaturated/non-continuous scrubbing regime | cite as support for practical parameter choice | Do not confuse with final closed-loop measured mode |
+| `model/run_risk_budget_handoff.py` | Thin orchestrator from `E_residual` to scrub policy | cite as project procedure implementation | Reuses existing policy builder |
+| `results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` | Shows criterion-to-policy residual budget chain | cite in Chapter 3/4 bridge | Policy artifact, not RTL by itself |
 
 ## Chapter 4. RTL realization and risk-resource verification
 
@@ -72,8 +82,12 @@ The dissertation is organized around the following chain:
 | `REPRODUCE.md` | Reproduction instructions | support | Not a scientific claim |
 | `results/paper/measured_control/closed_loop_smoke/closed_loop_smoke_summary.md` | Smoke proof that MODE_MEASURED closes in RTL | cite as integration check | Smoke only |
 | `results/paper/measured_control/closed_loop/closed_loop_measured_summary.md` | Multi-seed closed-loop measured RTL result | cite in Chapter 4/5 | Current measured policy is conservative, not optimized |
-| `results/paper/measured_control/closed_loop/closed_loop_measured_series.csv` | Machine-readable closed-loop results | cite for exact values | Use unique DUE as risk proxy, not repeated DED detections |
-| `results/paper/interleaving/interleaving_summary.md` | Also supports RTL validation of simultaneous MBU injection | cite | Simplified MBU generator |
+| `results/paper/measured_control/closed_loop/closed_loop_measured_series.csv` | Machine-readable closed-loop results | cite for exact values | Use latched/new DUE and final unique DUE, not repeated DED alone |
+| `model/run_measured_weight_sweep.py` | Closed-loop measured-control weight sweep on latch metrics | cite as engineering sweep | Demonstration, not net resource win |
+| `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` | Main theory-aligned measured-control sweep | cite in Chapter 5 with caution | Not primary risk result |
+| `results/paper/interleaving/interleaving_summary.md` | Also supports RTL validation of simultaneous MBU injection with latched DUE metrics | cite | Simplified MBU generator |
+| `model/run_accumulation_only_rtl_series.py` | RTL series for `g_D = 0` accumulation-only branch | cite as sanity check | Small RTL series, not physical qualification |
+| `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` | Main accumulation-only RTL report | cite in Chapter 4 | Remaining DUE counts are small; CI must be respected |
 
 ## Chapter 5. Closed-loop measured control and safe-envelope interpretation
 
@@ -95,7 +109,7 @@ The dissertation is organized around the following chain:
 | Any result that says D>1 clusters were serialized over adjacent cycles | Obsolete after simultaneous injection-slot implementation |
 | Raw VCD files | Debug-only artifacts, should not be cited |
 | Temporary `results/logs/*.out` simulation binaries | Reproducible build products, not scientific outputs |
-| `uncorrectable_detections` alone as risk metric | It includes repeated detections of already-DUE words; use `unique_uncorrectable_words` as the primary risk proxy |
+| `uncorrectable_detections` alone as risk metric | It includes repeated detections of already-DUE words; use `new_due_count` and final `unique_uncorrectable_words` as risk proxies |
 | Threshold scrub-rate mode as novelty | Covered by prior art; use only as comparison baseline |
 | Measured-control offline replay as closed-loop proof | Offline replay is calibration; closed-loop proof is in `MODE_MEASURED` runs |
 
@@ -108,7 +122,7 @@ The dissertation is organized around the following chain:
 | For the accumulated model, ideal adaptive gain equals 1 + CV^2 | `efficiency_scale_verification.md`, `risk_sensitivity_summary.md` |
 | Discrete period grids and hardware constraints reduce the ideal gain | `risk_sensitivity_summary.md`, `unsaturated_control_summary.md`, RTL strategy comparisons |
 | Sufficient interleaving can return the problem to accumulated-risk control | `interleaving_summary.md`, `interleaving_interval_sweep_deltas.csv` |
-| Closed-loop measured control is implementable in RTL but currently conservative | `measured_control_summary.md`, `closed_loop_measured_summary.md` |
+| Closed-loop measured control is implementable in RTL but currently demonstration-only, not a net resource win | `measured_control_summary.md`, `measured_weight_sweep_summary.md`, `closed_loop_measured_summary.md` |
 | RTL work supports specialty 2.3.2 by showing controller-level realization and resource/risk tradeoff | `adaptive_scrub_controller.v`, `tb_strategy_comparison.v`, closed-loop and interleaving summaries |
 
 ## Final writing cautions
@@ -121,3 +135,5 @@ The dissertation is organized around the following chain:
 6. Do not call D=3 slowest-fastest unique-DUE growth statistically significant in the latest interleaving sweep; the CI includes zero.
 7. State that MBU probabilities in the criterion examples are illustrative unless replaced by literature-supported technology values.
 8. Keep the primary novelty on the risk-limited chain: applicability criterion, eta scale, and hardware-aware project procedure.
+9. Use `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
+10. Do not describe measured-control weight sweep as a net win; describe it as closed-loop RTL feasibility and telemetry.

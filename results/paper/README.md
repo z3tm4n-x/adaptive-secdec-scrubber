@@ -115,3 +115,16 @@
 `REPRODUCE.md`
 
 Перед повторным запуском серий учитывайте, что некоторые sweep-эксперименты занимают заметное время.
+
+## Theory-aligned additions
+
+| Block | Primary artifact | Role |
+|---|---|---|
+| Theory consistency | `results/paper/theory_consistency/theory_consistency_summary.md` | Checks exact-vs-quadratic, slope 1/2 behavior, and instant-risk floor. |
+| Poisson accumulation validation | `results/paper/theory_consistency/poisson_accumulation_validation.md` | Monte Carlo validation of accumulated DUE expectations. |
+| MBU parameter sources | `doc/mbu_parameter_sources.md` | Separates illustrative, logical_round_robin, source_required and future literature-backed values. |
+| MBU criterion with parameter tables | `results/paper/tables/mbu_interleaving_criterion_examples.md` | Computes `g_D`, `E_inst`, `E_residual`, suppression requirements. |
+| Risk-budget handoff | `results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` | Connects criterion output to residual-budget scrub policy. |
+| Latched interleaving sweep | `results/paper/interleaving/interleaving_summary.md` | Uses `new_due_count` and `repeated_due_detections` in addition to final unique DUE. |
+| Accumulation-only RTL | `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` | RTL sanity check of the `g_D = 0` branch. |
+| Measured-control weight sweep | `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` | Demonstrates closed-loop measured telemetry; not a net resource win. |

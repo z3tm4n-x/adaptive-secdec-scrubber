@@ -1,12 +1,14 @@
 # Dissertation repository check
 
-- Total checks: 96
-- Passed: 96
-- Failed: 0
+- Total checks: 154
+- Passed: 153
+- Failed: 1
 
 ## Failed checks
 
-No failed checks.
+| check | details |
+|---|---|
+| `text_contains:results/paper/final_results_summary.md:measured-control net win` | not found |
 
 ## Passed checks
 
@@ -47,21 +49,66 @@ No failed checks.
 | `required:results/paper/tables/risk_sensitivity.csv` | present |
 | `required:results/paper/tables/mbu_interleaving_criterion_examples.md` | present |
 | `required:results/paper/tables/mbu_interleaving_criterion_examples.csv` | present |
+| `required:results/paper/measured_control/weight_sweep/measured_weight_sweep_deltas.csv` | present |
+| `required:results/paper/measured_control/weight_sweep/measured_weight_sweep_runs.csv` | present |
+| `required:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.csv` | present |
+| `required:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` | present |
+| `required:results/paper/accumulation_only_rtl/accumulation_only_rtl_deltas.csv` | present |
+| `required:results/paper/accumulation_only_rtl/accumulation_only_rtl_runs.csv` | present |
+| `required:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.csv` | present |
+| `required:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` | present |
+| `required:results/paper/risk_budget_handoff/risk_budget_handoff_cases.csv` | present |
+| `required:results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` | present |
+| `required:results/paper/tables/mbu_suppression_requirements.csv` | present |
+| `required:results/paper/tables/mbu_suppression_requirements.md` | present |
+| `required:results/paper/theory_consistency/poisson_accumulation_validation.csv` | present |
+| `required:results/paper/theory_consistency/poisson_accumulation_validation.md` | present |
+| `required:results/paper/theory_consistency/theory_consistency.csv` | present |
+| `required:results/paper/theory_consistency/theory_consistency_summary.md` | present |
+| `required:model/run_measured_weight_sweep.py` | present |
+| `required:model/run_accumulation_only_rtl_series.py` | present |
+| `required:model/run_risk_budget_handoff.py` | present |
+| `required:model/run_poisson_accumulation_validation.py` | present |
+| `required:model/run_theory_consistency_checks.py` | present |
+| `required:data/mbu_hmd_literature_template.csv` | present |
+| `required:data/mbu_pm_literature_template.csv` | present |
+| `required:data/mbu_hmd_logical_round_robin.csv` | present |
+| `required:data/mbu_pm_logical_example.csv` | present |
+| `required:doc/mbu_parameter_sources.md` | present |
 | `csv:results/paper/measured_control/closed_loop/closed_loop_measured_series.csv` | rows=40 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | rows=150 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv` | rows=15 |
-| `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | rows=39 |
+| `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | rows=65 |
 | `csv:results/paper/tables/risk_sensitivity.csv` | rows=19 |
 | `csv:results/paper/tables/mbu_interleaving_criterion_examples.csv` | rows=24 |
 | `csv:results/paper/tables/efficiency_scale_verification.csv` | rows=6 |
+| `csv:results/paper/measured_control/weight_sweep/measured_weight_sweep_deltas.csv` | rows=18 |
+| `csv:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.csv` | rows=6 |
+| `csv:results/paper/measured_control/weight_sweep/measured_weight_sweep_runs.csv` | rows=30 |
+| `csv:results/paper/accumulation_only_rtl/accumulation_only_rtl_deltas.csv` | rows=6 |
+| `csv:results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.csv` | rows=2 |
+| `csv:results/paper/accumulation_only_rtl/accumulation_only_rtl_runs.csv` | rows=20 |
+| `csv:results/paper/risk_budget_handoff/risk_budget_handoff_cases.csv` | rows=10 |
+| `csv:results/paper/tables/mbu_suppression_requirements.csv` | rows=28 |
+| `csv:results/paper/theory_consistency/poisson_accumulation_validation.csv` | rows=4 |
+| `csv:results/paper/theory_consistency/theory_consistency.csv` | rows=31 |
 | `text_contains:doc/dissertation_mapping.md:Do not state that adaptive scrub-rate itself is new` | found |
 | `text_contains:doc/dissertation_mapping.md:mbu_interleaving_criterion_examples.md` | found |
 | `text_contains:doc/dissertation_mapping.md:risk_sensitivity_summary.md` | found |
 | `text_contains:doc/dissertation_mapping.md:closed_loop_measured_summary.md` | found |
+| `text_contains:doc/dissertation_mapping.md:run_theory_consistency_checks.py` | found |
+| `text_contains:doc/dissertation_mapping.md:run_risk_budget_handoff.py` | found |
+| `text_contains:doc/dissertation_mapping.md:run_accumulation_only_rtl_series.py` | found |
+| `text_contains:doc/dissertation_mapping.md:run_measured_weight_sweep.py` | found |
+| `text_contains:doc/dissertation_mapping.md:new_due_count` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:closed-loop RTL` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:MODE_MEASURED` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:offline replay` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:unique DUE` | found |
+| `text_contains:results/paper/measured_control/measured_control_summary.md:Measured-control status: demonstration, not a net resource win.` | found |
+| `text_contains:results/paper/measured_control/measured_control_summary.md:runtime first-arrival` | found |
+| `text_contains:results/paper/measured_control/measured_control_summary.md:post-run audit` | found |
+| `text_contains:results/paper/measured_control/measured_control_summary.md:not a net resource win` | found |
 | `text_contains:results/paper/final_results_summary.md:closed-loop` | found |
 | `text_contains:results/paper/final_results_summary.md:MODE_MEASURED` | found |
 | `text_contains:results/paper/final_results_summary.md:offline replay` | found |
@@ -69,9 +116,17 @@ No failed checks.
 | `text_contains:results/paper/final_results_summary.md:Current interleaving note` | found |
 | `text_contains:results/paper/final_results_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/final_results_summary.md:Measured-control status: demonstration` | found |
+| `text_contains:results/paper/final_results_summary.md:Theory-aligned repository update` | found |
+| `text_contains:results/paper/final_results_summary.md:run_risk_budget_handoff.py` | found |
+| `text_contains:results/paper/final_results_summary.md:new_due_count` | found |
+| `text_contains:results/paper/final_results_summary.md:measured-control не следует описывать как net resource win` | found |
+| `text_contains:results/paper/final_results_summary.md:g_D = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:истинно одновременно` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:Частичное перемежение D=2` | found |
+| `text_contains:results/paper/interleaving/interleaving_summary.md:new_due_count` | found |
+| `text_contains:results/paper/interleaving/interleaving_summary.md:repeated DED` | found |
+| `text_contains:results/paper/interleaving/interleaving_summary.md:diagnostic counter` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:1 + CV` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:discrete_gain_vs_fixed` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:below one` | found |
@@ -80,6 +135,8 @@ No failed checks.
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:g_D <= E* / N_events` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:subbudget_3bit_clusters` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:positive residual budget` | found |
+| `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:Suppression requirements` | found |
+| `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:h_m^(D) <= g_crit / p_m` | found |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:Техническое ограничение текущего Verilog-стенда` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:физически одномоментный кластер сериализуется` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:по соседним тактам` | absent |
@@ -93,6 +150,8 @@ No failed checks.
 | `text_forbidden:results/paper/final_results_summary.md:+6.400 [4.399; 8.401]` | absent |
 | `text_forbidden:results/paper/final_results_summary.md:статистически значимый рост unique` | absent |
 | `text_forbidden:results/paper/final_results_summary.md:Это не полностью аппаратно замкнутый контур` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:measured-control is a net win` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:measured-control net win` | absent |
 | `py_compile:model/risk_core.py` | compiled |
 | `py_compile:model/verify_efficiency_scale.py` | compiled |
 | `py_compile:model/run_risk_sensitivity.py` | compiled |
@@ -106,5 +165,5 @@ No failed checks.
 | `py_compile:model/generate_fault_events.py` | compiled |
 | `debug_artifacts:results/paper/**/*.vcd` | none |
 | `debug_artifacts:results/paper/**/*.out` | none |
-| `old_interleaving_seed_dirs` | none |
+| `interleaving_seed_dirs_latched_due_columns` | per-seed dirs present and latched DUE columns verified: 150 |
 | `make_target:dissertation_check` | present |

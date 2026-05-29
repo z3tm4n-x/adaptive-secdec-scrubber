@@ -163,8 +163,8 @@ Smoke-проверка показала:
 1. Теоретический выигрыш адаптивного восстановления определяется вариативностью риска и для идеальной оценки ограничен величиной `1 + CV²`.
 2. В RTL-модели с конечной памятью адаптивные стратегии уменьшают занятость интерфейса памяти, но вне насыщения это является компромиссом с риск-метрикой, а не бесплатным улучшением.
 3. Наблюдаемый measured-control возможен по счётчикам исполнения, но должен учитывать не только исправленные ошибки, но и DED-индикатор.
-4. Для measured-control выбранная рабочая точка `w=0.50` статистически улучшает риск-метрики относительно corrected-only.
-5. Closed-loop RTL-режим `MODE_MEASURED` реализует тот же принцип внутри контроллера: уровень выбирается по счётчикам corrected/DED без внешнего расписания уровней. Текущая настройка является консервативной: она уменьшает среднее число unique DUE, но увеличивает busy и повторные DED detections.
+4. Measured-control в текущей версии является демонстрацией замкнутого RTL-механизма и телеметрии, а не самостоятельным доказанным выигрышем по риск-ресурсной метрике.
+5. Closed-loop RTL-режим `MODE_MEASURED` реализует принцип внутри контроллера: уровень выбирается по счётчикам corrected/DED без внешнего расписания уровней. Новые latch-метрики показывают, что текущие веса не дают убедительного net win; поэтому блок используется как реализуемость и инженерный механизм, а не как центральная новизна.
 6. Мгновенные многобитовые кластеры не устраняются увеличением частоты скраббинга; для них требуется перемежение.
 7. При достаточном перемежении мгновенный кластер преобразуется в набор одиночных ошибок по разным кодовым словам, и задача снова становится управляемой периодом восстановления.
 
@@ -184,5 +184,51 @@ Smoke-проверка показала:
 | Measured-control | `results/paper/measured_control/measured_control_summary.md` |
 | Перемежение | `results/paper/interleaving/interleaving_summary.md` |
 | True pair alignment | `results/paper/true_pair_alignment/true_pair_alignment_summary.md` |
+| Theory consistency | `results/paper/theory_consistency/theory_consistency_summary.md` |
+| Poisson accumulation validation | `results/paper/theory_consistency/poisson_accumulation_validation.md` |
+| Risk-budget handoff | `results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` |
+| Accumulation-only RTL | `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` |
+| Measured-control weight sweep | `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` |
 
 Current interleaving note: the final RTL interleaving results use true simultaneous multi-slot cluster injection. Groups belonging to one physical cluster are injected with the same `time_cycle`; for the current results `cluster_injection_skew = 0`. D=3 statistically significantly reduces `unique_uncorrectable_words` relative to D=1 and D=2 in the tested clustered-fault scenario. Inside D=3, the slowest-fastest paired delta for unique DUE has a confidence interval that includes zero, so this internal growth must not be called statistically significant.
+
+## 9. Theory-aligned repository update
+
+После отдельной theory-alignment итерации репозиторий теперь проверяет полную цепочку:
+
+1. `p_m`, `h_m^(D)` и статус источников параметров задокументированы в `doc/mbu_parameter_sources.md`.
+2. `evaluate_mbu_interleaving_criterion.py` читает таблицы `p_m/h_m`, считает `g_D`, `E_inst`, `E_residual` и таблицу подавления `h_m <= g_crit / p_m`.
+3. `run_risk_budget_handoff.py` передаёт положительный `E_residual` в `scrub_risk_policy.py`, не создавая параллельный policy-builder.
+4. `run_theory_consistency_checks.py` проверяет exact-vs-quadratic, наклон 2 при `g_D=0`, наклон 1 при `g_D>0` и пол `E_inst`.
+5. `run_poisson_accumulation_validation.py` подтверждает accumulated-risk модель независимой Poisson Monte Carlo проверкой.
+6. `tb_strategy_comparison.v` теперь выводит latched runtime DUE метрики: `new_due_count` и `repeated_due_detections`.
+
+### 9.1. Accumulation-only RTL branch
+
+В серии `results/paper/accumulation_only_rtl` проверен случай `D=3`, `cluster_bit_count=3`, где мгновенная same-event DED-составляющая устранена логическим перемежением.
+
+| fixed interval | new DUE mean | final unique DUE mean | busy, % |
+|---:|---:|---:|---:|
+| 1089 | 0.000 | 0.000 | 23.100 |
+| 2400 | 0.400 | 0.400 | 10.300 |
+
+Paired delta `interval_2400_minus_1089` по `new_due_count`: 0.400 [-0.123; 0.923].
+
+Вывод: серия подтверждает ветвь `g_D = 0` как RTL sanity check. Остаточные DUE малы; рост на более медленном интервале в этой серии не следует называть статистически значимым.
+
+### 9.2. Measured-control latch-metric sweep
+
+Новый closed-loop weight sweep оценивает measured-control не по повторному diagnostic DED counter, а по `new_due_count`, `repeated_due_detections`, final `unique_uncorrectable_words` и busy.
+
+| config / strategy | busy, % | new DUE | final unique DUE | repeated DED |
+|---|---:|---:|---:|---:|
+| default fixed | 14.100 | 16.600 | 15.400 | 521.0 |
+| default measured | 20.200 | 16.800 | 15.800 | 832.4 |
+| corrected-only measured | 13.660 | 17.200 | 15.600 | 525.4 |
+| DED-heavy measured | 20.200 | 16.800 | 15.800 | 832.4 |
+
+Default measured-minus-fixed delta по busy_per_mille: 61.000 [61.000; 61.000]. Default measured-minus-fixed delta по `new_due_count`: 0.200 [-1.100; 1.500].
+
+Corrected-only measured-minus-fixed delta по busy_per_mille: -4.400 [-8.895; 0.095]. Corrected-only measured-minus-fixed delta по `new_due_count`: 0.600 [-0.729; 1.929].
+
+Вывод: measured-control не следует описывать как net resource win. Он подтверждает реализуемость замкнутого контроллера и наблюдаемой телеметрии, но центральный результат диссертации остаётся risk-limited chain: criterion, eta scale, residual-budget policy, RTL sanity checks.
