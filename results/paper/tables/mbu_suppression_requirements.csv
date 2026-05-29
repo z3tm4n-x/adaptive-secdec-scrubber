@@ -1,0 +1,29 @@
+scenario,event_count,interleave_depth,m,p_m,g_D_limit,h_required_max,h_required_max_capped,interpretation
+subbudget_3bit_clusters,1000000,1,3,5e-09,1.00503358535e-08,2.0100671707,1,no suppression required for this single class alone
+subbudget_3bit_clusters,1000000,2,3,5e-09,1.00503358535e-08,2.0100671707,1,no suppression required for this single class alone
+subbudget_3bit_clusters,1000000,3,3,5e-09,1.00503358535e-08,2.0100671707,1,no suppression required for this single class alone
+subbudget_3bit_clusters,1000000,4,3,5e-09,1.00503358535e-08,2.0100671707,1,no suppression required for this single class alone
+rare_3bit_clusters,1000000,1,3,2e-08,1.00503358535e-08,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+rare_3bit_clusters,1000000,2,3,2e-08,1.00503358535e-08,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+rare_3bit_clusters,1000000,3,3,2e-08,1.00503358535e-08,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+rare_3bit_clusters,1000000,4,3,2e-08,1.00503358535e-08,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+strong_3bit_clusters,1000000,1,3,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+strong_3bit_clusters,1000000,2,3,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+strong_3bit_clusters,1000000,3,3,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+strong_3bit_clusters,1000000,4,3,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,1,2,5e-08,1.00503358535e-08,0.20100671707,0.20100671707,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,1,3,1e-07,1.00503358535e-08,0.100503358535,0.100503358535,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,2,2,5e-08,1.00503358535e-08,0.20100671707,0.20100671707,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,2,3,1e-07,1.00503358535e-08,0.100503358535,0.100503358535,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,3,2,5e-08,1.00503358535e-08,0.20100671707,0.20100671707,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,3,3,1e-07,1.00503358535e-08,0.100503358535,0.100503358535,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,4,2,5e-08,1.00503358535e-08,0.20100671707,0.20100671707,logical mapping must suppress this class below the listed h_m limit
+mixed_2bit_3bit,1000000,4,3,1e-07,1.00503358535e-08,0.100503358535,0.100503358535,logical mapping must suppress this class below the listed h_m limit
+four_bit_clusters,1000000,1,4,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+four_bit_clusters,1000000,2,4,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+four_bit_clusters,1000000,3,4,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+four_bit_clusters,1000000,4,4,2e-07,1.00503358535e-08,0.0502516792675,0.0502516792675,logical mapping must suppress this class below the listed h_m limit
+high_event_count_low_probability,100000000,1,3,2e-10,1.00503358535e-10,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+high_event_count_low_probability,100000000,2,3,2e-10,1.00503358535e-10,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+high_event_count_low_probability,100000000,3,3,2e-10,1.00503358535e-10,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
+high_event_count_low_probability,100000000,4,3,2e-10,1.00503358535e-10,0.502516792675,0.502516792675,logical mapping must suppress this class below the listed h_m limit
