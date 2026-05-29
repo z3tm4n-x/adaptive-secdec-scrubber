@@ -80,6 +80,9 @@ TEXT_MUST_CONTAIN = {
         "MODE_MEASURED",
         "offline replay",
         "unique DUE",
+        "Current interleaving note",
+        "cluster_injection_skew = 0",
+        "Measured-control status: demonstration",
     ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
@@ -107,6 +110,17 @@ TEXT_MUST_NOT_CONTAIN = {
         "физически одномоментный кластер сериализуется",
         "по соседним тактам",
         "статистически значимый рост unique",
+    ],
+    "results/paper/final_results_summary.md": [
+        "Техническое ограничение текущего Verilog-стенда",
+        "физически одномоментный кластер сериализуется",
+        "по соседним тактам",
+        "одна fault-инжекция за такт",
+        "D3 slowest-fastest | +6.400",
+        "`D3 slowest-fastest` | +6.400",
+        "+6.400 [4.399; 8.401]",
+        "статистически значимый рост unique",
+        "Это не полностью аппаратно замкнутый контур",
     ],
 }
 

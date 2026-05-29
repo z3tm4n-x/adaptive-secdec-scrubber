@@ -1,7 +1,7 @@
 # Dissertation repository check
 
-- Total checks: 84
-- Passed: 84
+- Total checks: 96
+- Passed: 96
 - Failed: 0
 
 ## Failed checks
@@ -66,6 +66,9 @@ No failed checks.
 | `text_contains:results/paper/final_results_summary.md:MODE_MEASURED` | found |
 | `text_contains:results/paper/final_results_summary.md:offline replay` | found |
 | `text_contains:results/paper/final_results_summary.md:unique DUE` | found |
+| `text_contains:results/paper/final_results_summary.md:Current interleaving note` | found |
+| `text_contains:results/paper/final_results_summary.md:cluster_injection_skew = 0` | found |
+| `text_contains:results/paper/final_results_summary.md:Measured-control status: demonstration` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:истинно одновременно` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:Частичное перемежение D=2` | found |
@@ -81,6 +84,15 @@ No failed checks.
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:физически одномоментный кластер сериализуется` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:по соседним тактам` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:статистически значимый рост unique` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:Техническое ограничение текущего Verilog-стенда` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:физически одномоментный кластер сериализуется` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:по соседним тактам` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:одна fault-инжекция за такт` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:D3 slowest-fastest | +6.400` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:`D3 slowest-fastest` | +6.400` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:+6.400 [4.399; 8.401]` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:статистически значимый рост unique` | absent |
+| `text_forbidden:results/paper/final_results_summary.md:Это не полностью аппаратно замкнутый контур` | absent |
 | `py_compile:model/risk_core.py` | compiled |
 | `py_compile:model/verify_efficiency_scale.py` | compiled |
 | `py_compile:model/run_risk_sensitivity.py` | compiled |

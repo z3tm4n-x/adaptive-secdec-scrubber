@@ -76,6 +76,9 @@
 
 ## 4. Observable signal, measured-control replay и closed-loop RTL
 
+Measured-control status: demonstration, not a net resource win. Closed-loop measured control is treated as an RTL feasibility and telemetry experiment; it must not be described as an overall improvement when its memory-busy cost exceeds the fixed baseline.
+
+
 Построен наблюдаемый управляющий сигнал по RTL-счётчикам исполнения:
 
 | Счётчик |
@@ -121,7 +124,7 @@ Single-seed результат используется только как де
 
 После калибровки реализован closed-loop RTL-режим `MODE_MEASURED`, в котором управляющий уровень формируется внутри контроллера по приращениям `corrected_error_count` и `uncorrectable_error_count`.
 
-Это не полностью аппаратно замкнутый контур, но управляющее расписание строится без использования истинного ряда ν(t), только по наблюдаемым счётчикам.
+Offline replay используется только как калибровочный этап. Closed-loop RTL-режим `MODE_MEASURED` является аппаратно замкнутым в пределах RTL-модели: уровень выбирается внутри контроллера по наблюдаемым счётчикам corrected/DED без внешнего расписания уровней и без использования истинного ряда ν(t).
 
 ## 5. Перемежение D=1/2/3 для мгновенных кластеров
 
@@ -147,7 +150,7 @@ Smoke-проверка показала:
 |---|---:|
 | `D3 - D1` | от -6.100 до -6.600, CI строго ниже нуля |
 | `D3 - D2` | от -15.400 до -16.200, CI строго ниже нуля |
-| `D3 slowest-fastest` | +6.400 [4.399; 8.401] |
+| `D3 slowest-fastest` | +0.400 [-0.123; 0.923] |
 
 Вывод: перемежение D=3 статистически значимо снижает число уникальных неустранимых слов относительно D=1 и D=2. После достаточного перемежения остаточный риск снова становится чувствительным к интервалу скраббинга, то есть возвращается к накопительной модели риска.
 
@@ -162,14 +165,13 @@ Smoke-проверка показала:
 3. Наблюдаемый measured-control возможен по счётчикам исполнения, но должен учитывать не только исправленные ошибки, но и DED-индикатор.
 4. Для measured-control выбранная рабочая точка `w=0.50` статистически улучшает риск-метрики относительно corrected-only.
 5. Closed-loop RTL-режим `MODE_MEASURED` реализует тот же принцип внутри контроллера: уровень выбирается по счётчикам corrected/DED без внешнего расписания уровней. Текущая настройка является консервативной: она уменьшает среднее число unique DUE, но увеличивает busy и повторные DED detections.
-5. Мгновенные многобитовые кластеры не устраняются увеличением частоты скраббинга; для них требуется перемежение.
-6. При достаточном перемежении мгновенный кластер преобразуется в набор одиночных ошибок по разным кодовым словам, и задача снова становится управляемой периодом восстановления.
+6. Мгновенные многобитовые кластеры не устраняются увеличением частоты скраббинга; для них требуется перемежение.
+7. При достаточном перемежении мгновенный кластер преобразуется в набор одиночных ошибок по разным кодовым словам, и задача снова становится управляемой периодом восстановления.
 
 ## 7. Ограничения
 
 - measured-control replay используется как калибровочный этап; closed-loop RTL-режим `MODE_MEASURED` реализован отдельно и требует дальнейшей оптимизации порогов;
 - физическая аппаратная проекция секундных интервалов оценивается отдельно от методической RTL-серии;
-- кластерное перемежение для D>1 в текущем testbench сериализуется по соседним тактам из-за ограничения “одна fault-инжекция за такт”;
 - статистические выводы относятся к выбранной модели событий, числу seed и сетке интервалов;
 - adaptive-точки проверены относительно выбранной fixed-сетки, а не непрерывного множества всех возможных политик.
 
@@ -182,3 +184,5 @@ Smoke-проверка показала:
 | Measured-control | `results/paper/measured_control/measured_control_summary.md` |
 | Перемежение | `results/paper/interleaving/interleaving_summary.md` |
 | True pair alignment | `results/paper/true_pair_alignment/true_pair_alignment_summary.md` |
+
+Current interleaving note: the final RTL interleaving results use true simultaneous multi-slot cluster injection. Groups belonging to one physical cluster are injected with the same `time_cycle`; for the current results `cluster_injection_skew = 0`. D=3 statistically significantly reduces `unique_uncorrectable_words` relative to D=1 and D=2 in the tested clustered-fault scenario. Inside D=3, the slowest-fastest paired delta for unique DUE has a confidence interval that includes zero, so this internal growth must not be called statistically significant.
