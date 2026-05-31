@@ -128,3 +128,13 @@
 | Latched interleaving sweep | `results/paper/interleaving/interleaving_summary.md` | Uses `new_due_count` and `repeated_due_detections` in addition to final unique DUE. |
 | Accumulation-only RTL | `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` | RTL sanity check of the `g_D = 0` branch. |
 | Measured-control weight sweep | `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` | Demonstrates closed-loop measured telemetry; not a net resource win. |
+
+## RTL synthesis resource estimates
+
+| Artifact | Role |
+|---|---|
+| `results/paper/synthesis/rtl_synthesis_summary.md` | Main synthesis resource-estimate report for synthesizable RTL blocks. |
+| `results/paper/synthesis/rtl_synthesis_summary.csv` | Machine-readable synthesis summary. |
+| `model/run_rtl_synthesis.py` | Reproducible Yosys synthesis driver. |
+
+The full `adaptive_scrub_controller` synthesizes in the Xilinx 7-series estimate flow with 3220 cells, 730 FF, and 883 LUT. These are RTL synthesis resource estimates only; Fmax requires target-specific place-and-route.

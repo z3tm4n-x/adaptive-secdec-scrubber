@@ -1,0 +1,623 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Executing script file `/home/z3tm4n/adaptive_scrubbing/results/paper/synthesis/scripts/secded_decoder_generic.ys' --
+
+1. Executing Verilog-2005 frontend: rtl/secded_32_39_decoder.v
+Parsing SystemVerilog input from `rtl/secded_32_39_decoder.v' to AST representation.
+Generating RTLIL representation for module `\secded_32_39_decoder'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \secded_32_39_decoder
+
+2.2. Analyzing design hierarchy..
+Top module:  \secded_32_39_decoder
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 151 empty switches in `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Cleaned up 151 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 87 switch rules as full_case in process $proc$rtl/secded_32_39_decoder.v:18$7 in module secded_32_39_decoder.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 60 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~87 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+     1/103: $4\error_position[5:0]
+     2/103: $4\uncorrectable[0:0]
+     3/103: $4\double_error[0:0]
+     4/103: $4\single_error[0:0]
+     5/103: $4\codeword_corrected[38:0]
+     6/103: $3\error_position[5:0]
+     7/103: $3\uncorrectable[0:0]
+     8/103: $3\double_error[0:0]
+     9/103: $3\single_error[0:0]
+    10/103: $3\codeword_corrected[38:0]
+    11/103: $2\error_position[5:0]
+    12/103: $2\uncorrectable[0:0]
+    13/103: $2\double_error[0:0]
+    14/103: $2\single_error[0:0]
+    15/103: $2\codeword_corrected[38:0]
+    16/103: $1\error_position[5:0]
+    17/103: $1\uncorrectable[0:0]
+    18/103: $1\double_error[0:0]
+    19/103: $1\single_error[0:0]
+    20/103: $1\codeword_corrected[38:0]
+    21/103: $6\syndrome[5:0]
+    22/103: $96\parity[0:0]
+    23/103: $95\parity[0:0]
+    24/103: $94\parity[0:0]
+    25/103: $93\parity[0:0]
+    26/103: $92\parity[0:0]
+    27/103: $91\parity[0:0]
+    28/103: $90\parity[0:0]
+    29/103: $5\syndrome[5:0]
+    30/103: $89\parity[0:0]
+    31/103: $88\parity[0:0]
+    32/103: $87\parity[0:0]
+    33/103: $86\parity[0:0]
+    34/103: $85\parity[0:0]
+    35/103: $84\parity[0:0]
+    36/103: $83\parity[0:0]
+    37/103: $82\parity[0:0]
+    38/103: $81\parity[0:0]
+    39/103: $80\parity[0:0]
+    40/103: $79\parity[0:0]
+    41/103: $78\parity[0:0]
+    42/103: $77\parity[0:0]
+    43/103: $76\parity[0:0]
+    44/103: $75\parity[0:0]
+    45/103: $74\parity[0:0]
+    46/103: $4\syndrome[5:0]
+    47/103: $73\parity[0:0]
+    48/103: $72\parity[0:0]
+    49/103: $71\parity[0:0]
+    50/103: $70\parity[0:0]
+    51/103: $69\parity[0:0]
+    52/103: $68\parity[0:0]
+    53/103: $67\parity[0:0]
+    54/103: $66\parity[0:0]
+    55/103: $65\parity[0:0]
+    56/103: $64\parity[0:0]
+    57/103: $63\parity[0:0]
+    58/103: $62\parity[0:0]
+    59/103: $61\parity[0:0]
+    60/103: $60\parity[0:0]
+    61/103: $59\parity[0:0]
+    62/103: $58\parity[0:0]
+    63/103: $3\syndrome[5:0]
+    64/103: $57\parity[0:0]
+    65/103: $56\parity[0:0]
+    66/103: $55\parity[0:0]
+    67/103: $54\parity[0:0]
+    68/103: $53\parity[0:0]
+    69/103: $52\parity[0:0]
+    70/103: $51\parity[0:0]
+    71/103: $50\parity[0:0]
+    72/103: $49\parity[0:0]
+    73/103: $48\parity[0:0]
+    74/103: $47\parity[0:0]
+    75/103: $46\parity[0:0]
+    76/103: $45\parity[0:0]
+    77/103: $44\parity[0:0]
+    78/103: $43\parity[0:0]
+    79/103: $42\parity[0:0]
+    80/103: $41\parity[0:0]
+    81/103: $40\parity[0:0]
+    82/103: $39\parity[0:0]
+    83/103: $2\syndrome[5:0]
+    84/103: $38\parity[0:0]
+    85/103: $37\parity[0:0]
+    86/103: $36\parity[0:0]
+    87/103: $35\parity[0:0]
+    88/103: $34\parity[0:0]
+    89/103: $33\parity[0:0]
+    90/103: $32\parity[0:0]
+    91/103: $31\parity[0:0]
+    92/103: $30\parity[0:0]
+    93/103: $29\parity[0:0]
+    94/103: $28\parity[0:0]
+    95/103: $27\parity[0:0]
+    96/103: $26\parity[0:0]
+    97/103: $25\parity[0:0]
+    98/103: $24\parity[0:0]
+    99/103: $23\parity[0:0]
+   100/103: $22\parity[0:0]
+   101/103: $21\parity[0:0]
+   102/103: $20\parity[0:0]
+   103/103: $1\syndrome[5:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\secded_32_39_decoder.\codeword_corrected' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\data_out' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\single_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\double_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\uncorrectable' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\error_position' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\syndrome' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\overall_parity_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\parity' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\pos' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 87 empty switches in `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Removing empty process `secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Cleaned up 87 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+<suppressed ~19 debug messages>
+
+4. Executing OPT pass (performing simple optimizations).
+
+4.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+4.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+4.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$230.
+    dead port 1/2 on $mux $procmux$224.
+    dead port 1/2 on $mux $procmux$218.
+    dead port 1/2 on $mux $procmux$212.
+    dead port 2/2 on $mux $procmux$209.
+    dead port 1/2 on $mux $procmux$203.
+    dead port 2/2 on $mux $procmux$200.
+    dead port 1/2 on $mux $procmux$194.
+    dead port 2/2 on $mux $procmux$191.
+    dead port 1/2 on $mux $procmux$186.
+    dead port 2/2 on $mux $procmux$183.
+    dead port 1/2 on $mux $procmux$177.
+    dead port 2/2 on $mux $procmux$174.
+    dead port 1/2 on $mux $procmux$168.
+    dead port 1/2 on $mux $procmux$165.
+    dead port 1/2 on $mux $procmux$159.
+    dead port 1/2 on $mux $procmux$156.
+    dead port 1/2 on $mux $procmux$150.
+    dead port 1/2 on $mux $procmux$147.
+    dead port 1/2 on $mux $procmux$141.
+    dead port 1/2 on $mux $procmux$138.
+    dead port 1/2 on $mux $procmux$132.
+    dead port 1/2 on $mux $procmux$129.
+    dead port 1/2 on $mux $procmux$236.
+    dead port 1/2 on $mux $procmux$242.
+Removed 25 multiplexer ports.
+<suppressed ~6 debug messages>
+
+4.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+4.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+4.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 232 unused wires.
+<suppressed ~1 debug messages>
+
+4.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+4.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+4.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+4.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+4.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+4.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+4.16. Finished OPT passes. (There is nothing left to do.)
+
+5. Executing FSM pass (extract and optimize FSM).
+
+5.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+5.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+5.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+5.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+5.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+5.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+5.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+5.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+6.9. Finished OPT passes. (There is nothing left to do.)
+
+7. Executing MEMORY pass.
+
+7.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+7.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+7.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+7.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+7.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+7.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+7.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+7.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+7.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+7.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+8. Executing OPT pass (performing simple optimizations).
+
+8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+8.9. Finished OPT passes. (There is nothing left to do.)
+
+9. Executing TECHMAP pass (map to technology primitives).
+
+9.1. Executing Verilog-2005 frontend: /usr/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+9.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $reduce_xor.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $logic_and.
+Using extmapper simplemap for cells of type $reduce_bool.
+Running "alumacc" on wrapper $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$constmap:0ebe86838c3e845ab1b34c19956a30ce2cd4a073$paramod$2d11a04ddd49fada06fedd6b45b3e1763ae37043\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $reduce_and.
+Using template $paramod$00298f3f8094950cb9a5ff2fda48d0d8bde8806c\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $and.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $or.
+No more expansions possible.
+<suppressed ~961 debug messages>
+
+10. Executing OPT pass (performing simple optimizations).
+
+10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+<suppressed ~147 debug messages>
+
+10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~36 debug messages>
+Removed a total of 12 cells.
+
+10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+10.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 12 unused cells and 109 unused wires.
+<suppressed ~13 debug messages>
+
+10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+10.16. Finished OPT passes. (There is nothing left to do.)
+
+11. Executing ABC pass (technology mapping using ABC).
+
+11.1. Extracting gate netlist of module `\secded_32_39_decoder' to `<abc-temp-dir>/input.blif'..
+Extracted 454 gates and 494 wires to a netlist network with 39 inputs and 48 outputs.
+
+11.1.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+11.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       41
+ABC RESULTS:            ANDNOT cells:        8
+ABC RESULTS:              NAND cells:       44
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        5
+ABC RESULTS:              XNOR cells:      113
+ABC RESULTS:               XOR cells:       28
+ABC RESULTS:        internal signals:      407
+ABC RESULTS:           input signals:       39
+ABC RESULTS:          output signals:       48
+Removing temp directory.
+
+12. Executing OPT pass (performing simple optimizations).
+
+12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+12.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 225 unused wires.
+<suppressed ~4 debug messages>
+
+12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+12.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+12.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+12.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+12.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+12.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+12.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+12.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module secded_32_39_decoder.
+
+12.16. Finished OPT passes. (There is nothing left to do.)
+
+13. Printing statistics.
+
+=== secded_32_39_decoder ===
+
+   Number of wires:                201
+   Number of wire bits:            344
+   Number of public wires:           8
+   Number of public wire bits:     151
+   Number of ports:                  7
+   Number of port bits:            119
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                241
+     $_ANDNOT_                       8
+     $_AND_                         41
+     $_NAND_                        44
+     $_NOR_                          1
+     $_ORNOT_                        5
+     $_OR_                           1
+     $_XNOR_                       113
+     $_XOR_                         28
+
+End of script. Logfile hash: 7f60622139, CPU: user 0.10s system 0.01s, MEM: 18.93 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 77% 1x abc (0 sec), 5% 18x opt_expr (0 sec), ...

@@ -1,0 +1,15 @@
+
+read_verilog -sv rtl/secded_32_39_decoder.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v
+hierarchy -check -top adaptive_scrub_controller
+proc
+opt
+fsm
+opt
+memory
+opt
+techmap
+opt
+abc
+opt
+clean
+stat

@@ -1,0 +1,4 @@
+
+read_verilog -sv rtl/secded_32_39_decoder.v
+synth_xilinx -family xc7 -flatten -noclkbuf -top secded_32_39_decoder
+stat -tech xilinx

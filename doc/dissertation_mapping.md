@@ -137,3 +137,14 @@ The dissertation is organized around the following chain:
 8. Keep the primary novelty on the risk-limited chain: applicability criterion, eta scale, and hardware-aware project procedure.
 9. Use `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
 10. Do not describe measured-control weight sweep as a net win; describe it as closed-loop RTL feasibility and telemetry.
+
+## RTL synthesis artifacts for Chapter 4
+
+| Artifact | Dissertation use | Caution |
+|---|---|---|
+| `model/run_rtl_synthesis.py` | Reproducible synthesis driver for Section 4.8 | Uses Yosys-only flows; no place-and-route timing closure. |
+| `results/paper/synthesis/rtl_synthesis_summary.md` | Main resource-estimate report | Cite as RTL synthesis resource estimate, not as final device implementation. |
+| `results/paper/synthesis/rtl_synthesis_summary.csv` | Exact machine-readable resource counts | The full controller estimate is 3220 cells, 730 FF, 883 LUT in the Xilinx 7-series estimate flow. |
+| `results/paper/synthesis/logs/` | Raw Yosys logs for traceability | Testbench and post-run audit logic are not part of the deployed controller estimate. |
+
+Chapter 4 wording guard: the synthesis results close the resource-estimate part of the RTL model. They do not establish flight qualification and they do not provide a valid Fmax without target-specific place-and-route.

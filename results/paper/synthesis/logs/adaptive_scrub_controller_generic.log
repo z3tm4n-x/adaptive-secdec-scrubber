@@ -1,0 +1,1715 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Executing script file `/home/z3tm4n/adaptive_scrubbing/results/paper/synthesis/scripts/adaptive_scrub_controller_generic.ys' --
+
+1. Executing Verilog-2005 frontend: rtl/secded_32_39_decoder.v
+Parsing SystemVerilog input from `rtl/secded_32_39_decoder.v' to AST representation.
+Generating RTLIL representation for module `\secded_32_39_decoder'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/interval_selector.v
+Parsing SystemVerilog input from `rtl/interval_selector.v' to AST representation.
+Generating RTLIL representation for module `\interval_selector'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/measured_control_estimator.v
+Parsing SystemVerilog input from `rtl/measured_control_estimator.v' to AST representation.
+Generating RTLIL representation for module `\measured_control_estimator'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: rtl/adaptive_scrub_controller.v
+Parsing SystemVerilog input from `rtl/adaptive_scrub_controller.v' to AST representation.
+Generating RTLIL representation for module `\adaptive_scrub_controller'.
+Successfully finished Verilog frontend.
+
+5. Executing HIERARCHY pass (managing design hierarchy).
+
+5.1. Analyzing design hierarchy..
+Top module:  \adaptive_scrub_controller
+Used module:     \secded_32_39_decoder
+Used module:     \interval_selector
+Used module:     \measured_control_estimator
+Parameter \LEVEL_WIDTH = 3
+Parameter \INTERVAL_WIDTH = 32
+
+5.2. Executing AST frontend in derive mode using pre-parsed AST for module `\interval_selector'.
+Parameter \LEVEL_WIDTH = 3
+Parameter \INTERVAL_WIDTH = 32
+Generating RTLIL representation for module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Parameter \LEVEL_WIDTH = 3
+Parameter \COUNTER_WIDTH = 32
+Parameter \SCORE_WIDTH = 32
+Parameter \WINDOW_CYCLES = 25000
+Parameter \CORRECTED_WEIGHT = 2
+Parameter \UNCORRECTABLE_WEIGHT = 1
+Parameter \THRESHOLD_LEVEL1 = 8
+Parameter \THRESHOLD_LEVEL2 = 22
+Parameter \THRESHOLD_LEVEL3 = 36
+Parameter \THRESHOLD_LEVEL4 = 50
+Parameter \THRESHOLD_LEVEL5 = 65
+Parameter \THRESHOLD_LEVEL6 = 79
+Parameter \THRESHOLD_LEVEL7 = 93
+Parameter \INITIAL_LEVEL = 0
+
+5.3. Executing AST frontend in derive mode using pre-parsed AST for module `\measured_control_estimator'.
+Parameter \LEVEL_WIDTH = 3
+Parameter \COUNTER_WIDTH = 32
+Parameter \SCORE_WIDTH = 32
+Parameter \WINDOW_CYCLES = 25000
+Parameter \CORRECTED_WEIGHT = 2
+Parameter \UNCORRECTABLE_WEIGHT = 1
+Parameter \THRESHOLD_LEVEL1 = 8
+Parameter \THRESHOLD_LEVEL2 = 22
+Parameter \THRESHOLD_LEVEL3 = 36
+Parameter \THRESHOLD_LEVEL4 = 50
+Parameter \THRESHOLD_LEVEL5 = 65
+Parameter \THRESHOLD_LEVEL6 = 79
+Parameter \THRESHOLD_LEVEL7 = 93
+Parameter \INITIAL_LEVEL = 0
+Generating RTLIL representation for module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+
+5.4. Analyzing design hierarchy..
+Top module:  \adaptive_scrub_controller
+Used module:     \secded_32_39_decoder
+Used module:     $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector
+Used module:     $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator
+
+5.5. Analyzing design hierarchy..
+Top module:  \adaptive_scrub_controller
+Used module:     \secded_32_39_decoder
+Used module:     $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector
+Used module:     $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator
+Removing unused module `\measured_control_estimator'.
+Removing unused module `\interval_selector'.
+Removed 2 unused modules.
+
+6. Executing PROC pass (convert processes to netlists).
+
+6.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 151 empty switches in `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Cleaned up 151 empty switches.
+
+6.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$rtl/adaptive_scrub_controller.v:293$188 in module adaptive_scrub_controller.
+Marked 10 switch rules as full_case in process $proc$rtl/measured_control_estimator.v:115$236 in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Removed 1 dead cases from process $proc$rtl/interval_selector.v:115$227 in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Marked 4 switch rules as full_case in process $proc$rtl/interval_selector.v:115$227 in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Marked 8 switch rules as full_case in process $proc$rtl/interval_selector.v:52$217 in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Marked 87 switch rules as full_case in process $proc$rtl/secded_32_39_decoder.v:18$7 in module secded_32_39_decoder.
+Removed a total of 1 dead cases.
+
+6.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 3 redundant assignments.
+Promoted 63 assignments to connections.
+
+6.4. Executing PROC_INIT pass (extract init attributes).
+
+6.5. Executing PROC_ARST pass (detect async resets in processes).
+
+6.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~126 debug messages>
+
+6.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+     1/21: $0\previous_safe_mode_active[0:0]
+     2/21: $0\state[2:0]
+     3/21: $0\completed_first_pass[0:0]
+     4/21: $0\pass_duration_counter[31:0]
+     5/21: $0\interval_initialized[0:0]
+     6/21: $0\previous_selected_interval[31:0]
+     7/21: $0\current_addr[3:0]
+     8/21: $0\interval_counter[31:0]
+     9/21: $0\last_pass_duration[31:0]
+    10/21: $0\safe_mode_entry_count[31:0]
+    11/21: $0\safe_mode_cycle_count[31:0]
+    12/21: $0\memory_busy_cycle_count[31:0]
+    13/21: $0\scrub_active_cycle_count[31:0]
+    14/21: $0\total_cycle_count[31:0]
+    15/21: $0\interval_switch_count[31:0]
+    16/21: $0\memory_write_count[31:0]
+    17/21: $0\memory_read_count[31:0]
+    18/21: $0\scrub_cycle_count[31:0]
+    19/21: $0\scrub_active[0:0]
+    20/21: $0\uncorrectable_error_count[31:0]
+    21/21: $0\corrected_error_count[31:0]
+Creating decoders for process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+     1/22: $10\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$260
+     2/22: $9\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$258
+     3/22: $8\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$256
+     4/22: $7\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$254
+     5/22: $6\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$252
+     6/22: $5\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$250
+     7/22: $4\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$248
+     8/22: $3\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$245
+     9/22: $3\score_to_level$func$rtl/measured_control_estimator.v:139$228.score[31:0]$246
+    10/22: $2\score_to_level$func$rtl/measured_control_estimator.v:139$228.score[31:0]$242
+    11/22: $2\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$241
+    12/22: $0\measured_ctrl_update[0:0]
+    13/22: $1\score_to_level$func$rtl/measured_control_estimator.v:139$228.score[31:0]$240
+    14/22: $1\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$239
+    15/22: $0\previous_uncorrectable_error_count[31:0]
+    16/22: $0\previous_corrected_error_count[31:0]
+    17/22: $0\measured_raw_score[31:0]
+    18/22: $0\measured_uncorrectable_delta[31:0]
+    19/22: $0\measured_corrected_delta[31:0]
+    20/22: $0\measured_window_count[31:0]
+    21/22: $0\measured_ctrl_valid[0:0]
+    22/22: $0\measured_ctrl_level[2:0]
+Creating decoders for process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:115$227'.
+     1/4: $4\selected_interval[31:0]
+     2/4: $3\selected_interval[31:0]
+     3/4: $2\selected_interval[31:0]
+     4/4: $1\selected_interval[31:0]
+Creating decoders for process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+     1/4: $0\control_age[31:0]
+     2/4: $0\threshold_state[1:0]
+     3/4: $0\current_level[2:0]
+     4/4: $0\safe_mode_active[0:0]
+Creating decoders for process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+     1/103: $4\error_position[5:0]
+     2/103: $4\uncorrectable[0:0]
+     3/103: $4\double_error[0:0]
+     4/103: $4\single_error[0:0]
+     5/103: $4\codeword_corrected[38:0]
+     6/103: $3\error_position[5:0]
+     7/103: $3\uncorrectable[0:0]
+     8/103: $3\double_error[0:0]
+     9/103: $3\single_error[0:0]
+    10/103: $3\codeword_corrected[38:0]
+    11/103: $2\error_position[5:0]
+    12/103: $2\uncorrectable[0:0]
+    13/103: $2\double_error[0:0]
+    14/103: $2\single_error[0:0]
+    15/103: $2\codeword_corrected[38:0]
+    16/103: $1\error_position[5:0]
+    17/103: $1\uncorrectable[0:0]
+    18/103: $1\double_error[0:0]
+    19/103: $1\single_error[0:0]
+    20/103: $1\codeword_corrected[38:0]
+    21/103: $6\syndrome[5:0]
+    22/103: $96\parity[0:0]
+    23/103: $95\parity[0:0]
+    24/103: $94\parity[0:0]
+    25/103: $93\parity[0:0]
+    26/103: $92\parity[0:0]
+    27/103: $91\parity[0:0]
+    28/103: $90\parity[0:0]
+    29/103: $5\syndrome[5:0]
+    30/103: $89\parity[0:0]
+    31/103: $88\parity[0:0]
+    32/103: $87\parity[0:0]
+    33/103: $86\parity[0:0]
+    34/103: $85\parity[0:0]
+    35/103: $84\parity[0:0]
+    36/103: $83\parity[0:0]
+    37/103: $82\parity[0:0]
+    38/103: $81\parity[0:0]
+    39/103: $80\parity[0:0]
+    40/103: $79\parity[0:0]
+    41/103: $78\parity[0:0]
+    42/103: $77\parity[0:0]
+    43/103: $76\parity[0:0]
+    44/103: $75\parity[0:0]
+    45/103: $74\parity[0:0]
+    46/103: $4\syndrome[5:0]
+    47/103: $73\parity[0:0]
+    48/103: $72\parity[0:0]
+    49/103: $71\parity[0:0]
+    50/103: $70\parity[0:0]
+    51/103: $69\parity[0:0]
+    52/103: $68\parity[0:0]
+    53/103: $67\parity[0:0]
+    54/103: $66\parity[0:0]
+    55/103: $65\parity[0:0]
+    56/103: $64\parity[0:0]
+    57/103: $63\parity[0:0]
+    58/103: $62\parity[0:0]
+    59/103: $61\parity[0:0]
+    60/103: $60\parity[0:0]
+    61/103: $59\parity[0:0]
+    62/103: $58\parity[0:0]
+    63/103: $3\syndrome[5:0]
+    64/103: $57\parity[0:0]
+    65/103: $56\parity[0:0]
+    66/103: $55\parity[0:0]
+    67/103: $54\parity[0:0]
+    68/103: $53\parity[0:0]
+    69/103: $52\parity[0:0]
+    70/103: $51\parity[0:0]
+    71/103: $50\parity[0:0]
+    72/103: $49\parity[0:0]
+    73/103: $48\parity[0:0]
+    74/103: $47\parity[0:0]
+    75/103: $46\parity[0:0]
+    76/103: $45\parity[0:0]
+    77/103: $44\parity[0:0]
+    78/103: $43\parity[0:0]
+    79/103: $42\parity[0:0]
+    80/103: $41\parity[0:0]
+    81/103: $40\parity[0:0]
+    82/103: $39\parity[0:0]
+    83/103: $2\syndrome[5:0]
+    84/103: $38\parity[0:0]
+    85/103: $37\parity[0:0]
+    86/103: $36\parity[0:0]
+    87/103: $35\parity[0:0]
+    88/103: $34\parity[0:0]
+    89/103: $33\parity[0:0]
+    90/103: $32\parity[0:0]
+    91/103: $31\parity[0:0]
+    92/103: $30\parity[0:0]
+    93/103: $29\parity[0:0]
+    94/103: $28\parity[0:0]
+    95/103: $27\parity[0:0]
+    96/103: $26\parity[0:0]
+    97/103: $25\parity[0:0]
+    98/103: $24\parity[0:0]
+    99/103: $23\parity[0:0]
+   100/103: $22\parity[0:0]
+   101/103: $21\parity[0:0]
+   102/103: $20\parity[0:0]
+   103/103: $1\syndrome[5:0]
+
+6.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.\selected_interval' from process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:115$227'.
+No latch inferred for signal `\secded_32_39_decoder.\codeword_corrected' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\data_out' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\single_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\double_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\uncorrectable' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\error_position' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\syndrome' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\overall_parity_error' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\parity' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+No latch inferred for signal `\secded_32_39_decoder.\pos' from process `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+
+6.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\adaptive_scrub_controller.\corrected_error_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1070' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\uncorrectable_error_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1071' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\scrub_active' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1072' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\scrub_cycle_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1073' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\memory_read_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1074' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\memory_write_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1075' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\interval_switch_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1076' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\total_cycle_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1077' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\scrub_active_cycle_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1078' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\memory_busy_cycle_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1079' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\safe_mode_cycle_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1080' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\safe_mode_entry_count' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1081' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\last_pass_duration' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1082' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\state' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1083' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\interval_counter' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1084' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\current_addr' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1085' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\previous_selected_interval' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1086' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\interval_initialized' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1087' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\previous_safe_mode_active' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1088' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\pass_duration_counter' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1089' with positive edge clock.
+Creating register for signal `\adaptive_scrub_controller.\completed_first_pass' using process `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+  created $dff cell `$procdff$1090' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_ctrl_level' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1091' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_ctrl_valid' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1092' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_ctrl_update' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1093' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_window_count' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1094' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_corrected_delta' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1095' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_uncorrectable_delta' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1096' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\measured_raw_score' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1097' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\previous_corrected_error_count' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1098' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\previous_uncorrectable_error_count' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1099' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1100' with positive edge clock.
+Creating register for signal `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.\score_to_level$func$rtl/measured_control_estimator.v:139$228.score' using process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+  created $dff cell `$procdff$1101' with positive edge clock.
+Creating register for signal `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.\safe_mode_active' using process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+  created $dff cell `$procdff$1102' with positive edge clock.
+Creating register for signal `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.\current_level' using process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+  created $dff cell `$procdff$1103' with positive edge clock.
+Creating register for signal `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.\threshold_state' using process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+  created $dff cell `$procdff$1104' with positive edge clock.
+Creating register for signal `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.\control_age' using process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+  created $dff cell `$procdff$1105' with positive edge clock.
+
+6.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+6.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 15 empty switches in `\adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+Removing empty process `adaptive_scrub_controller.$proc$rtl/adaptive_scrub_controller.v:293$188'.
+Found and cleaned up 10 empty switches in `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+Removing empty process `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.$proc$rtl/measured_control_estimator.v:115$236'.
+Found and cleaned up 4 empty switches in `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:115$227'.
+Removing empty process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:115$227'.
+Found and cleaned up 10 empty switches in `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+Removing empty process `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.$proc$rtl/interval_selector.v:52$217'.
+Found and cleaned up 87 empty switches in `\secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Removing empty process `secded_32_39_decoder.$proc$rtl/secded_32_39_decoder.v:18$7'.
+Cleaned up 126 empty switches.
+
+6.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module adaptive_scrub_controller.
+<suppressed ~15 debug messages>
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+<suppressed ~8 debug messages>
+Optimizing module secded_32_39_decoder.
+<suppressed ~19 debug messages>
+
+7. Executing OPT pass (performing simple optimizations).
+
+7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module adaptive_scrub_controller.
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+<suppressed ~4 debug messages>
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module secded_32_39_decoder.
+
+7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\adaptive_scrub_controller'.
+<suppressed ~111 debug messages>
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+<suppressed ~3 debug messages>
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+<suppressed ~15 debug messages>
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~3 debug messages>
+Removed a total of 44 cells.
+
+7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port B of cell $procmux$318: \interval_initialized -> 1'1
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$672.
+    dead port 2/2 on $mux $procmux$672.
+    dead port 1/2 on $mux $procmux$669.
+    dead port 2/2 on $mux $procmux$669.
+    dead port 1/2 on $mux $procmux$657.
+    dead port 2/2 on $mux $procmux$657.
+    dead port 1/2 on $mux $procmux$654.
+    dead port 2/2 on $mux $procmux$654.
+    dead port 1/2 on $mux $procmux$651.
+    dead port 2/2 on $mux $procmux$651.
+    dead port 1/2 on $mux $procmux$648.
+    dead port 2/2 on $mux $procmux$648.
+    dead port 1/2 on $mux $procmux$645.
+    dead port 2/2 on $mux $procmux$645.
+    dead port 1/2 on $mux $procmux$642.
+    dead port 2/2 on $mux $procmux$642.
+    dead port 1/2 on $mux $procmux$640.
+    dead port 2/2 on $mux $procmux$640.
+    dead port 1/2 on $mux $procmux$636.
+    dead port 2/2 on $mux $procmux$636.
+    dead port 1/2 on $mux $procmux$633.
+    dead port 2/2 on $mux $procmux$633.
+    dead port 1/2 on $mux $procmux$631.
+    dead port 2/2 on $mux $procmux$631.
+    dead port 1/2 on $mux $procmux$627.
+    dead port 2/2 on $mux $procmux$624.
+    dead port 2/2 on $mux $procmux$622.
+    dead port 1/2 on $mux $procmux$615.
+    dead port 2/2 on $mux $procmux$612.
+    dead port 2/2 on $mux $procmux$610.
+    dead port 1/2 on $mux $procmux$608.
+    dead port 1/2 on $mux $procmux$600.
+    dead port 2/2 on $mux $procmux$597.
+    dead port 2/2 on $mux $procmux$595.
+    dead port 1/2 on $mux $procmux$593.
+    dead port 1/2 on $mux $procmux$590.
+    dead port 1/2 on $mux $procmux$582.
+    dead port 2/2 on $mux $procmux$579.
+    dead port 2/2 on $mux $procmux$577.
+    dead port 1/2 on $mux $procmux$575.
+    dead port 1/2 on $mux $procmux$572.
+    dead port 1/2 on $mux $procmux$569.
+    dead port 1/2 on $mux $procmux$561.
+    dead port 2/2 on $mux $procmux$558.
+    dead port 2/2 on $mux $procmux$556.
+    dead port 1/2 on $mux $procmux$554.
+    dead port 1/2 on $mux $procmux$551.
+    dead port 1/2 on $mux $procmux$548.
+    dead port 1/2 on $mux $procmux$545.
+    dead port 1/2 on $mux $procmux$537.
+    dead port 2/2 on $mux $procmux$534.
+    dead port 2/2 on $mux $procmux$532.
+    dead port 1/2 on $mux $procmux$530.
+    dead port 1/2 on $mux $procmux$527.
+    dead port 1/2 on $mux $procmux$524.
+    dead port 1/2 on $mux $procmux$521.
+    dead port 1/2 on $mux $procmux$518.
+    dead port 1/2 on $mux $procmux$510.
+    dead port 2/2 on $mux $procmux$507.
+    dead port 2/2 on $mux $procmux$505.
+    dead port 1/2 on $mux $procmux$503.
+    dead port 1/2 on $mux $procmux$500.
+    dead port 1/2 on $mux $procmux$497.
+    dead port 1/2 on $mux $procmux$494.
+    dead port 1/2 on $mux $procmux$491.
+    dead port 1/2 on $mux $procmux$488.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$779.
+    dead port 1/2 on $mux $procmux$771.
+    dead port 2/2 on $mux $procmux$768.
+    dead port 1/2 on $mux $procmux$755.
+    dead port 2/2 on $mux $procmux$752.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$946.
+    dead port 1/2 on $mux $procmux$940.
+    dead port 1/2 on $mux $procmux$934.
+    dead port 1/2 on $mux $procmux$928.
+    dead port 2/2 on $mux $procmux$925.
+    dead port 1/2 on $mux $procmux$919.
+    dead port 2/2 on $mux $procmux$916.
+    dead port 1/2 on $mux $procmux$910.
+    dead port 2/2 on $mux $procmux$907.
+    dead port 1/2 on $mux $procmux$902.
+    dead port 2/2 on $mux $procmux$899.
+    dead port 1/2 on $mux $procmux$893.
+    dead port 2/2 on $mux $procmux$890.
+    dead port 1/2 on $mux $procmux$884.
+    dead port 1/2 on $mux $procmux$881.
+    dead port 1/2 on $mux $procmux$875.
+    dead port 1/2 on $mux $procmux$872.
+    dead port 1/2 on $mux $procmux$866.
+    dead port 1/2 on $mux $procmux$863.
+    dead port 1/2 on $mux $procmux$857.
+    dead port 1/2 on $mux $procmux$854.
+    dead port 1/2 on $mux $procmux$848.
+    dead port 1/2 on $mux $procmux$845.
+    dead port 1/2 on $mux $procmux$952.
+    dead port 1/2 on $mux $procmux$958.
+Removed 96 multiplexer ports.
+<suppressed ~49 debug messages>
+
+7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \adaptive_scrub_controller.
+    New ctrl vector for $pmux cell $procmux$439: { $procmux$452_CMP $auto$opt_reduce.cc:137:opt_pmux$1109 $procmux$440_CMP }
+    New ctrl vector for $pmux cell $procmux$336: { $procmux$441_CMP $auto$opt_reduce.cc:137:opt_pmux$1111 }
+    New ctrl vector for $pmux cell $procmux$300: { $procmux$452_CMP $auto$opt_reduce.cc:137:opt_pmux$1113 $procmux$440_CMP }
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 4 changes.
+
+7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\adaptive_scrub_controller'.
+<suppressed ~3 debug messages>
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~3 debug messages>
+Removed a total of 2 cells.
+
+7.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$1089 ($dff) from module adaptive_scrub_controller (D = $procmux$300_Y, Q = \pass_duration_counter, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1114 ($sdff) from module adaptive_scrub_controller (D = $procmux$300_Y, Q = \pass_duration_counter).
+Adding SRST signal on $procdff$1090 ($dff) from module adaptive_scrub_controller (D = $procmux$290_Y, Q = \completed_first_pass, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$1122 ($sdff) from module adaptive_scrub_controller (D = $procmux$290_Y, Q = \completed_first_pass).
+Adding SRST signal on $procdff$1070 ($dff) from module adaptive_scrub_controller (D = $procmux$477_Y, Q = \corrected_error_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1130 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:414$208_Y, Q = \corrected_error_count).
+Adding SRST signal on $procdff$1071 ($dff) from module adaptive_scrub_controller (D = $procmux$465_Y, Q = \uncorrectable_error_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1134 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:418$209_Y, Q = \uncorrectable_error_count).
+Adding SRST signal on $procdff$1072 ($dff) from module adaptive_scrub_controller (D = $procmux$439_Y, Q = \scrub_active, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$1140 ($sdff) from module adaptive_scrub_controller (D = $procmux$439_Y, Q = \scrub_active).
+Adding SRST signal on $procdff$1073 ($dff) from module adaptive_scrub_controller (D = $procmux$433_Y, Q = \scrub_cycle_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1144 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:446$215_Y, Q = \scrub_cycle_count).
+Adding SRST signal on $procdff$1074 ($dff) from module adaptive_scrub_controller (D = $procmux$427_Y, Q = \memory_read_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1146 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:399$205_Y, Q = \memory_read_count).
+Adding SRST signal on $procdff$1075 ($dff) from module adaptive_scrub_controller (D = $procmux$416_Y, Q = \memory_write_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1148 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:428$211_Y, Q = \memory_write_count).
+Adding SRST signal on $procdff$1076 ($dff) from module adaptive_scrub_controller (D = $procmux$408_Y, Q = \interval_switch_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1150 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:366$199_Y, Q = \interval_switch_count).
+Adding SRST signal on $procdff$1077 ($dff) from module adaptive_scrub_controller (D = $procmux$398_Y, Q = \total_cycle_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1154 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:336$189_Y, Q = \total_cycle_count).
+Adding SRST signal on $procdff$1078 ($dff) from module adaptive_scrub_controller (D = $procmux$393_Y, Q = \scrub_active_cycle_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1156 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:339$190_Y, Q = \scrub_active_cycle_count).
+Adding SRST signal on $procdff$1079 ($dff) from module adaptive_scrub_controller (D = $procmux$386_Y, Q = \memory_busy_cycle_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1160 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:343$192_Y, Q = \memory_busy_cycle_count).
+Adding SRST signal on $procdff$1080 ($dff) from module adaptive_scrub_controller (D = $procmux$379_Y, Q = \safe_mode_cycle_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1164 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:347$193_Y, Q = \safe_mode_cycle_count).
+Adding SRST signal on $procdff$1081 ($dff) from module adaptive_scrub_controller (D = $procmux$372_Y, Q = \safe_mode_entry_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1168 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:351$196_Y, Q = \safe_mode_entry_count).
+Adding SRST signal on $procdff$1082 ($dff) from module adaptive_scrub_controller (D = $procmux$365_Y, Q = \last_pass_duration, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1172 ($sdff) from module adaptive_scrub_controller (D = $add$rtl/adaptive_scrub_controller.v:454$216_Y, Q = \last_pass_duration).
+Adding SRST signal on $procdff$1083 ($dff) from module adaptive_scrub_controller (D = $procmux$270_Y, Q = \state, rval = 3'000).
+Adding SRST signal on $procdff$1084 ($dff) from module adaptive_scrub_controller (D = $procmux$359_Y, Q = \interval_counter, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1175 ($sdff) from module adaptive_scrub_controller (D = $procmux$357_Y, Q = \interval_counter).
+Adding SRST signal on $procdff$1085 ($dff) from module adaptive_scrub_controller (D = $procmux$336_Y, Q = \current_addr, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:266:slice$1177 ($sdff) from module adaptive_scrub_controller (D = $procmux$336_Y, Q = \current_addr).
+Adding SRST signal on $procdff$1086 ($dff) from module adaptive_scrub_controller (D = $procmux$330_Y, Q = \previous_selected_interval, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1185 ($sdff) from module adaptive_scrub_controller (D = $procmux$328_Y, Q = \previous_selected_interval).
+Adding SRST signal on $procdff$1087 ($dff) from module adaptive_scrub_controller (D = $procmux$320_Y, Q = \interval_initialized, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$1191 ($sdff) from module adaptive_scrub_controller (D = $procmux$318_Y, Q = \interval_initialized).
+Adding SRST signal on $procdff$1088 ($dff) from module adaptive_scrub_controller (D = \safe_mode_active, Q = \previous_safe_mode_active, rval = 1'0).
+Adding SRST signal on $procdff$1099 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$678_Y, Q = \previous_uncorrectable_error_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1194 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = \uncorrectable_error_count, Q = \previous_uncorrectable_error_count).
+Adding SRST signal on $procdff$1091 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$741_Y, Q = \measured_ctrl_level, rval = 3'000).
+Adding EN signal on $auto$ff.cc:266:slice$1198 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $4\score_to_level$func$rtl/measured_control_estimator.v:139$228.$result[2:0]$248, Q = \measured_ctrl_level).
+Adding SRST signal on $procdff$1092 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$732_Y, Q = \measured_ctrl_valid, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$1202 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = 1'1, Q = \measured_ctrl_valid).
+Adding SRST signal on $procdff$1093 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$661_Y, Q = \measured_ctrl_update, rval = 1'0).
+Adding SRST signal on $procdff$1094 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$723_Y, Q = \measured_window_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1211 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$721_Y, Q = \measured_window_count).
+Adding SRST signal on $procdff$1095 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$714_Y, Q = \measured_corrected_delta, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1213 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $sub$rtl/measured_control_estimator.v:73$229_Y, Q = \measured_corrected_delta).
+Adding SRST signal on $procdff$1096 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$705_Y, Q = \measured_uncorrectable_delta, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1217 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $sub$rtl/measured_control_estimator.v:76$230_Y, Q = \measured_uncorrectable_delta).
+Adding SRST signal on $procdff$1097 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$696_Y, Q = \measured_raw_score, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1221 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $ternary$rtl/measured_control_estimator.v:88$235_Y, Q = \measured_raw_score).
+Adding SRST signal on $procdff$1098 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = $procmux$687_Y, Q = \previous_corrected_error_count, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1225 ($sdff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator (D = \corrected_error_count, Q = \previous_corrected_error_count).
+Setting constant 1-bit at position 0 on $procdff$1100 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 1 on $procdff$1100 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 2 on $procdff$1100 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 0 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 1 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 2 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 3 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 4 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 5 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 6 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 7 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 8 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 9 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 10 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 11 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 12 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 13 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 14 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 15 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 16 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 17 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 18 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 19 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 20 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 21 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 22 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 23 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 24 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 25 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 26 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 27 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 28 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 29 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 30 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Setting constant 1-bit at position 31 on $procdff$1101 ($dff) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Adding SRST signal on $procdff$1102 ($dff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $procmux$830_Y, Q = \safe_mode_active, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$1229 ($sdff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = 1'1, Q = \safe_mode_active).
+Adding SRST signal on $procdff$1103 ($dff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $procmux$822_Y, Q = \current_level, rval = 3'000).
+Adding EN signal on $auto$ff.cc:266:slice$1235 ($sdff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = \ctrl_level, Q = \current_level).
+Adding SRST signal on $procdff$1104 ($dff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $procmux$813_Y, Q = \threshold_state, rval = 2'00).
+Adding EN signal on $auto$ff.cc:266:slice$1241 ($sdff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $procmux$800_Y, Q = \threshold_state).
+Adding SRST signal on $procdff$1105 ($dff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $procmux$784_Y, Q = \control_age, rval = 0).
+Adding EN signal on $auto$ff.cc:266:slice$1247 ($sdff) from module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector (D = $add$rtl/interval_selector.v:106$225_Y, Q = \control_age).
+
+7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 87 unused cells and 657 unused wires.
+<suppressed ~91 debug messages>
+
+7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+<suppressed ~4 debug messages>
+Optimizing module secded_32_39_decoder.
+
+7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~26 debug messages>
+
+7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+<suppressed ~18 debug messages>
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+<suppressed ~15 debug messages>
+Finding identical cells in module `\adaptive_scrub_controller'.
+<suppressed ~3 debug messages>
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 12 cells.
+
+7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 12 unused wires.
+<suppressed ~3 debug messages>
+
+7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+7.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~26 debug messages>
+
+7.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+7.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+7.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+7.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+7.23. Finished OPT passes. (There is nothing left to do.)
+
+8. Executing FSM pass (extract and optimize FSM).
+
+8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+9. Executing OPT pass (performing simple optimizations).
+
+9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~26 debug messages>
+
+9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+9.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+9.9. Finished OPT passes. (There is nothing left to do.)
+
+10. Executing MEMORY pass.
+
+10.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+10.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+10.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+10.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+10.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+10.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+10.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+10.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+10.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+10.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+10.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~26 debug messages>
+
+11.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+11.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+11.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+11.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+11.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+11.9. Finished OPT passes. (There is nothing left to do.)
+
+12. Executing TECHMAP pass (map to technology primitives).
+
+12.1. Executing Verilog-2005 frontend: /usr/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+12.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $reduce_xor.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $logic_and.
+Using extmapper simplemap for cells of type $reduce_bool.
+Running "alumacc" on wrapper $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$le:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=6:B_SIGNED=0:B_WIDTH=6:Y_WIDTH=6:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$constmap:0ebe86838c3e845ab1b34c19956a30ce2cd4a073$paramod$2d11a04ddd49fada06fedd6b45b3e1763ae37043\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$00298f3f8094950cb9a5ff2fda48d0d8bde8806c\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $and.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$57f63e8a3282e053be0430389b09fa050ac7dca0\_90_pmux for cells of type $pmux.
+Using template $paramod$54d740639e1393b22262823179ff783ea9f17a35\_90_pmux for cells of type $pmux.
+Using template $paramod$c5c783b17ab1d780abfad8cfe6563a0a7b47a3b0\_90_pmux for cells of type $pmux.
+Running "alumacc" on wrapper $extern:wrap:$le:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$le:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$le:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$sub:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $eq.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=32:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $logic_or.
+Using extmapper simplemap for cells of type $ne.
+Running "alumacc" on wrapper $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=32:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=4:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$bf2533632d512eac76dd186c0da49367e29b8e98\_90_pmux for cells of type $pmux.
+Using template $paramod$d629d85c8826a74239b9178d1930215a43b0ceb0\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $sdffe.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using template $paramod$740b056ede97228d3eae64ea2fdc81f0a33e0fe7\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Running "alumacc" on wrapper $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$ge:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$le:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$le:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$le:A_SIGNED=0:A_WIDTH=3:B_SIGNED=0:B_WIDTH=3:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$bf8e268f26361094a16ad6650df0ad1ca719658a\_90_pmux for cells of type $pmux.
+Using template $paramod$97565c3687be688407d1272a293bd9d0ae6852dc\_90_pmux for cells of type $pmux.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=64:Y_WIDTH=64:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=64:Y_WIDTH=64:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=64:Y_WIDTH=64:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$gt:A_SIGNED=0:A_WIDTH=64:B_SIGNED=0:B_WIDTH=32:Y_WIDTH=1:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$039520c137afc9cd69dd56c3fb11a4e1fbe5f664\_90_alu for cells of type $alu.
+Using template $paramod$425066d11b1a6f068ec157e714ae99280dc1b91b\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000001000000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~7316 debug messages>
+
+13. Executing OPT pass (performing simple optimizations).
+
+13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+<suppressed ~2370 debug messages>
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+<suppressed ~342 debug messages>
+Optimizing module adaptive_scrub_controller.
+<suppressed ~3273 debug messages>
+Optimizing module secded_32_39_decoder.
+<suppressed ~147 debug messages>
+
+13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+<suppressed ~2691 debug messages>
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+<suppressed ~126 debug messages>
+Finding identical cells in module `\adaptive_scrub_controller'.
+<suppressed ~1305 debug messages>
+Finding identical cells in module `\secded_32_39_decoder'.
+<suppressed ~36 debug messages>
+Removed a total of 1386 cells.
+
+13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+13.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 1029 unused cells and 4875 unused wires.
+<suppressed ~1033 debug messages>
+
+13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+13.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+13.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+13.13. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $auto$ff.cc:266:slice$3086 ($_SDFF_PP0_) from module adaptive_scrub_controller (D = $procmux$270.Y_B [2], Q = \state [2], rval = 1'0).
+Adding SRST signal on $auto$ff.cc:266:slice$3085 ($_SDFF_PP0_) from module adaptive_scrub_controller (D = $procmux$270.Y_B [1], Q = \state [1], rval = 1'0).
+Adding SRST signal on $auto$ff.cc:266:slice$3084 ($_SDFF_PP0_) from module adaptive_scrub_controller (D = $procmux$270.Y_B [0], Q = \state [0], rval = 1'0).
+
+13.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 3 unused cells and 4 unused wires.
+<suppressed ~4 debug messages>
+
+13.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+13.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+13.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+<suppressed ~12 debug messages>
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 4 cells.
+
+13.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~1 debug messages>
+
+13.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+13.23. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.24. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+13.25. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+13.26. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+13.27. Executing OPT_DFF pass (perform DFF optimizations).
+
+13.28. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+13.29. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+13.30. Finished OPT passes. (There is nothing left to do.)
+
+14. Executing ABC pass (technology mapping using ABC).
+
+14.1. Extracting gate netlist of module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator' to `<abc-temp-dir>/input.blif'..
+Extracted 1292 gates and 1456 wires to a netlist network with 162 inputs and 134 outputs.
+
+14.1.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+14.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      117
+ABC RESULTS:            ANDNOT cells:       17
+ABC RESULTS:              NAND cells:      238
+ABC RESULTS:               NOR cells:       14
+ABC RESULTS:               NOT cells:        6
+ABC RESULTS:                OR cells:       18
+ABC RESULTS:             ORNOT cells:      108
+ABC RESULTS:              XNOR cells:      119
+ABC RESULTS:               XOR cells:       50
+ABC RESULTS:              ZERO cells:       17
+ABC RESULTS:        internal signals:     1160
+ABC RESULTS:           input signals:      162
+ABC RESULTS:          output signals:      134
+Removing temp directory.
+
+14.2. Extracting gate netlist of module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector' to `<abc-temp-dir>/input.blif'..
+Replacing 32 occurrences of constant undef bits with constant zero bits
+Extracted 1412 gates and 1921 wires to a netlist network with 507 inputs and 71 outputs.
+
+14.2.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+14.2.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      408
+ABC RESULTS:            ANDNOT cells:       15
+ABC RESULTS:              NAND cells:      668
+ABC RESULTS:               NOR cells:        8
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:       34
+ABC RESULTS:             ORNOT cells:       78
+ABC RESULTS:              XNOR cells:        4
+ABC RESULTS:               XOR cells:       31
+ABC RESULTS:        internal signals:     1343
+ABC RESULTS:           input signals:      507
+ABC RESULTS:          output signals:       71
+Removing temp directory.
+
+14.3. Extracting gate netlist of module `\adaptive_scrub_controller' to `<abc-temp-dir>/input.blif'..
+Replacing 77 occurrences of constant undef bits with constant zero bits
+Extracted 2098 gates and 2641 wires to a netlist network with 540 inputs and 548 outputs.
+
+14.3.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+14.3.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      625
+ABC RESULTS:            ANDNOT cells:       26
+ABC RESULTS:               BUF cells:        1
+ABC RESULTS:               MUX cells:        7
+ABC RESULTS:              NAND cells:      231
+ABC RESULTS:               NOR cells:       54
+ABC RESULTS:               NOT cells:       17
+ABC RESULTS:                OR cells:       46
+ABC RESULTS:             ORNOT cells:       94
+ABC RESULTS:              XNOR cells:       97
+ABC RESULTS:               XOR cells:      379
+ABC RESULTS:        internal signals:     1553
+ABC RESULTS:           input signals:      540
+ABC RESULTS:          output signals:      548
+Removing temp directory.
+
+14.4. Extracting gate netlist of module `\secded_32_39_decoder' to `<abc-temp-dir>/input.blif'..
+Extracted 454 gates and 494 wires to a netlist network with 39 inputs and 48 outputs.
+
+14.4.1. Executing ABC.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ABC command line: "source <abc-temp-dir>/abc.script".
+ABC: 
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+14.4.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       41
+ABC RESULTS:            ANDNOT cells:        8
+ABC RESULTS:              NAND cells:       44
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        5
+ABC RESULTS:              XNOR cells:      113
+ABC RESULTS:               XOR cells:       28
+ABC RESULTS:        internal signals:      407
+ABC RESULTS:           input signals:       39
+ABC RESULTS:          output signals:       48
+Removing temp directory.
+
+15. Executing OPT pass (performing simple optimizations).
+
+15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+<suppressed ~64 debug messages>
+Optimizing module secded_32_39_decoder.
+
+15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+<suppressed ~102 debug messages>
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 34 cells.
+
+15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+15.6. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 0 on $auto$ff.cc:266:slice$11559 ($_SDFFE_PP0P_) from module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+
+15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 3576 unused wires.
+<suppressed ~9 debug messages>
+
+15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+<suppressed ~10 debug messages>
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+Removed 0 unused cells and 10 unused wires.
+<suppressed ~1 debug messages>
+
+15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+15.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+15.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \adaptive_scrub_controller..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \secded_32_39_decoder..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+  Optimizing cells in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+  Optimizing cells in module \adaptive_scrub_controller.
+  Optimizing cells in module \secded_32_39_decoder.
+Performed a total of 0 changes.
+
+15.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator'.
+Finding identical cells in module `$paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector'.
+Finding identical cells in module `\adaptive_scrub_controller'.
+Finding identical cells in module `\secded_32_39_decoder'.
+Removed a total of 0 cells.
+
+15.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator..
+Finding unused cells or wires in module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector..
+Finding unused cells or wires in module \adaptive_scrub_controller..
+Finding unused cells or wires in module \secded_32_39_decoder..
+
+15.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator.
+Optimizing module $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector.
+Optimizing module adaptive_scrub_controller.
+Optimizing module secded_32_39_decoder.
+
+15.23. Finished OPT passes. (There is nothing left to do.)
+
+16. Printing statistics.
+
+=== $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator ===
+
+   Number of wires:                582
+   Number of wire bits:           1147
+   Number of public wires:          21
+   Number of public wire bits:     584
+   Number of ports:                 12
+   Number of port bits:            200
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                839
+     $_ANDNOT_                      17
+     $_AND_                         96
+     $_NAND_                       238
+     $_NOR_                          7
+     $_NOT_                          6
+     $_ORNOT_                      108
+     $_OR_                          18
+     $_SDFFE_PP0P_                 179
+     $_SDFF_PP0_                     1
+     $_XNOR_                       119
+     $_XOR_                         50
+
+=== $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector ===
+
+   Number of wires:               1214
+   Number of wire bits:           1787
+   Number of public wires:          30
+   Number of public wire bits:     540
+   Number of ports:                 30
+   Number of port bits:            540
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               1285
+     $_ANDNOT_                      15
+     $_AND_                        408
+     $_NAND_                       668
+     $_NOR_                          8
+     $_NOT_                          1
+     $_ORNOT_                       78
+     $_OR_                          34
+     $_SDFFE_PP0P_                  38
+     $_XNOR_                         4
+     $_XOR_                         31
+
+=== adaptive_scrub_controller ===
+
+   Number of wires:               1215
+   Number of wire bits:           3355
+   Number of public wires:          76
+   Number of public wire bits:    1403
+   Number of ports:                 57
+   Number of port bits:           1178
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               2070
+     $_ANDNOT_                      26
+     $_AND_                        625
+     $_MUX_                          7
+     $_NAND_                       231
+     $_NOR_                         54
+     $_NOT_                         17
+     $_ORNOT_                       94
+     $_OR_                          46
+     $_SDFFE_PP0N_                  96
+     $_SDFFE_PP0P_                 391
+     $_SDFF_PP0_                     4
+     $_XNOR_                        97
+     $_XOR_                        379
+     $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator      1
+     $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector      1
+     secded_32_39_decoder            1
+
+=== secded_32_39_decoder ===
+
+   Number of wires:                201
+   Number of wire bits:            344
+   Number of public wires:           8
+   Number of public wire bits:     151
+   Number of ports:                  7
+   Number of port bits:            119
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                241
+     $_ANDNOT_                       8
+     $_AND_                         41
+     $_NAND_                        44
+     $_NOR_                          1
+     $_ORNOT_                        5
+     $_OR_                           1
+     $_XNOR_                       113
+     $_XOR_                         28
+
+=== design hierarchy ===
+
+   adaptive_scrub_controller         1
+     $paramod$0ba38a2bcf6fefd2b87fb17fc2460c7b3083d935\measured_control_estimator      1
+     $paramod$bb9691242f7c16163833672c3bc3501f754d7220\interval_selector      1
+     secded_32_39_decoder            1
+
+   Number of wires:               3212
+   Number of wire bits:           6633
+   Number of public wires:         135
+   Number of public wire bits:    2678
+   Number of ports:                106
+   Number of port bits:           2037
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               4432
+     $_ANDNOT_                      66
+     $_AND_                       1170
+     $_MUX_                          7
+     $_NAND_                      1181
+     $_NOR_                         70
+     $_NOT_                         24
+     $_ORNOT_                      285
+     $_OR_                          99
+     $_SDFFE_PP0N_                  96
+     $_SDFFE_PP0P_                 608
+     $_SDFF_PP0_                     5
+     $_XNOR_                       333
+     $_XOR_                        488
+
+End of script. Logfile hash: 6145a0f948, CPU: user 1.12s system 0.04s, MEM: 52.20 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 44% 1x abc (0 sec), 16% 30x opt_expr (0 sec), ...

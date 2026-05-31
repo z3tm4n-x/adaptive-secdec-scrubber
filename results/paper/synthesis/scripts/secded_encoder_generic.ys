@@ -1,0 +1,15 @@
+
+read_verilog -sv rtl/secded_32_39_encoder.v
+hierarchy -check -top secded_32_39_encoder
+proc
+opt
+fsm
+opt
+memory
+opt
+techmap
+opt
+abc
+opt
+clean
+stat

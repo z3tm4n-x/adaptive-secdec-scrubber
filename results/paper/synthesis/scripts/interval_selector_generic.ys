@@ -1,0 +1,15 @@
+
+read_verilog -sv rtl/interval_selector.v
+hierarchy -check -top interval_selector
+proc
+opt
+fsm
+opt
+memory
+opt
+techmap
+opt
+abc
+opt
+clean
+stat

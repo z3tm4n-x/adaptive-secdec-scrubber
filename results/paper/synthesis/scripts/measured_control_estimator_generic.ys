@@ -1,0 +1,15 @@
+
+read_verilog -sv rtl/measured_control_estimator.v
+hierarchy -check -top measured_control_estimator
+proc
+opt
+fsm
+opt
+memory
+opt
+techmap
+opt
+abc
+opt
+clean
+stat

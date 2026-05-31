@@ -74,6 +74,9 @@ REQUIRED_FILES = [
     "data/mbu_hmd_logical_round_robin.csv",
     "data/mbu_pm_logical_example.csv",
     "doc/mbu_parameter_sources.md",
+    "model/run_rtl_synthesis.py",
+    "results/paper/synthesis/rtl_synthesis_summary.md",
+    "results/paper/synthesis/rtl_synthesis_summary.csv",
 ]
 
 
@@ -95,6 +98,7 @@ CSV_MIN_ROWS = {
     "results/paper/tables/mbu_suppression_requirements.csv": 20,
     "results/paper/theory_consistency/poisson_accumulation_validation.csv": 4,
     "results/paper/theory_consistency/theory_consistency.csv": 31,
+    "results/paper/synthesis/rtl_synthesis_summary.csv": 10,
 }
 
 
@@ -109,6 +113,10 @@ TEXT_MUST_CONTAIN = {
         "run_accumulation_only_rtl_series.py",
         "run_measured_weight_sweep.py",
         "new_due_count",
+        "run_rtl_synthesis.py",
+        "rtl_synthesis_summary.md",
+        "RTL synthesis resource estimate",
+        "Fmax",
     ],
     "results/paper/measured_control/measured_control_summary.md": [
         "closed-loop RTL",
@@ -133,6 +141,12 @@ TEXT_MUST_CONTAIN = {
         "new_due_count",
         "measured-control не следует описывать как net resource win",
         "g_D = 0",
+        "RTL synthesis resource estimates",
+        "adaptive_scrub_controller",
+        "3220 cells",
+        "730 FF",
+        "883 LUT",
+        "Fmax is not claimed",
     ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
@@ -191,6 +205,20 @@ TEXT_MUST_CONTAIN = {
         "runtime first-arrival",
         "post-run memory audit",
     ],
+    "results/paper/README.md": [
+        "RTL synthesis resource estimates",
+        "rtl_synthesis_summary.md",
+        "run_rtl_synthesis.py",
+        "Fmax requires target-specific place-and-route",
+    ],
+    "results/paper/synthesis/rtl_synthesis_summary.md": [
+        "RTL synthesis summary",
+        "adaptive_scrub_controller",
+        "SEC-DED decode path",
+        "latched-DUE audit",
+        "Fmax requires target-specific place-and-route",
+        "| `adaptive_scrub_controller` | `xilinx_xc7_estimate` | ok | 3220 | 730 | 883",
+    ],
 }
 
 
@@ -231,6 +259,7 @@ PYTHON_SCRIPTS = [
     "model/check_repository_results_integrity.py",
     "model/regression_check_risk_outputs.py",
     "model/generate_fault_events.py",
+    "model/run_rtl_synthesis.py",
 ]
 
 

@@ -1,7 +1,7 @@
 # Dissertation repository check
 
-- Total checks: 176
-- Passed: 176
+- Total checks: 201
+- Passed: 201
 - Failed: 0
 
 ## Failed checks
@@ -73,6 +73,9 @@ No failed checks.
 | `required:data/mbu_hmd_logical_round_robin.csv` | present |
 | `required:data/mbu_pm_logical_example.csv` | present |
 | `required:doc/mbu_parameter_sources.md` | present |
+| `required:model/run_rtl_synthesis.py` | present |
+| `required:results/paper/synthesis/rtl_synthesis_summary.md` | present |
+| `required:results/paper/synthesis/rtl_synthesis_summary.csv` | present |
 | `csv:results/paper/measured_control/closed_loop/closed_loop_measured_series.csv` | rows=40 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | rows=150 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv` | rows=15 |
@@ -90,6 +93,7 @@ No failed checks.
 | `csv:results/paper/tables/mbu_suppression_requirements.csv` | rows=28 |
 | `csv:results/paper/theory_consistency/poisson_accumulation_validation.csv` | rows=4 |
 | `csv:results/paper/theory_consistency/theory_consistency.csv` | rows=31 |
+| `csv:results/paper/synthesis/rtl_synthesis_summary.csv` | rows=10 |
 | `text_contains:doc/dissertation_mapping.md:Do not state that adaptive scrub-rate itself is new` | found |
 | `text_contains:doc/dissertation_mapping.md:mbu_interleaving_criterion_examples.md` | found |
 | `text_contains:doc/dissertation_mapping.md:risk_sensitivity_summary.md` | found |
@@ -99,6 +103,10 @@ No failed checks.
 | `text_contains:doc/dissertation_mapping.md:run_accumulation_only_rtl_series.py` | found |
 | `text_contains:doc/dissertation_mapping.md:run_measured_weight_sweep.py` | found |
 | `text_contains:doc/dissertation_mapping.md:new_due_count` | found |
+| `text_contains:doc/dissertation_mapping.md:run_rtl_synthesis.py` | found |
+| `text_contains:doc/dissertation_mapping.md:rtl_synthesis_summary.md` | found |
+| `text_contains:doc/dissertation_mapping.md:RTL synthesis resource estimate` | found |
+| `text_contains:doc/dissertation_mapping.md:Fmax` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:closed-loop RTL` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:MODE_MEASURED` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:offline replay` | found |
@@ -119,6 +127,12 @@ No failed checks.
 | `text_contains:results/paper/final_results_summary.md:new_due_count` | found |
 | `text_contains:results/paper/final_results_summary.md:measured-control не следует описывать как net resource win` | found |
 | `text_contains:results/paper/final_results_summary.md:g_D = 0` | found |
+| `text_contains:results/paper/final_results_summary.md:RTL synthesis resource estimates` | found |
+| `text_contains:results/paper/final_results_summary.md:adaptive_scrub_controller` | found |
+| `text_contains:results/paper/final_results_summary.md:3220 cells` | found |
+| `text_contains:results/paper/final_results_summary.md:730 FF` | found |
+| `text_contains:results/paper/final_results_summary.md:883 LUT` | found |
+| `text_contains:results/paper/final_results_summary.md:Fmax is not claimed` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:истинно одновременно` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:Частичное перемежение D=2` | found |
@@ -158,6 +172,16 @@ No failed checks.
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:new_due_count` | found |
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:runtime first-arrival` | found |
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:post-run memory audit` | found |
+| `text_contains:results/paper/README.md:RTL synthesis resource estimates` | found |
+| `text_contains:results/paper/README.md:rtl_synthesis_summary.md` | found |
+| `text_contains:results/paper/README.md:run_rtl_synthesis.py` | found |
+| `text_contains:results/paper/README.md:Fmax requires target-specific place-and-route` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:RTL synthesis summary` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:adaptive_scrub_controller` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:SEC-DED decode path` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:latched-DUE audit` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:Fmax requires target-specific place-and-route` | found |
+| `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:| `adaptive_scrub_controller` | `xilinx_xc7_estimate` | ok | 3220 | 730 | 883` | found |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:Техническое ограничение текущего Verilog-стенда` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:физически одномоментный кластер сериализуется` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:по соседним тактам` | absent |
@@ -184,6 +208,7 @@ No failed checks.
 | `py_compile:model/check_repository_results_integrity.py` | compiled |
 | `py_compile:model/regression_check_risk_outputs.py` | compiled |
 | `py_compile:model/generate_fault_events.py` | compiled |
+| `py_compile:model/run_rtl_synthesis.py` | compiled |
 | `debug_artifacts:results/paper/**/*.vcd` | none |
 | `debug_artifacts:results/paper/**/*.out` | none |
 | `interleaving_seed_dirs_latched_due_columns` | per-seed dirs present and latched DUE columns verified: 150 |

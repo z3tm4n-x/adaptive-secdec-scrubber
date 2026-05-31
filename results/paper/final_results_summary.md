@@ -189,6 +189,7 @@ Smoke-проверка показала:
 | Risk-budget handoff | `results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` |
 | Accumulation-only RTL | `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` |
 | Measured-control weight sweep | `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` |
+| RTL synthesis resource estimates | `results/paper/synthesis/rtl_synthesis_summary.md` |
 
 Current interleaving note: the final RTL interleaving results use true simultaneous multi-slot cluster injection. Groups belonging to one physical cluster are injected with the same `time_cycle`; for the current results `cluster_injection_skew = 0`. D=3 statistically significantly reduces `unique_uncorrectable_words` relative to D=1 and D=2 in the tested clustered-fault scenario. Inside D=3, the slowest-fastest paired delta for unique DUE has a confidence interval that includes zero, so this internal growth must not be called statistically significant.
 
@@ -232,3 +233,19 @@ Default measured-minus-fixed delta по busy_per_mille: 61.000 [61.000; 61.000].
 Corrected-only measured-minus-fixed delta по busy_per_mille: -4.400 [-8.895; 0.095]. Corrected-only measured-minus-fixed delta по `new_due_count`: 0.600 [-0.729; 1.929].
 
 Вывод: measured-control не следует описывать как net resource win. Он подтверждает реализуемость замкнутого контроллера и наблюдаемой телеметрии, но центральный результат диссертации остаётся risk-limited chain: criterion, eta scale, residual-budget policy, RTL sanity checks.
+
+## 10. RTL synthesis resource estimates
+
+A final RTL synthesis resource-estimate pass was added for the synthesizable blocks used by the dissertation model. Testbenches, fault generators, result builders, and post-run audit scripts are not included in the hardware-cost estimate.
+
+| target | Xilinx 7-series estimate: cells | FF | LUT | carry | mux |
+|---|---:|---:|---:|---:|---:|
+| `secded_32_39_encoder` | 106 | 0 | 33 | 0 | 2 |
+| `secded_32_39_decoder` | 256 | 0 | 116 | 2 | 14 |
+| `interval_selector` | 1082 | 38 | 306 | 11 | 186 |
+| `measured_control_estimator` | 679 | 197 | 211 | 51 | 19 |
+| `adaptive_scrub_controller` | 3220 | 730 | 883 | 183 | 214 |
+
+For the full `adaptive_scrub_controller`, the technology-independent generic flow reports 2068 cells and 491 FF-equivalent cells. The Xilinx 7-series estimate reports 3220 cells, 730 FF, and 883 LUT.
+
+Interpretation: this closes the dissertation Section 4.8 resource-estimate gap at RTL synthesis level. Fmax is not claimed from this Yosys-only flow; a valid maximum-frequency statement requires a concrete target device, timing constraints, and place-and-route.

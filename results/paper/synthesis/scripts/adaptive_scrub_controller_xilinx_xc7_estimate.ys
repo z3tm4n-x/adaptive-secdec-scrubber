@@ -1,0 +1,4 @@
+
+read_verilog -sv rtl/secded_32_39_decoder.v rtl/interval_selector.v rtl/measured_control_estimator.v rtl/adaptive_scrub_controller.v
+synth_xilinx -family xc7 -flatten -noclkbuf -top adaptive_scrub_controller
+stat -tech xilinx
