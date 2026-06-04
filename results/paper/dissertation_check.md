@@ -1,7 +1,7 @@
 # Dissertation repository check
 
-- Total checks: 245
-- Passed: 245
+- Total checks: 247
+- Passed: 247
 - Failed: 0
 
 ## Failed checks
@@ -98,6 +98,12 @@ No failed checks.
 | `csv:results/paper/theory_consistency/poisson_accumulation_validation.csv` | rows=4 |
 | `csv:results/paper/theory_consistency/theory_consistency.csv` | rows=31 |
 | `csv:results/paper/synthesis/rtl_synthesis_summary.csv` | rows=10 |
+| `text_contains:results/paper/README.md:RTL synthesis resource estimates` | found |
+| `text_contains:results/paper/README.md:rtl_synthesis_summary.md` | found |
+| `text_contains:results/paper/README.md:run_rtl_synthesis.py` | found |
+| `text_contains:results/paper/README.md:protection_envelope_summary.md` | found |
+| `text_contains:results/paper/README.md:run_protection_envelope.py` | found |
+| `text_contains:results/paper/README.md:Fmax requires target-specific place-and-route` | found |
 | `text_contains:README.md:Protection envelope` | found |
 | `text_contains:README.md:final_dangerous_words` | found |
 | `text_contains:README.md:final_sdc_words` | found |
@@ -210,18 +216,14 @@ No failed checks.
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:new_due_count` | found |
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:runtime first-arrival` | found |
 | `text_contains:results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md:post-run memory audit` | found |
-| `text_contains:results/paper/README.md:RTL synthesis resource estimates` | found |
-| `text_contains:results/paper/README.md:rtl_synthesis_summary.md` | found |
-| `text_contains:results/paper/README.md:run_rtl_synthesis.py` | found |
-| `text_contains:results/paper/README.md:protection_envelope_summary.md` | found |
-| `text_contains:results/paper/README.md:run_protection_envelope.py` | found |
-| `text_contains:results/paper/README.md:Fmax requires target-specific place-and-route` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:RTL synthesis summary` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:adaptive_scrub_controller` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:SEC-DED decode path` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:latched-DUE audit` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:Fmax requires target-specific place-and-route` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:| `adaptive_scrub_controller` | `xilinx_xc7_estimate` | ok | 3220 | 730 | 883` | found |
+| `text_forbidden:results/paper/README.md:Для D>1 кластерные инжекции сериализуются` | absent |
+| `text_forbidden:results/paper/README.md:одна fault-инжекция за такт` | absent |
 | `text_forbidden:README.md:сбойной обстановки` | absent |
 | `text_forbidden:doc/spec.md:сбойной обстановки` | absent |
 | `text_forbidden:doc/spec.md:Оценка сбойной обстановки` | absent |

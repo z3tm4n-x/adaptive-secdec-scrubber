@@ -107,6 +107,11 @@ CSV_MIN_ROWS = {
 
 
 TEXT_MUST_CONTAIN = {
+    "results/paper/README.md": [
+        "одновременную multi-slot инжекцию кластеров",
+        "cluster_injection_skew = 0",
+        "Устаревшие данные с сериализацией кластеров не следует использовать как основной вывод",
+    ],
     "README.md": [
         "Protection envelope",
         "final_dangerous_words",
@@ -270,6 +275,10 @@ TEXT_MUST_CONTAIN = {
 
 
 TEXT_MUST_NOT_CONTAIN = {
+    "results/paper/README.md": [
+        "Для D>1 кластерные инжекции сериализуются",
+        "одна fault-инжекция за такт",
+    ],
     "README.md": [
         "сбойной обстановки",
     ],
