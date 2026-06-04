@@ -317,7 +317,7 @@ test_strategy_comparison: prepare_dirs gen_fault_events
 		mkdir -p $(dir $(TRACE_OUTPUT)); \
 		echo "strategy,cycle,scrub_cycle_count,selected_interval,effective_wait_interval,last_pass_duration,current_level,threshold_state,safe_mode_active,control_age,corrected_error_count,uncorrectable_error_count,memory_read_count,memory_write_count,measured_ctrl_level,measured_ctrl_valid,measured_ctrl_update,measured_window_count,measured_corrected_delta,measured_uncorrectable_delta,measured_raw_score" > $(TRACE_OUTPUT); \
 	fi
-	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,new_due_count,repeated_due_detections,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
+	echo "strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,final_sdc_words,final_dangerous_words,new_due_count,repeated_due_detections,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille" > results/tables/strategy_comparison.csv
 	vvp results/logs/strategy_comparison.out \
 		+STRATEGY=0 \
 		+TOTAL_RUN_CYCLES=$(FAULT_TOTAL_CYCLES) \

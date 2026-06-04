@@ -193,6 +193,8 @@ integer busy_per_mille;
 integer scrub_per_mille;
 integer safe_per_mille;
 integer unique_uncorrectable_word_count;
+integer final_sdc_word_count;
+integer final_dangerous_word_count;
 
 /*
  * Runtime DUE latch metrics.
@@ -936,14 +938,25 @@ endtask
 
 task audit_final_memory;
     integer addr_index;
+    reg [31:0] expected_data;
     begin
         unique_uncorrectable_word_count = 0;
+        final_sdc_word_count = 0;
+        final_dangerous_word_count = 0;
 
         /*
          * После завершения основного прогона управление памятью
          * возвращается проверочной среде. Мы читаем все слова памяти
-         * и считаем число разных адресов, в которых декодер видит
-         * неустранимую ошибку.
+         * и считаем две группы опасных состояний:
+         *   1) обнаруженные неустранимые ошибки SECDED;
+         *   2) тихую порчу данных, когда декодер не выставляет
+         *      uncorrectable, но полезные данные уже неверны.
+         *
+         * В этом стенде память инициализируется адресно-зависимыми
+         * полезными данными 32'h4000_0000 + addr, а контроллер
+         * записывает обратно только исправленные SECDED-слова.
+         * Поэтому checked_data_out, отличающийся от ожидаемого
+         * значения без checked_uncorrectable, является SDC-исходом.
          */
         tb_mode = 1'b1;
         tb_read_en = 1'b0;
@@ -951,12 +964,17 @@ task audit_final_memory;
         tb_inject_en = 1'b0;
 
         for (addr_index = 0; addr_index < DEPTH; addr_index = addr_index + 1) begin
+            expected_data = 32'h4000_0000 + addr_index;
             read_memory_word(addr_index[ADDR_WIDTH-1:0]);
 
             if (checked_uncorrectable) begin
                 unique_uncorrectable_word_count = unique_uncorrectable_word_count + 1;
+            end else if (checked_data_out != expected_data) begin
+                final_sdc_word_count = final_sdc_word_count + 1;
             end
         end
+
+        final_dangerous_word_count = unique_uncorrectable_word_count + final_sdc_word_count;
     end
 endtask
 
@@ -1047,7 +1065,7 @@ task write_results;
         end else begin
             $fdisplay(
                 csv_file,
-                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                "%0s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
                 strategy_name,
                 snap_total_cycle_count,
                 snap_scrub_cycle_count,
@@ -1056,6 +1074,8 @@ task write_results;
                 snap_corrected_error_count,
                 snap_uncorrectable_error_count,
                 unique_uncorrectable_word_count,
+                final_sdc_word_count,
+                final_dangerous_word_count,
                 snap_new_due_count,
                 snap_repeated_due_detection_count,
                 snap_interval_switch_count,
@@ -1079,6 +1099,8 @@ task write_results;
         $display("  corrected_error_count     = %0d", snap_corrected_error_count);
         $display("  uncorrectable_detections  = %0d", snap_uncorrectable_error_count);
         $display("  unique_uncorrectable_words = %0d", unique_uncorrectable_word_count);
+        $display("  final_sdc_words          = %0d", final_sdc_word_count);
+        $display("  final_dangerous_words    = %0d", final_dangerous_word_count);
         $display("  new_due_count             = %0d", snap_new_due_count);
         $display("  repeated_due_detections   = %0d", snap_repeated_due_detection_count);
         $display("  interval_switch_count     = %0d", snap_interval_switch_count);
