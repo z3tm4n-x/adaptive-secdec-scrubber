@@ -79,7 +79,7 @@ No failed checks.
 | `csv:results/paper/measured_control/closed_loop/closed_loop_measured_series.csv` | rows=40 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | rows=150 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv` | rows=15 |
-| `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | rows=65 |
+| `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | rows=91 |
 | `csv:results/paper/tables/risk_sensitivity.csv` | rows=19 |
 | `csv:results/paper/tables/mbu_interleaving_criterion_examples.csv` | rows=24 |
 | `csv:results/paper/tables/efficiency_scale_verification.csv` | rows=6 |
