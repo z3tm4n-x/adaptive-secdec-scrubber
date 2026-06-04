@@ -14,10 +14,12 @@ STRATEGY RESULT: fixed
   corrected_error_count     = 9
   uncorrectable_detections  = 114
   unique_uncorrectable_words = 11
+  final_sdc_words          = 8
+  final_dangerous_words    = 19
   new_due_count             = 10
   repeated_due_detections   = 104
   interval_switch_count     = 0
   memory_busy_cycle_count   = 5129
   busy_per_mille            = 102
 Strategy comparison run passed for strategy fixed.
-tb/tb_strategy_comparison.v:1205: $finish called at 505176000 (1ps)
+tb/tb_strategy_comparison.v:1249: $finish called at 505176000 (1ps)

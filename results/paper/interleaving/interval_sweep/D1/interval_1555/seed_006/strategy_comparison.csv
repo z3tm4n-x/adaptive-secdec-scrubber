@@ -1,2 +1,2 @@
-strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,new_due_count,repeated_due_detections,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
-fixed,50000,31,8004,11,11,146,8,8,138,0,0,0,32057,8015,641,160,0
+strategy,total_cycles,scrub_cycles,reads,writes,corrected,uncorrectable_detections,unique_uncorrectable_words,final_sdc_words,final_dangerous_words,new_due_count,repeated_due_detections,interval_switches,safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,scrub_per_mille,busy_per_mille,safe_per_mille
+fixed,50000,31,8004,11,11,146,8,9,17,8,138,0,0,0,32057,8015,641,160,0
