@@ -1,7 +1,7 @@
 # Dissertation repository check
 
-- Total checks: 201
-- Passed: 201
+- Total checks: 224
+- Passed: 224
 - Failed: 0
 
 ## Failed checks
@@ -22,6 +22,7 @@ No failed checks.
 | `required:model/run_risk_sensitivity.py` | present |
 | `required:model/evaluate_mbu_interleaving_criterion.py` | present |
 | `required:model/run_interleaving_sweep.py` | present |
+| `required:model/run_protection_envelope.py` | present |
 | `required:model/run_closed_loop_measured_series.py` | present |
 | `required:model/build_interleaving_summary.py` | present |
 | `required:rtl/adaptive_scrub_controller.v` | present |
@@ -41,6 +42,8 @@ No failed checks.
 | `required:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | present |
 | `required:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv` | present |
 | `required:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | present |
+| `required:results/paper/protection_envelope/protection_envelope_summary.md` | present |
+| `required:results/paper/protection_envelope/protection_envelope.csv` | present |
 | `required:results/paper/tables/efficiency_scale_verification.md` | present |
 | `required:results/paper/tables/efficiency_scale_verification.csv` | present |
 | `required:results/paper/tables/risk_sensitivity_summary.md` | present |
@@ -80,6 +83,7 @@ No failed checks.
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | rows=150 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv` | rows=15 |
 | `csv:results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | rows=91 |
+| `csv:results/paper/protection_envelope/protection_envelope.csv` | rows=16 |
 | `csv:results/paper/tables/risk_sensitivity.csv` | rows=19 |
 | `csv:results/paper/tables/mbu_interleaving_criterion_examples.csv` | rows=24 |
 | `csv:results/paper/tables/efficiency_scale_verification.csv` | rows=6 |
@@ -100,12 +104,16 @@ No failed checks.
 | `text_contains:doc/dissertation_mapping.md:closed_loop_measured_summary.md` | found |
 | `text_contains:doc/dissertation_mapping.md:run_theory_consistency_checks.py` | found |
 | `text_contains:doc/dissertation_mapping.md:run_risk_budget_handoff.py` | found |
+| `text_contains:doc/dissertation_mapping.md:run_protection_envelope.py` | found |
+| `text_contains:doc/dissertation_mapping.md:protection_envelope_summary.md` | found |
 | `text_contains:doc/dissertation_mapping.md:run_accumulation_only_rtl_series.py` | found |
 | `text_contains:doc/dissertation_mapping.md:run_measured_weight_sweep.py` | found |
 | `text_contains:doc/dissertation_mapping.md:new_due_count` | found |
 | `text_contains:doc/dissertation_mapping.md:run_rtl_synthesis.py` | found |
 | `text_contains:doc/dissertation_mapping.md:rtl_synthesis_summary.md` | found |
 | `text_contains:doc/dissertation_mapping.md:RTL synthesis resource estimate` | found |
+| `text_contains:doc/dissertation_mapping.md:Protection envelope` | found |
+| `text_contains:doc/dissertation_mapping.md:architecture_change_required` | found |
 | `text_contains:doc/dissertation_mapping.md:Fmax` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:closed-loop RTL` | found |
 | `text_contains:results/paper/measured_control/measured_control_summary.md:MODE_MEASURED` | found |
@@ -133,12 +141,24 @@ No failed checks.
 | `text_contains:results/paper/final_results_summary.md:730 FF` | found |
 | `text_contains:results/paper/final_results_summary.md:883 LUT` | found |
 | `text_contains:results/paper/final_results_summary.md:Fmax is not claimed` | found |
+| `text_contains:results/paper/final_results_summary.md:final_dangerous_words` | found |
+| `text_contains:results/paper/final_results_summary.md:final_sdc_words` | found |
+| `text_contains:results/paper/final_results_summary.md:Protection envelope` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:Protection envelope for SECDED scrubbing` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:rho_D = E_inst / E*` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:E_acc_min` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:architecture_change_required` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:bandwidth_or_tau_min_insufficient` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:scrub_period_selectable` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:illustrative design points` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:истинно одновременно` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:Частичное перемежение D=2` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:new_due_count` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:repeated DED` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:diagnostic counter` | found |
+| `text_contains:results/paper/interleaving/interleaving_summary.md:final_dangerous_words` | found |
+| `text_contains:results/paper/interleaving/interleaving_summary.md:final_sdc_words` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:1 + CV` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:discrete_gain_vs_fixed` | found |
 | `text_contains:results/paper/tables/risk_sensitivity_summary.md:below one` | found |
@@ -175,6 +195,8 @@ No failed checks.
 | `text_contains:results/paper/README.md:RTL synthesis resource estimates` | found |
 | `text_contains:results/paper/README.md:rtl_synthesis_summary.md` | found |
 | `text_contains:results/paper/README.md:run_rtl_synthesis.py` | found |
+| `text_contains:results/paper/README.md:protection_envelope_summary.md` | found |
+| `text_contains:results/paper/README.md:run_protection_envelope.py` | found |
 | `text_contains:results/paper/README.md:Fmax requires target-specific place-and-route` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:RTL synthesis summary` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:adaptive_scrub_controller` | found |
@@ -202,6 +224,7 @@ No failed checks.
 | `py_compile:model/run_risk_sensitivity.py` | compiled |
 | `py_compile:model/evaluate_mbu_interleaving_criterion.py` | compiled |
 | `py_compile:model/run_interleaving_sweep.py` | compiled |
+| `py_compile:model/run_protection_envelope.py` | compiled |
 | `py_compile:model/run_closed_loop_measured_series.py` | compiled |
 | `py_compile:model/build_interleaving_summary.py` | compiled |
 | `py_compile:model/build_measured_control_summary.py` | compiled |
@@ -211,5 +234,5 @@ No failed checks.
 | `py_compile:model/run_rtl_synthesis.py` | compiled |
 | `debug_artifacts:results/paper/**/*.vcd` | none |
 | `debug_artifacts:results/paper/**/*.out` | none |
-| `interleaving_seed_dirs_latched_due_columns` | per-seed dirs present and latched DUE columns verified: 150 |
+| `interleaving_seed_dirs_latched_due_columns` | per-seed dirs present and latched DUE/dangerous-state columns verified: 150 |
 | `make_target:dissertation_check` | present |

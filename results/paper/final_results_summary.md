@@ -249,3 +249,31 @@ A final RTL synthesis resource-estimate pass was added for the synthesizable blo
 For the full `adaptive_scrub_controller`, the technology-independent generic flow reports 2068 cells and 491 FF-equivalent cells. The Xilinx 7-series estimate reports 3220 cells, 730 FF, and 883 LUT.
 
 Interpretation: this closes the dissertation Section 4.8 resource-estimate gap at RTL synthesis level. Fmax is not claimed from this Yosys-only flow; a valid maximum-frequency statement requires a concrete target device, timing constraints, and place-and-route.
+
+
+## Protection envelope: applicability regions for SECDED scrubbing
+
+The protection-envelope report turns the Chapter 2 decomposition into a direct
+engineering applicability map. It evaluates `rho_D = E_inst / E*`, the residual
+budget `E_residual = E* - E_inst`, and the minimum accumulated-risk floor
+`E_acc_min` under `tau_min`.
+
+The resulting regions are:
+
+- `architecture_change_required`: period selection alone cannot satisfy the target because the instant dangerous component consumes the risk budget;
+- `bandwidth_or_tau_min_insufficient`: the instant component is acceptable, but the minimum scrub interval is still insufficient for the residual accumulated-risk budget;
+- `scrub_period_selectable`: the residual accumulated-risk budget is reachable, so the Chapter 3 period-selection method applies.
+
+Artifacts: `model/run_protection_envelope.py`,
+`results/paper/protection_envelope/protection_envelope_summary.md`, and
+`results/paper/protection_envelope/protection_envelope.csv`.
+
+## Dangerous-state metric update
+
+The interleaving series now distinguishes DED-only metrics
+(`new_due_count`, `unique_uncorrectable_words`, `repeated_due_detections`)
+from the full dangerous-state audit. The full metric
+`final_dangerous_words` equals detected final unique DUE plus
+`final_sdc_words`, so odd-weight SECDED miscorrection/SDC outcomes are no
+longer hidden by DED-only counters.
+

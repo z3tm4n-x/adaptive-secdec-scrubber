@@ -129,6 +129,22 @@
 | Accumulation-only RTL | `results/paper/accumulation_only_rtl/accumulation_only_rtl_summary.md` | RTL sanity check of the `g_D = 0` branch. |
 | Measured-control weight sweep | `results/paper/measured_control/weight_sweep/measured_weight_sweep_summary.md` | Demonstrates closed-loop measured telemetry; not a net resource win. |
 
+
+## Protection envelope / applicability map
+
+The protection-envelope report is the Chapter 2 feasibility bridge. It separates
+three design regions for SECDED scrubbing:
+
+- `architecture_change_required`: the instant dangerous component already exceeds the risk budget;
+- `bandwidth_or_tau_min_insufficient`: the instant component passes, but the minimum scrub interval is insufficient for the residual accumulated-risk budget;
+- `scrub_period_selectable`: the residual budget is reachable and the scrub-period method can be applied.
+
+Artifacts:
+
+- `protection_envelope/protection_envelope_summary.md`
+- `protection_envelope/protection_envelope.csv`
+- `model/run_protection_envelope.py`
+
 ## RTL synthesis resource estimates
 
 | Artifact | Role |

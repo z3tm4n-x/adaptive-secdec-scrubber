@@ -44,6 +44,21 @@ The dissertation is organized around the following chain:
 | `results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv` | Paired delta significance for D comparisons | cite | CI interpretation only within tested scenario |
 | `results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv` | Full aggregated run table | cite for traceability | Large table; prefer summary/deltas in text |
 
+
+### Protection envelope / feasibility map
+
+The repository now includes an explicit protection-envelope artifact for the
+Chapter 2 applicability argument:
+
+- `model/run_protection_envelope.py`
+- `results/paper/protection_envelope/protection_envelope_summary.md`
+- `results/paper/protection_envelope/protection_envelope.csv`
+
+This report classifies scenarios into three regions:
+`architecture_change_required`, `bandwidth_or_tau_min_insufficient`, and
+`scrub_period_selectable`. It is the numerical bridge from the instantaneous
+MBU criterion to the Chapter 3 residual-budget period-selection method.
+
 ## Chapter 3. Risk-limited period optimization and efficiency scale
 
 | Artifact | Use in dissertation | Status | Limitation |
@@ -135,7 +150,7 @@ The dissertation is organized around the following chain:
 6. Do not call D=3 slowest-fastest unique-DUE growth statistically significant in the latest interleaving sweep; the CI includes zero.
 7. State that MBU probabilities in the criterion examples are illustrative unless replaced by literature-supported technology values.
 8. Keep the primary novelty on the risk-limited chain: applicability criterion, eta scale, and hardware-aware project procedure.
-9. Use `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
+9. Use `final_dangerous_words` for full dangerous-state accounting (detected final unique DUE plus `final_sdc_words`) and `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
 10. Do not describe measured-control weight sweep as a net win; describe it as closed-loop RTL feasibility and telemetry.
 
 ## RTL synthesis artifacts for Chapter 4

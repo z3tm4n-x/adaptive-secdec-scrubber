@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "model/run_risk_sensitivity.py",
     "model/evaluate_mbu_interleaving_criterion.py",
     "model/run_interleaving_sweep.py",
+    "model/run_protection_envelope.py",
     "model/run_closed_loop_measured_series.py",
     "model/build_interleaving_summary.py",
     "rtl/adaptive_scrub_controller.v",
@@ -42,6 +43,8 @@ REQUIRED_FILES = [
     "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv",
     "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv",
     "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv",
+    "results/paper/protection_envelope/protection_envelope_summary.md",
+    "results/paper/protection_envelope/protection_envelope.csv",
     "results/paper/tables/efficiency_scale_verification.md",
     "results/paper/tables/efficiency_scale_verification.csv",
     "results/paper/tables/risk_sensitivity_summary.md",
@@ -84,7 +87,8 @@ CSV_MIN_ROWS = {
     "results/paper/measured_control/closed_loop/closed_loop_measured_series.csv": 40,
     "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_runs.csv": 150,
     "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_summary.csv": 15,
-    "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv": 39,
+    "results/paper/interleaving/interval_sweep/interleaving_interval_sweep_deltas.csv": 49,
+    "results/paper/protection_envelope/protection_envelope.csv": 16,
     "results/paper/tables/risk_sensitivity.csv": 19,
     "results/paper/tables/mbu_interleaving_criterion_examples.csv": 24,
     "results/paper/tables/efficiency_scale_verification.csv": 5,
@@ -110,12 +114,16 @@ TEXT_MUST_CONTAIN = {
         "closed_loop_measured_summary.md",
         "run_theory_consistency_checks.py",
         "run_risk_budget_handoff.py",
+        "run_protection_envelope.py",
+        "protection_envelope_summary.md",
         "run_accumulation_only_rtl_series.py",
         "run_measured_weight_sweep.py",
         "new_due_count",
         "run_rtl_synthesis.py",
         "rtl_synthesis_summary.md",
         "RTL synthesis resource estimate",
+        "Protection envelope",
+        "architecture_change_required",
         "Fmax",
     ],
     "results/paper/measured_control/measured_control_summary.md": [
@@ -147,6 +155,18 @@ TEXT_MUST_CONTAIN = {
         "730 FF",
         "883 LUT",
         "Fmax is not claimed",
+        "final_dangerous_words",
+        "final_sdc_words",
+        "Protection envelope",
+    ],
+    "results/paper/protection_envelope/protection_envelope_summary.md": [
+        "Protection envelope for SECDED scrubbing",
+        "rho_D = E_inst / E*",
+        "E_acc_min",
+        "architecture_change_required",
+        "bandwidth_or_tau_min_insufficient",
+        "scrub_period_selectable",
+        "illustrative design points",
     ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
@@ -155,6 +175,8 @@ TEXT_MUST_CONTAIN = {
         "new_due_count",
         "repeated DED",
         "diagnostic counter",
+        "final_dangerous_words",
+        "final_sdc_words",
     ],
     "results/paper/tables/risk_sensitivity_summary.md": [
         "1 + CV",
@@ -209,6 +231,8 @@ TEXT_MUST_CONTAIN = {
         "RTL synthesis resource estimates",
         "rtl_synthesis_summary.md",
         "run_rtl_synthesis.py",
+        "protection_envelope_summary.md",
+        "run_protection_envelope.py",
         "Fmax requires target-specific place-and-route",
     ],
     "results/paper/synthesis/rtl_synthesis_summary.md": [
@@ -253,6 +277,7 @@ PYTHON_SCRIPTS = [
     "model/run_risk_sensitivity.py",
     "model/evaluate_mbu_interleaving_criterion.py",
     "model/run_interleaving_sweep.py",
+    "model/run_protection_envelope.py",
     "model/run_closed_loop_measured_series.py",
     "model/build_interleaving_summary.py",
     "model/build_measured_control_summary.py",
@@ -401,14 +426,20 @@ def check_no_debug_artifacts() -> list[CheckResult]:
         table = seed_dir / "strategy_comparison.csv"
         if table.exists():
             header = table.read_text(encoding="utf-8").splitlines()[0]
-            if "new_due_count" not in header or "repeated_due_detections" not in header:
+            required = [
+                "new_due_count",
+                "repeated_due_detections",
+                "final_sdc_words",
+                "final_dangerous_words",
+            ]
+            if any(column not in header for column in required):
                 stale_tables.append(table)
 
     ok = len(stale_tables) == 0
     if not interleaving_seed_dirs:
         detail = "no per-seed directories present; aggregated tables are authoritative"
     elif ok:
-        detail = f"per-seed dirs present and latched DUE columns verified: {len(interleaving_seed_dirs)}"
+        detail = f"per-seed dirs present and latched DUE/dangerous-state columns verified: {len(interleaving_seed_dirs)}"
     else:
         detail = ", ".join(rel(p) for p in stale_tables[:20])
         if len(stale_tables) > 20:
