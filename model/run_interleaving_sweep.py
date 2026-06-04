@@ -28,6 +28,8 @@ class RunRow:
     corrected: int
     uncorrectable_detections: int
     unique_uncorrectable_words: int
+    final_sdc_words: int
+    final_dangerous_words: int
     new_due_count: int
     repeated_due_detections: int
     interval_switches: int
@@ -76,8 +78,9 @@ def write_strategy_header(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "strategy,total_cycles,scrub_cycles,reads,writes,corrected,"
-        "uncorrectable_detections,unique_uncorrectable_words,new_due_count,"
-        "repeated_due_detections,interval_switches,"
+        "uncorrectable_detections,unique_uncorrectable_words,final_sdc_words,"
+        "final_dangerous_words,new_due_count,repeated_due_detections,"
+        "interval_switches,"
         "safe_entries,safe_cycles,scrub_active_cycles,memory_busy_cycles,"
         "scrub_per_mille,busy_per_mille,safe_per_mille\n",
         encoding="utf-8",
@@ -133,6 +136,23 @@ def run_strategy(args: argparse.Namespace, compiled_out: Path, interval: int, ru
         raise RuntimeError(f"expected one strategy result row, got {len(rows)}")
 
     row = rows[0]
+    if None in row:
+        raise RuntimeError(
+            "strategy_comparison.csv contains extra positional fields; "
+            "the generated header is stale relative to tb_strategy_comparison.v"
+        )
+    required_columns = {
+        "unique_uncorrectable_words",
+        "final_sdc_words",
+        "final_dangerous_words",
+        "new_due_count",
+        "repeated_due_detections",
+    }
+    missing_columns = required_columns - set(row)
+    if missing_columns:
+        raise RuntimeError(
+            f"strategy_comparison.csv is missing columns: {sorted(missing_columns)}"
+        )
     shutil.copy2(result_table, run_dir / "strategy_comparison.csv")
 
     return RunRow(
@@ -147,6 +167,8 @@ def run_strategy(args: argparse.Namespace, compiled_out: Path, interval: int, ru
         corrected=int(row["corrected"]),
         uncorrectable_detections=int(row["uncorrectable_detections"]),
         unique_uncorrectable_words=int(row["unique_uncorrectable_words"]),
+        final_sdc_words=int(row["final_sdc_words"]),
+        final_dangerous_words=int(row["final_dangerous_words"]),
         new_due_count=int(row["new_due_count"]),
         repeated_due_detections=int(row["repeated_due_detections"]),
         interval_switches=int(row["interval_switches"]),
@@ -188,6 +210,8 @@ def write_runs_csv(path: Path, rows: list[RunRow]) -> None:
         "corrected",
         "uncorrectable_detections",
         "unique_uncorrectable_words",
+        "final_sdc_words",
+        "final_dangerous_words",
         "new_due_count",
         "repeated_due_detections",
         "interval_switches",
@@ -211,6 +235,8 @@ def write_runs_csv(path: Path, rows: list[RunRow]) -> None:
                 "corrected": r.corrected,
                 "uncorrectable_detections": r.uncorrectable_detections,
                 "unique_uncorrectable_words": r.unique_uncorrectable_words,
+                "final_sdc_words": r.final_sdc_words,
+                "final_dangerous_words": r.final_dangerous_words,
                 "new_due_count": r.new_due_count,
                 "repeated_due_detections": r.repeated_due_detections,
                 "interval_switches": r.interval_switches,
@@ -239,6 +265,10 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
         "uncorrectable_detections_std",
         "unique_uncorrectable_words_mean",
         "unique_uncorrectable_words_std",
+        "final_sdc_words_mean",
+        "final_sdc_words_std",
+        "final_dangerous_words_mean",
+        "final_dangerous_words_std",
         "new_due_count_mean",
         "new_due_count_std",
         "repeated_due_detections_mean",
@@ -255,6 +285,8 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
             corr_m, corr_s = mean_std([r.corrected for r in rs])
             ded_m, ded_s = mean_std([r.uncorrectable_detections for r in rs])
             unique_m, unique_s = mean_std([r.unique_uncorrectable_words for r in rs])
+            sdc_m, sdc_s = mean_std([r.final_sdc_words for r in rs])
+            dangerous_m, dangerous_s = mean_std([r.final_dangerous_words for r in rs])
             new_due_m, new_due_s = mean_std([r.new_due_count for r in rs])
             repeated_m, repeated_s = mean_std([r.repeated_due_detections for r in rs])
             w.writerow({
@@ -271,6 +303,10 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
                 "uncorrectable_detections_std": f"{ded_s:.6f}",
                 "unique_uncorrectable_words_mean": f"{unique_m:.6f}",
                 "unique_uncorrectable_words_std": f"{unique_s:.6f}",
+                "final_sdc_words_mean": f"{sdc_m:.6f}",
+                "final_sdc_words_std": f"{sdc_s:.6f}",
+                "final_dangerous_words_mean": f"{dangerous_m:.6f}",
+                "final_dangerous_words_std": f"{dangerous_s:.6f}",
                 "new_due_count_mean": f"{new_due_m:.6f}",
                 "new_due_count_std": f"{new_due_s:.6f}",
                 "repeated_due_detections_mean": f"{repeated_m:.6f}",
@@ -280,6 +316,7 @@ def write_summary_csv(path: Path, rows: list[RunRow]) -> None:
 
 def write_deltas_csv(path: Path, rows: list[RunRow], intervals: list[int]) -> None:
     by_key = {(r.interleave_depth, r.fixed_interval, r.seed): r for r in rows}
+    seeds = sorted({r.seed for r in rows})
     fields = [
         "comparison",
         "lhs_depth",
@@ -308,6 +345,8 @@ def write_deltas_csv(path: Path, rows: list[RunRow], intervals: list[int]) -> No
         "corrected",
         "uncorrectable_detections",
         "unique_uncorrectable_words",
+        "final_sdc_words",
+        "final_dangerous_words",
         "new_due_count",
         "repeated_due_detections",
     ]
@@ -319,10 +358,17 @@ def write_deltas_csv(path: Path, rows: list[RunRow], intervals: list[int]) -> No
         for name, lhs_depth, lhs_interval, rhs_depth, rhs_interval in comparisons:
             for metric in metrics:
                 deltas: list[float] = []
-                for seed in range(1, 11):
-                    lhs = by_key[(lhs_depth, lhs_interval, seed)]
-                    rhs = by_key[(rhs_depth, rhs_interval, seed)]
+                for seed in seeds:
+                    lhs_key = (lhs_depth, lhs_interval, seed)
+                    rhs_key = (rhs_depth, rhs_interval, seed)
+                    if lhs_key not in by_key or rhs_key not in by_key:
+                        continue
+                    lhs = by_key[lhs_key]
+                    rhs = by_key[rhs_key]
                     deltas.append(float(getattr(lhs, metric) - getattr(rhs, metric)))
+
+                if not deltas:
+                    continue
 
                 m, s, lo, hi = ci95(deltas)
                 w.writerow({
