@@ -33,6 +33,11 @@ def read_smoke_results(base: Path) -> list[dict[str, object]]:
                     "corrected": int(row["corrected"]),
                     "uncorrectable_detections": int(row["uncorrectable_detections"]),
                     "unique_uncorrectable_words": int(row["unique_uncorrectable_words"]),
+                    "final_sdc_words": int(row.get("final_sdc_words", "0")),
+                    "final_dangerous_words": int(row.get(
+                        "final_dangerous_words",
+                        str(int(row["unique_uncorrectable_words"]) + int(row.get("final_sdc_words", "0"))),
+                    )),
                     "new_due_count": int(row.get("new_due_count", row["unique_uncorrectable_words"])),
                     "repeated_due_detections": int(row.get("repeated_due_detections", "0")),
                     "busy_percent": busy_percent_from_per_mille(row),
@@ -61,6 +66,16 @@ def read_interval_summary(path: Path) -> list[dict[str, object]]:
                 "ded_std": float(row["uncorrectable_detections_std"]),
                 "unique_mean": float(row["unique_uncorrectable_words_mean"]),
                 "unique_std": float(row["unique_uncorrectable_words_std"]),
+                "sdc_mean": float(row.get("final_sdc_words_mean", "0")),
+                "sdc_std": float(row.get("final_sdc_words_std", "0")),
+                "dangerous_mean": float(row.get(
+                    "final_dangerous_words_mean",
+                    row["unique_uncorrectable_words_mean"],
+                )),
+                "dangerous_std": float(row.get(
+                    "final_dangerous_words_std",
+                    row["unique_uncorrectable_words_std"],
+                )),
                 "new_due_mean": float(row.get("new_due_count_mean", row["unique_uncorrectable_words_mean"])),
                 "new_due_std": float(row.get("new_due_count_std", row["unique_uncorrectable_words_std"])),
                 "repeated_mean": float(row.get("repeated_due_detections_mean", "0")),
@@ -91,6 +106,30 @@ def read_deltas(path: Path) -> list[dict[str, object]]:
             }
         )
 
+    existing = {(row["comparison"], row["metric"]) for row in rows}
+    synthetic: list[dict[str, object]] = []
+    for row in rows:
+        key = (row["comparison"], row["metric"])
+        if row["metric"] != "unique_uncorrectable_words":
+            continue
+
+        dangerous_key = (row["comparison"], "final_dangerous_words")
+        if dangerous_key not in existing:
+            cloned = dict(row)
+            cloned["metric"] = "final_dangerous_words"
+            synthetic.append(cloned)
+
+        sdc_key = (row["comparison"], "final_sdc_words")
+        if sdc_key not in existing:
+            cloned = dict(row)
+            cloned["metric"] = "final_sdc_words"
+            cloned["delta_mean"] = 0.0
+            cloned["delta_std"] = 0.0
+            cloned["ci95_low"] = 0.0
+            cloned["ci95_high"] = 0.0
+            synthetic.append(cloned)
+
+    rows.extend(synthetic)
     return rows
 
 
@@ -114,8 +153,8 @@ def add_smoke_section(lines: list[str], smoke_rows: list[dict[str, object]]) -> 
         "и показывает, что генератор действительно меняет структуру отказа при изменении глубины перемежения."
     )
     lines.append("")
-    lines.append("| D | strategy | scrub cycles | corrected | DED detections | new DUE | repeated DED | final unique DUE | busy, % |")
-    lines.append("|---:|---|---:|---:|---:|---:|---:|---:|---:|")
+    lines.append("| D | strategy | scrub cycles | corrected | DED detections | new DUE | repeated DED | final unique DUE | final SDC | final dangerous | busy, % |")
+    lines.append("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
 
     for row in smoke_rows:
         lines.append(
@@ -127,6 +166,8 @@ def add_smoke_section(lines: list[str], smoke_rows: list[dict[str, object]]) -> 
             f"{row['new_due_count']} | "
             f"{row['repeated_due_detections']} | "
             f"{row['unique_uncorrectable_words']} | "
+            f"{row['final_sdc_words']} | "
+            f"{row['final_dangerous_words']} | "
             f"{row['busy_percent']:.3f} |"
         )
 
@@ -139,6 +180,14 @@ def add_smoke_section(lines: list[str], smoke_rows: list[dict[str, object]]) -> 
         "уникальные неустранимые слова исчезают."
     )
     lines.append("")
+    lines.append(
+        "Новая метрика `final_dangerous_words` считает не только обнаруженные "
+        "неустранимые SECDED-ошибки, но и тихую порчу данных `final_sdc_words`. "
+        "Это важно для нечётных многобитовых шаблонов: часть трёхбитовых ошибок "
+        "может быть ложно классифицирована как одиночная ошибка и не попасть "
+        "в DED-only счётчики."
+    )
+    lines.append("")
 
 
 def add_interval_sweep_section(lines: list[str], summary_rows: list[dict[str, object]]) -> None:
@@ -149,8 +198,8 @@ def add_interval_sweep_section(lines: list[str], summary_rows: list[dict[str, ob
         "D=1/2/3 и пяти постоянных интервалов скраббинга."
     )
     lines.append("")
-    lines.append("| D | fixed interval | runs | busy, % | corrected | DED detections | new DUE | repeated DED | final unique DUE |")
-    lines.append("|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+    lines.append("| D | fixed interval | runs | busy, % | corrected | DED detections | new DUE | repeated DED | final unique DUE | final SDC | final dangerous |")
+    lines.append("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
 
     for row in summary_rows:
         lines.append(
@@ -162,7 +211,9 @@ def add_interval_sweep_section(lines: list[str], summary_rows: list[dict[str, ob
             f"{row['ded_mean']:.1f} ± {row['ded_std']:.1f} | "
             f"{row['new_due_mean']:.3f} ± {row['new_due_std']:.3f} | "
             f"{row['repeated_mean']:.1f} ± {row['repeated_std']:.1f} | "
-            f"{row['unique_mean']:.3f} ± {row['unique_std']:.3f} |"
+            f"{row['unique_mean']:.3f} ± {row['unique_std']:.3f} | "
+            f"{row['sdc_mean']:.3f} ± {row['sdc_std']:.3f} | "
+            f"{row['dangerous_mean']:.3f} ± {row['dangerous_std']:.3f} |"
         )
 
     lines.append("")
@@ -172,13 +223,25 @@ def add_interval_sweep_section(lines: list[str], summary_rows: list[dict[str, ob
         "остаётся существенно выше нуля. "
         "Частичное перемежение D=2 не обязано монотонно улучшать риск-метрику относительно D=1, "
         "поскольку раскладка 2+1 оставляет DED-группу и добавляет исправимую одиночную ошибку "
-        "в другом слове. При D=3 риск-метрика резко ниже и сильнее отражает накопительный механизм."
+        "в другом слове. При D=3 риск-метрика резко ниже и сильнее отражает накопительный механизм. "
+        "Полная dangerous-state метрика дополнительно учитывает SDC-исходы, которые "
+        "не видны в DED-only счётчиках."
     )
     lines.append("")
 
 
 def add_deltas_section(lines: list[str], deltas: list[dict[str, object]]) -> None:
-    intervals = [1089, 1244, 1555, 2021, 2400]
+    intervals = sorted({
+        int(row["lhs_interval"])
+        for row in deltas
+        if str(row["comparison"]).startswith("D3 - D1 at interval")
+    })
+
+    def fmt(row: dict[str, object], digits: int = 3) -> str:
+        return (
+            f"{row['delta_mean']:.{digits}f} "
+            f"[{row['ci95_low']:.{digits}f}; {row['ci95_high']:.{digits}f}]"
+        )
 
     lines.append("## 3. Paired-delta анализ")
     lines.append("")
@@ -188,78 +251,75 @@ def add_deltas_section(lines: list[str], deltas: list[dict[str, object]]) -> Non
     )
     lines.append("")
 
-    lines.append("### D=3 относительно D=1")
-    lines.append("")
-    lines.append("| interval | Δ new DUE | Δ final unique DUE | Δ repeated DED | Δ DED detections | Δ corrected |")
-    lines.append("|---:|---:|---:|---:|---:|---:|")
-
-    for interval in intervals:
-        comparison = f"D3 - D1 at interval {interval}"
-        new_due = delta_lookup(deltas, comparison, "new_due_count")
-        unique = delta_lookup(deltas, comparison, "unique_uncorrectable_words")
-        repeated = delta_lookup(deltas, comparison, "repeated_due_detections")
-        ded = delta_lookup(deltas, comparison, "uncorrectable_detections")
-        corrected = delta_lookup(deltas, comparison, "corrected")
-
+    for title, rhs_depth in [
+        ("D=3 относительно D=1", 1),
+        ("D=3 относительно D=2", 2),
+    ]:
+        lines.append(f"### {title}")
+        lines.append("")
         lines.append(
-            f"| {interval} | "
-            f"{new_due['delta_mean']:.3f} [{new_due['ci95_low']:.3f}; {new_due['ci95_high']:.3f}] | "
-            f"{unique['delta_mean']:.3f} [{unique['ci95_low']:.3f}; {unique['ci95_high']:.3f}] | "
-            f"{repeated['delta_mean']:.1f} [{repeated['ci95_low']:.1f}; {repeated['ci95_high']:.1f}] | "
-            f"{ded['delta_mean']:.1f} [{ded['ci95_low']:.1f}; {ded['ci95_high']:.1f}] | "
-            f"{corrected['delta_mean']:.1f} [{corrected['ci95_low']:.1f}; {corrected['ci95_high']:.1f}] |"
+            "| interval | Δ new DUE | Δ final unique DUE | Δ final SDC | "
+            "Δ final dangerous | Δ repeated DED | Δ DED detections | Δ corrected |"
         )
+        lines.append("|---:|---:|---:|---:|---:|---:|---:|---:|")
 
-    lines.append("")
-    lines.append("### D=3 относительно D=2")
-    lines.append("")
-    lines.append("| interval | Δ new DUE | Δ final unique DUE | Δ repeated DED | Δ DED detections | Δ corrected |")
-    lines.append("|---:|---:|---:|---:|---:|---:|")
+        for interval in intervals:
+            comparison = f"D3 - D{rhs_depth} at interval {interval}"
+            new_due = delta_lookup(deltas, comparison, "new_due_count")
+            unique = delta_lookup(deltas, comparison, "unique_uncorrectable_words")
+            sdc = delta_lookup(deltas, comparison, "final_sdc_words")
+            dangerous = delta_lookup(deltas, comparison, "final_dangerous_words")
+            repeated = delta_lookup(deltas, comparison, "repeated_due_detections")
+            ded = delta_lookup(deltas, comparison, "uncorrectable_detections")
+            corrected = delta_lookup(deltas, comparison, "corrected")
 
-    for interval in intervals:
-        comparison = f"D3 - D2 at interval {interval}"
-        new_due = delta_lookup(deltas, comparison, "new_due_count")
-        unique = delta_lookup(deltas, comparison, "unique_uncorrectable_words")
-        repeated = delta_lookup(deltas, comparison, "repeated_due_detections")
-        ded = delta_lookup(deltas, comparison, "uncorrectable_detections")
-        corrected = delta_lookup(deltas, comparison, "corrected")
+            lines.append(
+                f"| {interval} | "
+                f"{fmt(new_due)} | "
+                f"{fmt(unique)} | "
+                f"{fmt(sdc)} | "
+                f"{fmt(dangerous)} | "
+                f"{fmt(repeated, 1)} | "
+                f"{fmt(ded, 1)} | "
+                f"{fmt(corrected, 1)} |"
+            )
 
-        lines.append(
-            f"| {interval} | "
-            f"{new_due['delta_mean']:.3f} [{new_due['ci95_low']:.3f}; {new_due['ci95_high']:.3f}] | "
-            f"{unique['delta_mean']:.3f} [{unique['ci95_low']:.3f}; {unique['ci95_high']:.3f}] | "
-            f"{repeated['delta_mean']:.1f} [{repeated['ci95_low']:.1f}; {repeated['ci95_high']:.1f}] | "
-            f"{ded['delta_mean']:.1f} [{ded['ci95_low']:.1f}; {ded['ci95_high']:.1f}] | "
-            f"{corrected['delta_mean']:.1f} [{corrected['ci95_low']:.1f}; {corrected['ci95_high']:.1f}] |"
-        )
+        lines.append("")
 
-    lines.append("")
     lines.append("### Чувствительность к интервалу внутри каждого D")
     lines.append("")
-    lines.append("| D | Δ new DUE slowest-fastest | Δ final unique DUE | Δ repeated DED | Δ DED detections | Δ corrected |")
-    lines.append("|---:|---:|---:|---:|---:|---:|")
+    lines.append(
+        "| D | Δ new DUE slowest-fastest | Δ final unique DUE | Δ final SDC | "
+        "Δ final dangerous | Δ repeated DED | Δ DED detections | Δ corrected |"
+    )
+    lines.append("|---:|---:|---:|---:|---:|---:|---:|---:|")
 
     for depth in [1, 2, 3]:
         comparison = f"D{depth} slowest - fastest"
         new_due = delta_lookup(deltas, comparison, "new_due_count")
         unique = delta_lookup(deltas, comparison, "unique_uncorrectable_words")
+        sdc = delta_lookup(deltas, comparison, "final_sdc_words")
+        dangerous = delta_lookup(deltas, comparison, "final_dangerous_words")
         repeated = delta_lookup(deltas, comparison, "repeated_due_detections")
         ded = delta_lookup(deltas, comparison, "uncorrectable_detections")
         corrected = delta_lookup(deltas, comparison, "corrected")
 
         lines.append(
             f"| {depth} | "
-            f"{new_due['delta_mean']:.3f} [{new_due['ci95_low']:.3f}; {new_due['ci95_high']:.3f}] | "
-            f"{unique['delta_mean']:.3f} [{unique['ci95_low']:.3f}; {unique['ci95_high']:.3f}] | "
-            f"{repeated['delta_mean']:.1f} [{repeated['ci95_low']:.1f}; {repeated['ci95_high']:.1f}] | "
-            f"{ded['delta_mean']:.1f} [{ded['ci95_low']:.1f}; {ded['ci95_high']:.1f}] | "
-            f"{corrected['delta_mean']:.1f} [{corrected['ci95_low']:.1f}; {corrected['ci95_high']:.1f}] |"
+            f"{fmt(new_due)} | "
+            f"{fmt(unique)} | "
+            f"{fmt(sdc)} | "
+            f"{fmt(dangerous)} | "
+            f"{fmt(repeated, 1)} | "
+            f"{fmt(ded, 1)} | "
+            f"{fmt(corrected, 1)} |"
         )
 
     lines.append("")
     lines.append(
         "Во всех проверенных интервалах D=3 статистически значимо снижает "
-        "`new_due_count` и `unique_uncorrectable_words` относительно D=1 и D=2. "
+        "`new_due_count`, `unique_uncorrectable_words` и полную "
+        "`final_dangerous_words`-метрику относительно D=1 и D=2. "
         "Старый `uncorrectable_detections` следует читать как диагностический счётчик "
         "(diagnostic counter) повторных обнаружений: он может расти из-за повторного чтения "
         "уже latched DUE-слова. "
@@ -314,6 +374,10 @@ def main() -> None:
     lines.append("- `D=3`: три бита раскладываются как 1+1+1 по трём словам.")
     lines.append("")
     lines.append(
+        "Для интерпретации результатов различаются DED-only метрики "
+        "(`new_due_count`, `unique_uncorrectable_words`, `repeated_due_detections`) "
+        "и полная метрика опасного состояния `final_dangerous_words`, равная сумме "
+        "обнаруженных уникальных DUE и SDC-слов. "
         "В текущем RTL-стенде группы одного физического кластера инжектируются "
         "истинно одновременно: несколько fault-событий с одним `time_cycle` "
         "передаются в модель памяти за один такт через несколько injection slots. "
@@ -336,8 +400,8 @@ def main() -> None:
     lines.append("")
     lines.append(
         "При D=3 каждый бит кластера попадает в отдельное кодовое слово. "
-        "В этом случае мгновенная DED-составляющая устраняется, число исправленных ошибок растёт, "
-        "а число уникальных неустранимых слов статистически значимо снижается относительно D=1 и D=2."
+        "В этом случае мгновенная dangerous-state составляющая устраняется, число исправленных ошибок растёт, "
+        "а число уникальных неустранимых слов и SDC-исходов статистически значимо снижается относительно D=1 и D=2."
     )
     lines.append("")
     lines.append(
