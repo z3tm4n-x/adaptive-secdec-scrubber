@@ -107,6 +107,15 @@ CSV_MIN_ROWS = {
 
 
 TEXT_MUST_CONTAIN = {
+    "README.md": [
+        "Protection envelope",
+        "final_dangerous_words",
+        "final_sdc_words",
+        "post-run verification audit",
+        "не аппаратные выходы SECDED-декодера",
+        "радиационной обстановки",
+        "управляющей оценке частоты ошибок",
+    ],
     "doc/dissertation_mapping.md": [
         "Do not state that adaptive scrub-rate itself is new",
         "mbu_interleaving_criterion_examples.md",
@@ -167,6 +176,8 @@ TEXT_MUST_CONTAIN = {
         "bandwidth_or_tau_min_insufficient",
         "scrub_period_selectable",
         "illustrative design points",
+        "nu_scale",
+        "`E_acc_min` depends",
     ],
     "results/paper/interleaving/interleaving_summary.md": [
         "истинно одновременно",
@@ -191,6 +202,17 @@ TEXT_MUST_CONTAIN = {
         "positive residual budget",
         "Suppression requirements",
         "h_m^(D) <= g_crit / p_m",
+    ],
+    "doc/spec.md": [
+        "уровню радиационной обстановки",
+        "Диагностические метрики и границы применимости",
+        "post-run verification audit",
+        "final_sdc_words",
+        "final_dangerous_words",
+        "не аппаратным выходом SECDED-декодера",
+        "architecture_change_required",
+        "bandwidth_or_tau_min_insufficient",
+        "scrub_period_selectable",
     ],
     "doc/mbu_parameter_sources.md": [
         "logical_round_robin",
@@ -248,6 +270,13 @@ TEXT_MUST_CONTAIN = {
 
 
 TEXT_MUST_NOT_CONTAIN = {
+    "README.md": [
+        "сбойной обстановки",
+    ],
+    "doc/spec.md": [
+        "сбойной обстановки",
+        "Оценка сбойной обстановки",
+    ],
     "results/paper/interleaving/interleaving_summary.md": [
         "Техническое ограничение текущего Verilog-стенда",
         "физически одномоментный кластер сериализуется",

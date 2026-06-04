@@ -30,24 +30,24 @@ The classification uses:
 
 ## Scenario table
 
-| scenario | D | p2 | p3 | p4 | g_D | rho_D | E_residual | E_acc_min | E_acc_min/E_residual | status |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| `bandwidth_limited_accumulation` | 1 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
-| `bandwidth_limited_accumulation` | 2 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
-| `bandwidth_limited_accumulation` | 3 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
-| `bandwidth_limited_accumulation` | 4 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
-| `four_bit_tail_requires_D4` | 1 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
-| `four_bit_tail_requires_D4` | 2 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
-| `four_bit_tail_requires_D4` | 3 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
-| `four_bit_tail_requires_D4` | 4 | 0 | 0 | 2e-08 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
-| `light_3bit_tail` | 1 | 0 | 5e-09 | 0 | 5e-09 | 0.497 | 0.00505034 | 0.00111001 | 0.219789 | `scrub_period_selectable` |
-| `light_3bit_tail` | 2 | 0 | 5e-09 | 0 | 5e-09 | 0.497 | 0.00505034 | 0.00111001 | 0.219789 | `scrub_period_selectable` |
-| `light_3bit_tail` | 3 | 0 | 5e-09 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
-| `light_3bit_tail` | 4 | 0 | 5e-09 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
-| `overbudget_3bit_tail` | 1 | 0 | 2e-08 | 0 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
-| `overbudget_3bit_tail` | 2 | 0 | 2e-08 | 0 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
-| `overbudget_3bit_tail` | 3 | 0 | 2e-08 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
-| `overbudget_3bit_tail` | 4 | 0 | 2e-08 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
+| scenario | D | nu_scale | p2 | p3 | p4 | g_D | rho_D | E_residual | E_acc_min | E_acc_min/E_residual | status |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| `bandwidth_limited_accumulation` | 1 | 4 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
+| `bandwidth_limited_accumulation` | 2 | 4 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
+| `bandwidth_limited_accumulation` | 3 | 4 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
+| `bandwidth_limited_accumulation` | 4 | 4 | 0 | 0 | 0 | 0 | 0 | 0.0100503 | 0.0177601 | 1.76712 | `bandwidth_or_tau_min_insufficient` |
+| `four_bit_tail_requires_D4` | 1 | 1 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
+| `four_bit_tail_requires_D4` | 2 | 1 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
+| `four_bit_tail_requires_D4` | 3 | 1 | 0 | 0 | 2e-08 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
+| `four_bit_tail_requires_D4` | 4 | 1 | 0 | 0 | 2e-08 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
+| `light_3bit_tail` | 1 | 1 | 0 | 5e-09 | 0 | 5e-09 | 0.497 | 0.00505034 | 0.00111001 | 0.219789 | `scrub_period_selectable` |
+| `light_3bit_tail` | 2 | 1 | 0 | 5e-09 | 0 | 5e-09 | 0.497 | 0.00505034 | 0.00111001 | 0.219789 | `scrub_period_selectable` |
+| `light_3bit_tail` | 3 | 1 | 0 | 5e-09 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
+| `light_3bit_tail` | 4 | 1 | 0 | 5e-09 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
+| `overbudget_3bit_tail` | 1 | 1 | 0 | 2e-08 | 0 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
+| `overbudget_3bit_tail` | 2 | 1 | 0 | 2e-08 | 0 | 2e-08 | 1.99 | -0.00994966 | 0.00111001 | inf | `architecture_change_required` |
+| `overbudget_3bit_tail` | 3 | 1 | 0 | 2e-08 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
+| `overbudget_3bit_tail` | 4 | 1 | 0 | 2e-08 | 0 | 0 | 0 | 0.0100503 | 0.00111001 | 0.110445 | `scrub_period_selectable` |
 
 ## Compact status map
 
@@ -59,6 +59,8 @@ The classification uses:
 | `overbudget_3bit_tail` | `architecture_change_required` | `architecture_change_required` | `scrub_period_selectable` | `scrub_period_selectable` |
 
 ## Interpretation
+
+`E_acc_min` depends on the accumulated-error-rate series used by the scenario. The `nu_scale` column explicitly shows when a scenario scales `ν(t)` to exercise the bandwidth/tau_min insufficiency region; therefore rows with `g_D = 0` may still have different accumulated-risk floors.
 
 The envelope separates two failure modes that are easy to conflate. If `rho_D >= 1`, no scrub period can satisfy the target because the instant dangerous component already consumes the whole risk measure. If `rho_D < 1` but `E_acc_min > E_residual`, the issue is not the instant MCU mapping but the practical lower bound on the scrub interval.
 

@@ -340,12 +340,12 @@ def write_markdown(
     lines.append("")
     lines.append("## Scenario table")
     lines.append("")
-    lines.append("| scenario | D | p2 | p3 | p4 | g_D | rho_D | E_residual | E_acc_min | E_acc_min/E_residual | status |")
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+    lines.append("| scenario | D | nu_scale | p2 | p3 | p4 | g_D | rho_D | E_residual | E_acc_min | E_acc_min/E_residual | status |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
 
     for r in ordered:
         lines.append(
-            f"| `{r.scenario}` | {r.interleave_depth} | "
+            f"| `{r.scenario}` | {r.interleave_depth} | {r.nu_scale:.3g} | "
             f"{r.p2:.3g} | {r.p3:.3g} | {r.p4:.3g} | "
             f"{r.g_d:.3g} | {r.rho_d:.3g} | "
             f"{finite_fmt(r.e_residual, 6)} | {finite_fmt(r.e_acc_min, 6)} | "
@@ -371,6 +371,14 @@ def write_markdown(
     lines.append("")
     lines.append("## Interpretation")
     lines.append("")
+    lines.append(
+        "`E_acc_min` depends on the accumulated-error-rate series used by the scenario. "
+        "The `nu_scale` column explicitly shows when a scenario scales `ν(t)` to exercise "
+        "the bandwidth/tau_min insufficiency region; therefore rows with `g_D = 0` may "
+        "still have different accumulated-risk floors."
+    )
+    lines.append("")
+
     lines.append(
         "The envelope separates two failure modes that are easy to conflate. "
         "If `rho_D >= 1`, no scrub period can satisfy the target because the "

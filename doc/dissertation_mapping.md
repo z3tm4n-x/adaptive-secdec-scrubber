@@ -78,6 +78,9 @@ MBU criterion to the Chapter 3 residual-budget period-selection method.
 | `model/run_risk_budget_handoff.py` | Thin orchestrator from `E_residual` to scrub policy | cite as project procedure implementation | Reuses existing policy builder |
 | `results/paper/risk_budget_handoff/risk_budget_handoff_summary.md` | Shows criterion-to-policy residual budget chain | cite in Chapter 3/4 bridge | Policy artifact, not RTL by itself |
 
+
+Important boundary: `final_sdc_words` and `final_dangerous_words` are testbench/post-run verification metrics based on an external golden data reference; they are not hardware SECDED decoder outputs and must not be described as online SDC detection by the controller.
+
 ## Chapter 4. RTL realization and risk-resource verification
 
 | Artifact | Use in dissertation | Status | Limitation |
@@ -150,7 +153,7 @@ MBU criterion to the Chapter 3 residual-budget period-selection method.
 6. Do not call D=3 slowest-fastest unique-DUE growth statistically significant in the latest interleaving sweep; the CI includes zero.
 7. State that MBU probabilities in the criterion examples are illustrative unless replaced by literature-supported technology values.
 8. Keep the primary novelty on the risk-limited chain: applicability criterion, eta scale, and hardware-aware project procedure.
-9. Use `final_dangerous_words` for full dangerous-state accounting (detected final unique DUE plus `final_sdc_words`) and `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
+9. Use `final_dangerous_words` as a post-run verification audit metric for full dangerous-state accounting (detected final unique DUE plus `final_sdc_words`) and `new_due_count` and final `unique_uncorrectable_words` for risk semantics; treat `uncorrectable_detections` as diagnostic/repeated detection load.
 10. Do not describe measured-control weight sweep as a net win; describe it as closed-loop RTL feasibility and telemetry.
 
 ## RTL synthesis artifacts for Chapter 4

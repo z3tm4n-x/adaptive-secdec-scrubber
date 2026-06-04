@@ -1,7 +1,7 @@
 # Dissertation repository check
 
-- Total checks: 224
-- Passed: 224
+- Total checks: 245
+- Passed: 245
 - Failed: 0
 
 ## Failed checks
@@ -98,6 +98,13 @@ No failed checks.
 | `csv:results/paper/theory_consistency/poisson_accumulation_validation.csv` | rows=4 |
 | `csv:results/paper/theory_consistency/theory_consistency.csv` | rows=31 |
 | `csv:results/paper/synthesis/rtl_synthesis_summary.csv` | rows=10 |
+| `text_contains:README.md:Protection envelope` | found |
+| `text_contains:README.md:final_dangerous_words` | found |
+| `text_contains:README.md:final_sdc_words` | found |
+| `text_contains:README.md:post-run verification audit` | found |
+| `text_contains:README.md:не аппаратные выходы SECDED-декодера` | found |
+| `text_contains:README.md:радиационной обстановки` | found |
+| `text_contains:README.md:управляющей оценке частоты ошибок` | found |
 | `text_contains:doc/dissertation_mapping.md:Do not state that adaptive scrub-rate itself is new` | found |
 | `text_contains:doc/dissertation_mapping.md:mbu_interleaving_criterion_examples.md` | found |
 | `text_contains:doc/dissertation_mapping.md:risk_sensitivity_summary.md` | found |
@@ -151,6 +158,8 @@ No failed checks.
 | `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:bandwidth_or_tau_min_insufficient` | found |
 | `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:scrub_period_selectable` | found |
 | `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:illustrative design points` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:nu_scale` | found |
+| `text_contains:results/paper/protection_envelope/protection_envelope_summary.md:`E_acc_min` depends` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:истинно одновременно` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:cluster_injection_skew = 0` | found |
 | `text_contains:results/paper/interleaving/interleaving_summary.md:Частичное перемежение D=2` | found |
@@ -169,6 +178,15 @@ No failed checks.
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:positive residual budget` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:Suppression requirements` | found |
 | `text_contains:results/paper/tables/mbu_interleaving_criterion_examples.md:h_m^(D) <= g_crit / p_m` | found |
+| `text_contains:doc/spec.md:уровню радиационной обстановки` | found |
+| `text_contains:doc/spec.md:Диагностические метрики и границы применимости` | found |
+| `text_contains:doc/spec.md:post-run verification audit` | found |
+| `text_contains:doc/spec.md:final_sdc_words` | found |
+| `text_contains:doc/spec.md:final_dangerous_words` | found |
+| `text_contains:doc/spec.md:не аппаратным выходом SECDED-декодера` | found |
+| `text_contains:doc/spec.md:architecture_change_required` | found |
+| `text_contains:doc/spec.md:bandwidth_or_tau_min_insufficient` | found |
+| `text_contains:doc/spec.md:scrub_period_selectable` | found |
 | `text_contains:doc/mbu_parameter_sources.md:logical_round_robin` | found |
 | `text_contains:doc/mbu_parameter_sources.md:illustrative` | found |
 | `text_contains:doc/mbu_parameter_sources.md:source_required` | found |
@@ -204,6 +222,9 @@ No failed checks.
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:latched-DUE audit` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:Fmax requires target-specific place-and-route` | found |
 | `text_contains:results/paper/synthesis/rtl_synthesis_summary.md:| `adaptive_scrub_controller` | `xilinx_xc7_estimate` | ok | 3220 | 730 | 883` | found |
+| `text_forbidden:README.md:сбойной обстановки` | absent |
+| `text_forbidden:doc/spec.md:сбойной обстановки` | absent |
+| `text_forbidden:doc/spec.md:Оценка сбойной обстановки` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:Техническое ограничение текущего Verilog-стенда` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:физически одномоментный кластер сериализуется` | absent |
 | `text_forbidden:results/paper/interleaving/interleaving_summary.md:по соседним тактам` | absent |
