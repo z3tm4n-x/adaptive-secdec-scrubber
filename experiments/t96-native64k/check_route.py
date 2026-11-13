@@ -3,7 +3,6 @@ Timing report convention follows T104 physical/check_io.py at 8ce9104.
 The 100 MHz phases, terminals, checks and coverage here belong to native64.
 """
 import argparse
-import hashlib
 import json
 import re
 from decimal import Decimal as D
@@ -38,11 +37,15 @@ def check(directory, read_access=D(45)):
     row = re.search(r"WNS\(ns\).*?\n\s*[- ]+\n\s*([\d. -]+)", summary)
     require(row, "Design timing summary missing")
     fields = row[1].split()
-    wns, whs = D(fields[0]), D(fields[4])
+    wns, whs, wpws = D(fields[0]), D(fields[4]), D(fields[8])
+    timing_checks = dict(re.findall(r"(?m)^\d+\. checking (\w+) \((\d+)\)", read("check.rpt")))
+    for category in ("no_clock", "unconstrained_internal_endpoints", "no_input_delay", "no_output_delay",
+                     "multiple_clock", "loops"):
+        require(timing_checks.get(category)=="0", f"Timing coverage incomplete: {category}")
     util = read("utilization.rpt")
     def usage(name):
         return int(re.search(r"(?m)^\| " + name + r"\s*\|\s*(\d+)", util)[1])
-    resource = {k: usage(k) for k in ("Slice LUTs", "Slice Registers", "Block RAM Tile", "DSPs", "BUFGCTRL", "MMCME2_ADV")}
+    resource = {k: usage(k) for k in ("Slice LUTs", "Slice Registers", "ILOGIC", "OLOGIC", "Block RAM Tile", "DSPs", "BUFGCTRL", "MMCME2_ADV")}
     route = read("route.rpt")
     net_count = int(re.search(r"# of routable nets\.+\s*:\s*(\d+)", route)[1])
     routed = int(re.search(r"# of fully routed nets\.+\s*:\s*(\d+)", route)[1])
@@ -98,14 +101,15 @@ def check(directory, read_access=D(45)):
              "Conditional 15 pF and 0.1..0.5 ns adapter, 3 ns SRAM edges, clocks and primed memory."]
     # Expose physical edge separation in addition to the nominal schedule.
     return {"part": "xc7z020clg484-1", "clock_MHz": 100, "wns_ns": str(wns), "whs_ns": str(whs),
-            "wns_failing": int(fields[2]), "whs_failing": int(fields[6]), "resources": resource,
+            "wpws_ns": str(wpws), "wns_failing": int(fields[2]), "whs_failing": int(fields[6]),
+            "wpws_failing": int(fields[10]), "resources": resource,
             "routable_nets": net_count, "fully_routed_nets": routed, "routing_errors": routing_errors,
             "drc_errors": drc_errors, "drc_warnings": drc_warnings,
             "pad_counts": {k: len(v) for k, v in expected.items()},
             "extrema_ns": {k:str(v) for k,v in {"input_min":imin,"input_max":imax,"output_min":omin,
                 "output_max":omax,"clock_spread":skew,"uncertainty":uncertainty,"setup":setup,"hold":hold}.items()},
             "external_margin_ns": {k: str(v) for k,v in margins.items()},
-            "notes": notes, "pass": wns>0 and whs>0 and routed==net_count and routing_errors==0 and
+            "notes": notes, "pass": min(wns,whs,wpws)>0 and routed==net_count and routing_errors==0 and
             not drc_errors and min(margins.values())>=0}
 
 
@@ -115,7 +119,9 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path)
     args=parser.parse_args()
     result=check(args.reports)
-    require(not check(args.reports,D(100))["pass"], "100 ns memory sentinel not rejected")
+    wrong=check(args.reports,D(100))
+    require(D(wrong["external_margin_ns"]["address_CE_ERR_read_access_45"])<0 and
+            not wrong["pass"], "100 ns memory was not rejected by the read access check")
     output=json.dumps(result,indent=2,ensure_ascii=False)+"\n"
     print(output,end="")
     if args.output:

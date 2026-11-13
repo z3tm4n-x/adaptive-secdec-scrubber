@@ -80,7 +80,7 @@ module policy_tb;
         thresholds[5]=38;thresholds[6]=75;thresholds[7]=149;
         thresholds[8]=298;thresholds[9]=596;
         samples=0;levels_seen=0;checked=0;
-        for(scenario=0;scenario<=13;scenario=scenario+1) begin
+        for(scenario=0;scenario<=15;scenario=scenario+1) begin
             restart;
             if(scenario==0) begin
                 for(n=0;n<=599*512;n=n+1) if(n==next_due) scan(n,0);
@@ -89,7 +89,9 @@ module policy_tb;
                 // Reach nontrivial state legitimately; spoil on a non-common
                 // scan, then verify the entire recovery and first new promotion.
                 for(n=0;n<=9*512;n=n+1) if(n==next_due)
-                    scan(n,n==4*512+2?scenario:0);
+                    scan(n,(scenario==14 && n==4*512) ? 6 :
+                           (scenario==15 && n==4*512) ? 1 :
+                           (scenario<=13 && n==4*512+2) ? scenario : 0);
                 checked=checked+1;
             end
         end

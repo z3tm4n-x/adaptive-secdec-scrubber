@@ -6,8 +6,9 @@ module native64_core (
     input wire [15:0] dq_in,
     input wire app_request, input wire [14:0] app_address,
     output reg app_grant, app_valid, output reg [15:0] app_data,
-    output reg [14:0] address,
-    output reg select_n, oe_n, we_n, drive,
+    (* DONT_TOUCH="TRUE", IOB="FALSE" *) output reg [14:0] address,
+    output wire select_n, oe_n, we_n,
+    output reg drive,
     (* IOB="TRUE", DONT_TOUCH="TRUE" *) output reg [14:0] pad_address,
     (* IOB="TRUE", DONT_TOUCH="TRUE" *) output reg pad_select_n, pad_oe_n, pad_we_n,
     (* IOB = "TRUE" *) output reg [15:0] dq_out,
@@ -22,6 +23,8 @@ module native64_core (
     output reg execution_fault
 );
     reg running, active;
+    (* DONT_TOUCH="TRUE", IOB="FALSE" *) reg selected, reading, writing;
+    assign select_n=!selected; assign oe_n=!reading; assign we_n=!writing;
     (* DONT_TOUCH="TRUE" *) reg [7:0] phase_a, phase_inv;
     (* DONT_TOUCH="TRUE" *) reg phase_parity;
     wire phase_error = (phase_a != ~phase_inv) || (phase_parity != ^phase_a);
@@ -29,6 +32,11 @@ module native64_core (
     reg [12:0] frame;
     reg [9:0] wait_rounds;
     reg wait_parity;
+    reg installed;
+    wire [3:0] policy_level;
+    // The current scan starts with FAST prearmed. An older slow command
+    // may not authorize skips if this scan's installation pulse is lost.
+    assign issued=(installed || command_strobe) ? policy_level : 4'd0;
     wire wrap_frame = phase == 139;
     wire wrap_round = wrap_frame && (&frame);
     wire wait_ok = wait_parity == ^wait_rounds;
@@ -65,6 +73,7 @@ module native64_core (
     wire owes_write = repair_a || !repair_b;
     wire complete_read = protect_owner && visit_token[9] && !owes_write;
     wire complete_write = protect_owner && visit_token[19] && owes_write;
+    reg [14:0] app_candidate;
     wire app_begin = phase==101 && app_request && !protect_owner;
     wire release_visit = complete_read || complete_write;
     wire addressed = seen == {1'b0,address};
@@ -82,9 +91,9 @@ module native64_core (
         .packet(report_send), .packet_complete(sealed), .packet_epoch(epoch),
         .packet_count(count), .sealed(sealed),
         .scan_bad(scan_bad && !scan_start), .actual_count(count),
-        .loss(loss || broken || (!active && !wait_ok) ||
+        .loss(loss || broken || (!active && !wait_ok) || (wrap_round && active && !installed) ||
               (protect_owner && visit_token[6] && sampled_err)),
-        .issued(issued), .quiet(quiet), .accepted_zero(accepted_zero),
+        .issued(policy_level), .quiet(quiet), .accepted_zero(accepted_zero),
         .command_strobe(command_strobe), .history_fault(history_fault)
     );
 
@@ -92,8 +101,9 @@ module native64_core (
         if (cold) begin
             running<=0; active<=1; phase_a<=0; phase_inv<=8'hff; phase_parity<=0;
             frame<=0; epoch<=0;
+            installed<=0;
             wait_rounds<=0; wait_parity<=0; visit_token<=0;
-            address<=0; select_n<=1; oe_n<=1; we_n<=1; drive<=0;
+            address<=0; selected<=0; reading<=0; writing<=0; drive<=0;
             protect_owner<=0; app_owner<=0; app_grant<=0; app_valid<=0;
             sampled<=0;
             repair_a<=0;repair_b<=1;
@@ -102,6 +112,7 @@ module native64_core (
         end else begin
             running<=1;
             report_send<=0; app_grant<=0; app_valid<=0;
+            if(command_strobe) installed<=1;
             phase_a<=next_phase; phase_inv<=~next_phase; phase_parity<=^next_phase;
             if (running && wrap_frame) frame<=frame+1'b1;
             if (wrap_round && running) begin
@@ -109,12 +120,13 @@ module native64_core (
                 wait_rounds<=next_wait; wait_parity<=^next_wait;
             end
             if (scan_start) begin
+                installed<=0;
                 seen<=0; count<=0; sealed<=0; scan_bad<=0;
             end
             visit_token<={visit_token[18:0],start_visit};
             if (start_visit) begin
                 address<={launch_frame,launch_lane}; protect_owner<=1;
-                select_n<=0; oe_n<=0; we_n<=1; drive<=0;
+                selected<=1; reading<=1; writing<=0; drive<=0;
                 sampled<=0;
                 committed<=0; damaged<=0;
             end
@@ -122,18 +134,18 @@ module native64_core (
                 sampled<=1;
             end
             if (protect_owner && visit_token[6]) begin
-                oe_n<=1;repair_a<=sampled_err;repair_b<=!sampled_err;
+                reading<=0;repair_a<=sampled_err;repair_b<=!sampled_err;
             end
             if (broken || history_fault || (!active && !wait_ok)) execution_fault<=1;
             if (broken) begin scan_bad<=1; damaged<=1; end
             if (protect_owner && visit_token[9] && owes_write) drive<=1;
-            if (protect_owner && visit_token[10] && owes_write) we_n<=0;
+            if (protect_owner && visit_token[10] && owes_write) writing<=1;
             if (protect_owner && visit_token[15] && !we_n && drive && !select_n) begin
-                we_n<=1; committed<=1;
+                writing<=0; committed<=1;
             end
             if (protect_owner && visit_token[17]) drive<=0;
             if (release_visit) begin
-                protect_owner<=0; select_n<=1; oe_n<=1; we_n<=1; drive<=0;
+                protect_owner<=0; selected<=0; reading<=0; writing<=0; drive<=0;
                 if (good_release) begin
                     seen<=seen+1'b1;
                     count<=count+{15'd0,owes_write};
@@ -146,30 +158,33 @@ module native64_core (
 
             // Only reads are admitted for the long-lived payload. The
             // application never changes the protection report or the repair.
-            if (phase==101 && app_request && !protect_owner) begin
-                app_grant<=1; app_owner<=1; address<=app_address;
-                select_n<=0; oe_n<=0;
+            if (phase==100) app_candidate<=app_address;
+            if (app_begin) begin
+                app_grant<=1; app_owner<=1; address<=app_candidate;
+                selected<=1; reading<=1;
             end
-            if (app_owner && phase==108) oe_n<=1;
-            if (app_owner && phase==111) begin select_n<=1; app_valid<=1; end
+            if (app_owner && phase==108) reading<=0;
+            if (app_owner && phase==111) begin selected<=0; app_valid<=1; end
             if (phase==125) app_owner<=0;
         end
     end
     // Capture exactly once at +60 ns; hold this image through WE# rising.
     reg drive_next=0;
-    // OLOGIC drives the bus; the fabric witnesses use the same transitions
-    // without feeding the pad Q back into the fabric or sharing its routing.
+    // Independent idle values allow the address pad FF to reload each edge.
+    // During every owned transaction its D equals the registered witness.
     always @(posedge clk) begin
-        if(cold) begin pad_select_n<=1; pad_oe_n<=1; pad_we_n<=1; pad_address<=0; end
+        pad_address<=cold ? 15'd0 : start_visit ? {launch_frame,launch_lane} :
+                     app_begin ? app_candidate : (protect_owner || app_owner) ? address : 15'd0;
+    end
+    // Opposite encoding to the fabric witnesses prevents feedback from a pad
+    // Q into logic. At an idle pin the asynchronous SRAM is deselected.
+    always @(posedge clk) begin
+        if(cold) begin pad_select_n<=1; pad_oe_n<=1; pad_we_n<=1; end
         else begin
-            if(start_visit) begin pad_address<={launch_frame,launch_lane}; pad_select_n<=0; pad_oe_n<=0; pad_we_n<=1; end
-            if(protect_owner && visit_token[6]) pad_oe_n<=1;
-            if(protect_owner && visit_token[10] && owes_write) pad_we_n<=0;
-            if(protect_owner && visit_token[15] && !we_n && drive && !select_n) pad_we_n<=1;
-            if(release_visit) begin pad_select_n<=1; pad_oe_n<=1; pad_we_n<=1; end
-            if(app_begin) begin pad_address<=app_address; pad_select_n<=0; pad_oe_n<=0; end
-            if(app_owner && phase==108) pad_oe_n<=1;
-            if(app_owner && phase==111) pad_select_n<=1;
+            pad_select_n<=!(start_visit || app_begin || (selected && !release_visit && !(app_owner && phase==111)));
+            pad_oe_n<=!(start_visit || app_begin || (reading && !release_visit && !(protect_owner && visit_token[6]) && !(app_owner && phase==108)));
+            pad_we_n<=!(!release_visit && !start_visit && ((protect_owner && visit_token[10] && owes_write) ||
+                    (writing && !(protect_owner && visit_token[15] && drive && selected))));
         end
     end
     always @(posedge clk) begin
@@ -181,4 +196,22 @@ module native64_core (
         else if(protect_owner && visit_token[8]) drive_next<=owes_write;
         pad_t_n<={16{!drive_next}};
     end
+`ifdef FORMAL
+    // Prove exact time position of every visit token and its reference phase.
+    reg proof_past=0;
+    genvar index;
+    generate for(index=0;index<20;index=index+1) begin: token_position
+        always @(posedge clk) if(proof_past && visit_token[index])
+            assert(phase==index || phase==24+index || phase==52+index || phase==76+index);
+    end endgenerate
+    always @(posedge clk) begin
+        proof_past<=1;
+        if(proof_past) begin
+            assert($onehot0(visit_token));
+            assert(running || (phase==0 && visit_token==0));
+            assert(phase<=139);
+            assert(phase_a==~phase_inv && phase_parity==^phase_a);
+        end
+    end
+`endif
 endmodule

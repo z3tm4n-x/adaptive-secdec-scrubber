@@ -12,5 +12,6 @@ for level in 1 2 3 4 5 6 7 8 9; do
     if [ "${#pids[@]}" -eq 3 ]; then for pid in "${pids[@]}"; do wait "$pid"; done; pids=(); fi
 done
 for defect in 1 2 3 4 5; do run 1 "$defect" & pids+=($!); done
+run 2 6 & pids+=($!)
 for pid in "${pids[@]}"; do wait "$pid"; done
 cat "$out"/join-*.txt

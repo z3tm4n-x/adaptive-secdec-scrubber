@@ -25,7 +25,7 @@ module policy_safety;
     end
 endmodule
 
-module pins_agree;
+module calendar_positions;
     wire clk;
     (* anyseq *) reg cold, loss, err, req;
     (* anyseq *) reg [15:0] dq;
@@ -38,6 +38,25 @@ module pins_agree;
     reg past=0;
     always @(posedge clk) begin
         past<=1; if(!past) assume(cold);
-        if(past) assert({address,cs,oe,we}=={pad_address,pcs,poe,pwe});
+    end
+endmodule
+
+module pins_bounded;
+    wire clk;
+    reg past=0;
+    (* anyseq *) reg err, request, loss;
+    (* anyseq *) reg [15:0] dq;
+    (* anyseq *) reg [14:0] app;
+    wire [14:0] a, pa;
+    wire cs, oe, we, pcs, poe, pwe;
+    native64_core dut(.clk(clk),.cold(!past),.loss(loss),.err_in(err),.dq_in(dq),
+        .app_request(request),.app_address(app),.address(a),.select_n(cs),.oe_n(oe),.we_n(we),
+        .pad_address(pa),.pad_select_n(pcs),.pad_oe_n(poe),.pad_we_n(pwe));
+    always @(posedge clk) begin
+        past<=1;
+        if(past) begin
+            assert({cs,oe,we}=={pcs,poe,pwe});
+            if(!pcs) assert(a==pa);
+        end
     end
 endmodule

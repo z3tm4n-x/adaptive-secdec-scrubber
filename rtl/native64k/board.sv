@@ -4,7 +4,7 @@ module native64_board (
     inout wire [15:0] sram_dq,
     output wire [19:0] sram_a,
     output wire sram_ce_n, sram_oe_n, sram_we_n, sram_ub_n, sram_lb_n,
-    output wire locked_led, fault_led
+    (* IOB="TRUE" *) output reg locked_led, fault_led
 );
     wire clk, ref_i, fb_i, fb, clk_i, locked;
     IBUF input_buffer(.I(ref100),.O(ref_i));
@@ -29,6 +29,7 @@ module native64_board (
     wire [15:0] pad_t_n;
     wire [3:0] issued;
     wire active_owner;
+    wire fault_status;
     assign sram_a={5'b0,address};
     assign sram_lb_n=0;
     assign sram_ub_n=0;
@@ -52,8 +53,9 @@ module native64_board (
          .app_valid(app_valid),.app_data(app_data),.pad_address(address),
          .pad_select_n(sram_ce_n),.pad_oe_n(sram_oe_n),.pad_we_n(sram_we_n),.drive(drive),
          .dq_out(dq_out),.pad_t_n(pad_t_n),.issued(issued),.protect_owner(active_owner),
-         .execution_fault(fault_led));
-    reg monitor=0;
-    always @(posedge clk) monitor<=observed ^ (^issued) ^ active_owner;
-    assign locked_led=monitor;
+         .execution_fault(fault_status));
+    always @(posedge clk) begin
+        locked_led<=observed ^ (^issued) ^ active_owner;
+        fault_led<=fault_status;
+    end
 endmodule
