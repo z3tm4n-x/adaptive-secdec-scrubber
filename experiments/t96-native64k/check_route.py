@@ -8,6 +8,11 @@ import re
 from decimal import Decimal as D
 from pathlib import Path
 
+# T186 calendar.json at 39cd9721, adopted in CONTRACT.md.
+CALENDAR_EDGE_NS = D("0.5")
+MIN_CLOCK_SCALE = D("0.99999")
+FMC_MIN_NS, FMC_MAX_NS = D("0.1"), D("0.5")
+
 
 def require(condition, message):
     if not condition:
@@ -30,7 +35,7 @@ def paths(report, direction):
         yield endpoint, delay, clock, setup, hold, number(r"Clock Uncertainty:\s+([\d.]+)ns")
 
 
-def check(directory, read_access=D(45)):
+def check(directory, read_access=D(45), *, edge_ns=CALENDAR_EDGE_NS):
     def read(file):
         return (directory / file).read_text(encoding="utf-8", errors="replace")
     summary = read("timing.rpt")
@@ -38,6 +43,18 @@ def check(directory, read_access=D(45)):
     require(row, "Design timing summary missing")
     fields = row[1].split()
     wns, whs, wpws = D(fields[0]), D(fields[4]), D(fields[8])
+    # Whole-design WNS can be a pin path with a max-delay constraint. Read
+    # the separate register-to-register row of the Intra Clock Table.
+    intra = summary.split("| Intra Clock Table", 1)[1].split("| Inter Clock Table", 1)[0]
+    logic_clock = re.search(r"(?m)^\s*clk_i\s+(-?[\d.]+)\s+-?[\d.]+\s+\d+\s+\d+\s+(-?[\d.]+)\s+", intra)
+    require(logic_clock, "Missing clk_i intra-clock setup/hold")
+    constraints = read("effective.xdc")
+    clock_model = {"clock": "clk_i", "wns_ns": logic_clock[1], "whs_ns": logic_clock[2]}
+    for kind, expected in (("setup", D(".5")), ("hold", D(".1"))):
+        setting = re.search(rf"(?m)^set_clock_uncertainty -{kind}\s+([\d.]+)\s+\[get_clocks \*\]", constraints)
+        require(setting and D(setting[1]) == expected, f"Unexpected {kind} uncertainty on generated clocks")
+        clock_model[f"user_{kind}_uncertainty_ns"] = setting[1]
+    clock_model["scope"] = "Relative clock timing at the registers must meet this STA model, including the source and MMCM."
     timing_checks = dict(re.findall(r"(?m)^\d+\. checking (\w+) \((\d+)\)", read("check.rpt")))
     for category in ("no_clock", "unconstrained_internal_endpoints", "no_input_delay", "no_output_delay",
                      "multiple_clock", "loops"):
@@ -74,7 +91,6 @@ def check(directory, read_access=D(45)):
                         extrema[direction].extend(extra)
     ins, outs = extrema["input"], extrema["output"]
     bound = D(".001")   # reports print to 0.001 ns; round each input outwards
-    lo, hi = D(".99999"), D("1.00001")
     clks = [p[2] for p in ins + outs]
     skew = max(clks) - min(clks) + 2 * bound
     uncertainty = max(p[5] for p in ins + outs) + bound
@@ -83,16 +99,23 @@ def check(directory, read_access=D(45)):
     omin, omax = min(p[1] for p in outs) - bound, max(p[1] for p in outs) + bound
     setup = max(D(".01"), max(p[3] for p in ins)) + bound
     hold = max(D(".33"), max(p[4] for p in ins)) + bound
-    # The external signal goes out on FMC and returns. Min and max trace
-    # flights are 0.1 and 0.5 ns. Output skew includes both extremes.
-    read_budget = 60*lo - skew - omax - 2*D(".5") - imax - setup - uncertainty
-    pin_spread = skew + omax - omin + D(".4") + uncertainty
+    # For distinct edges the earlier one can be late by J and the later one
+    # early by J. Keep that worst-case loss on top of the full STA allowance.
+    # The board flight delays are independent terms in the propagation path.
+    require(edge_ns >= 0, "Negative calendar edge bound")
+    pair_loss = 2 * edge_ns
+
+    def elapsed_min(nominal_ns):
+        return D(nominal_ns) * MIN_CLOCK_SCALE - pair_loss
+
+    read_budget = elapsed_min(60) - skew - omax - 2*FMC_MAX_NS - imax - setup - uncertainty
+    pin_spread = skew + omax - omin + (FMC_MAX_NS - FMC_MIN_NS) + uncertainty
     def span(t):
-        return D(t)*lo - pin_spread
+        return elapsed_min(t) - pin_spread
     margins = {
         "address_CE_ERR_read_access_45": read_budget - read_access,
         "OE_read_access_22": read_budget - 22,
-        "capture_hold_until_OE_high": 10*lo - skew + omin + D(".2") + imin - uncertainty - hold,
+        "capture_hold_until_OE_high": elapsed_min(10) - skew + omin + 2*FMC_MIN_NS + imin - uncertainty - hold,
         "WE_low_50_min35": span(50) - 35,
         "address_CE_to_end_160_min35": span(160) - 35,
         "write_data_setup_60_min25": span(60) - 25,
@@ -102,8 +125,8 @@ def check(directory, read_access=D(45)):
         "access_spacing_min240_cycle45": span(240) - 45,
         "OE_high_to_FPGA_drive_30_min18": span(30) - 18,
         "drive_off_to_next_OE_60_min0": span(60),
-        "WE_rise_before_release": 40*lo - skew - uncertainty - omax - D(".5"),
-        "last_repair_release_to_cut_140": 140*lo - skew - uncertainty - omax - D(".5"),
+        "WE_rise_before_release": elapsed_min(40) - skew - uncertainty - omax - FMC_MAX_NS,
+        "last_repair_release_to_cut_140": elapsed_min(140) - skew - uncertainty - omax - FMC_MAX_NS,
     }
     notes = ["High five SRAM address lines and both byte enables are static on this board top.",
              "Conditional 15 pF and 0.1..0.5 ns adapter, 3 ns SRAM edges, clocks and primed memory."]
@@ -111,11 +134,20 @@ def check(directory, read_access=D(45)):
     return {"part": "xc7z020clg484-1", "clock_MHz": 100, "wns_ns": str(wns), "whs_ns": str(whs),
             "wpws_ns": str(wpws), "wns_failing": int(fields[2]), "whs_failing": int(fields[6]),
             "wpws_failing": int(fields[10]), "resources": resource,
+            "internal_sta_model": clock_model,
             "routable_nets": net_count, "fully_routed_nets": routed, "routing_errors": routing_errors,
             "drc_errors": drc_errors, "drc_warnings": drc_warnings,
             "pad_counts": {k: len(v) for k, v in expected.items()},
             "extrema_ns": {k:str(v) for k,v in {"input_min":imin,"input_max":imax,"output_min":omin,
                 "output_max":omax,"clock_spread":skew,"uncertainty":uncertainty,"setup":setup,"hold":hold}.items()},
+            "external_clock_budget": {
+                "minimum_clock_scale": str(MIN_CLOCK_SCALE), "per_edge_J_ns": str(edge_ns),
+                "distinct_edge_shortening_2J_ns": str(pair_loss),
+                "retained_STA_uncertainty_ns": str(uncertainty),
+                "combined_allowance_ns": str(pair_loss+uncertainty),
+                "FMC_round_trip_max_ns": str(2*FMC_MAX_NS),
+                "minimum_60ns_edge_separation_ns": str(elapsed_min(60)),
+                "available_SRAM_read_access_ns": str(read_budget)},
             "external_margin_ns": {k: str(v) for k,v in margins.items()},
             "notes": notes, "pass": min(wns,whs,wpws)>0 and routed==net_count and routing_errors==0 and
             not drc_errors and min(margins.values())>=0}

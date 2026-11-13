@@ -310,9 +310,10 @@
     "experiments/t96-native64k/run_route.sh": "81ed183b8ade7c9292161031e568b0cabc4ba1ed4d68b46d907c823303defdbf",
     "experiments/t96-native64k/run_sentinel.sh": "1cb6ce783a450e21585bc3a2d09d230dee5ad65d7d4061f2d2fd054e86309cd7",
     "experiments/t96-native64k/run_sim.sh": "e796e14b8a52fc1f345645cb717b69d6bf475266aaee4465cff5e14ffc8c9adf",
-    "experiments/t96-native64k/check_route.py": "cacc148fc123b1d32abe53fade768cd7560244c696ad343d62bafd7d8b9d3c3d",
+    "experiments/t96-native64k/check_route.py": "89adf9c64718e8add23fa15a5efdb0e5a54a090e966371740a2171ed3e6c9858",
     "experiments/t96-native64k/collect.py": "04ff978a5079b69e68362dbfbfa2ce395617283cadd100e9d226065297543d44",
     "experiments/t96-native64k/export_evidence.py": "764e0ac6b92a0d37b0f70a0eaf35289de8ecaf17cff092e57a448d0a0e27695a",
+    "experiments/t96-native64k/test_edge_budget.py": "635ef863a2dc230570c852961d3edce4e106e0df000a01fb533b5f9279ee55f0",
     "experiments/t96-native64k/board.xdc": "729a75fbfd7da738472a925abe17b4ff0463249a868c2ec2416cf8a6e3203e15",
     "experiments/t96-native64k/route.tcl": "4cd8109a2d0d7f1176e78cae502029d180c05470e60bbe8fad38787223de8314",
     "experiments/t96-native64k/CONTRACT.md": "ea56d5aa3c305f5f1e1b102b004769bd989a21b6bbcc65a8dd081353ff92c584"
