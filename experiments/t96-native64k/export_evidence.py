@@ -28,6 +28,9 @@ if __name__=="__main__":
             add(z,"sta/"+file.name,file)
         for name in ("clean","last","dense","hit","phase","shared_sample","missed","policy"):
             add(z,"sim/"+name+".txt",a.sim/(name+".txt"))
+        for name in ("before","0","1","2","3"):
+            file=a.sim/f"epoch-{name}.txt"
+            add(z,"sim/"+file.name,file)
         for file in sorted(a.joined.glob("join-*.txt")):add(z,"join/"+file.name,file)
         for name in ("calendar_positions","pins_bounded","policy_safety"):add(z,"formal/"+name+".txt",a.formal/(name+".txt"))
         add(z,"sentinel/rejected.txt",a.sentinel/"rejected.txt")

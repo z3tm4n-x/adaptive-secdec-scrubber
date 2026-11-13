@@ -17,7 +17,7 @@ def worst_field(reports, pattern):
 class EdgeBudgetTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # The archive is the original pre-correction result of routing.
+        # Read the actual path reports of this routed RTL revision.
         tmp = TemporaryDirectory()
         cls.addClassCleanup(tmp.cleanup)
         cls.sta = Path(tmp.name) / "sta"
@@ -63,7 +63,11 @@ class EdgeBudgetTest(unittest.TestCase):
     def test_source_condition_and_internal_clock_row_are_separate(self):
         self.assertEqual(self.current["wns_ns"], "0.064")
         model = self.current["internal_sta_model"]
-        self.assertEqual((model["wns_ns"], model["whs_ns"]), ("0.090", "0.060"))
+        timing=(self.sta/"timing.rpt").read_text()
+        row=re.search(r"^[ \t]*clk_i\s+([.\d-]+)\s+[.\d-]+\s+\d+\s+\d+\s+([.\d-]+)",timing,re.M)
+        self.assertIsNotNone(row)
+        self.assertEqual((model["wns_ns"], model["whs_ns"]),row.groups())
+        self.assertGreater(min(map(D,row.groups())),0)
         self.assertEqual((D(model["user_setup_uncertainty_ns"]), D(model["user_hold_uncertainty_ns"])),
                          (D(".500"), D(".100")))
 

@@ -50,6 +50,27 @@ def collect(sim,join,formal):
         assert r["partial_owner_ns"]==(3276830 if name=="last" else -1)
         traces[name]=r
     history=read_trial(sim/"policy.txt","POLICY")
+    epoch_recovery={}
+    for scenario,mode,before,promotion in (("before",0,1,3584),("0",0,0,3072),
+            ("1",1,0,-1),("2",2,0,3584),("3",3,0,3584)):
+        file=sim/f"epoch-{scenario}.txt"
+        rec=read_trial(file,"EPOCH")
+        assert (rec["mode"],rec["old"],rec["reads"],rec["writes"],rec["report"],
+                rec["sample_ns"],rec["WE_rise_ns"],rec["release_ns"],rec["cut_ns"],rec["install_ns"],
+                rec["first_2L_epoch"])==(mode,before,32768,1,0,11468220,11468320,
+                                         11468360,11468500,11468700,promotion)
+        lines=file.read_text(encoding="utf-8").splitlines()
+        cells=[tuple(map(int,m.groups())) for line in lines
+               if (m:=re.search(r"^CELL .*epoch=(\d+) quiet=(\d+) period_L=(\d+)$",line))]
+        expected_z={"before":[0,0,1,2,3],"0":[0,1,2,3,4],"1":[0]*5,
+                    "2":[0,0,1,2,3],"3":[0,0,1,2,3]}[scenario]
+        assert cells==[(1536+512*i,z,2 if z>=3 else 1) for i,z in enumerate(expected_z)]
+        starts={int(m[1]):int(m[2]) for line in lines
+                if (m:=re.fullmatch(r"START epoch=(\d+) address0=([01])",line))}
+        for ep,z,period in cells[3:]:
+            assert (starts[ep],starts[ep+1],starts[ep+2])==(1,int(period==1),1)
+        epoch_recovery[scenario]={"events":rec,"common_cells_epoch_z_period_L":cells,
+                                  "observed_address_zero_at_boundaries":starts}
     assert history["levels_mask"]==1023 and history["report_cases"]==15 and history["saturation"]==596
     joins=[read_trial(join/f"join-{level}-{defect}.txt","JOIN") for level,defect in
            [(n,0) for n in range(1,10)]+[(1,n) for n in range(1,6)]+[(2,6)]]
@@ -75,6 +96,7 @@ def collect(sim,join,formal):
                 HERE/"board.xdc",HERE/"route.tcl",HERE/"CONTRACT.md"]
     return {"units":"nominal ns unless specified", "full_pin_trials":traces,
             "policy":history, "full_scan_boundary_trials":joins, "formal":proofs,
+            "closed_epoch_recovery":epoch_recovery,
             "fault_observations":{
                 "missed":"Actual capture strobe suppressed on final ERR. Incomplete service; no report or authorizing zero. No repair.",
                 "shared_sample":"ERR sampled high at +60 ns, then its common FF corrupted before +70 ns. No repair and a false accepting zero.",

@@ -8,7 +8,7 @@
   "whs_failing": 0,
   "wpws_failing": 0,
   "resources": {
-    "Slice LUTs": 363,
+    "Slice LUTs": 362,
     "Slice Registers": 273,
     "ILOGIC": 1,
     "OLOGIC": 36,
@@ -19,14 +19,14 @@
   },
   "internal_sta_model": {
     "clock": "clk_i",
-    "wns_ns": "0.090",
+    "wns_ns": "0.253",
     "whs_ns": "0.060",
     "user_setup_uncertainty_ns": "0.500",
     "user_hold_uncertainty_ns": "0.100",
     "scope": "Relative clock timing at the registers must meet this STA model, including the source and MMCM."
   },
-  "routable_nets": 690,
-  "fully_routed_nets": 690,
+  "routable_nets": 683,
+  "fully_routed_nets": 683,
   "routing_errors": 0,
   "drc_errors": [],
   "drc_warnings": [

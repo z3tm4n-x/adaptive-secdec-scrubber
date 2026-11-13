@@ -138,6 +138,10 @@ module native64_core (
             end
             if (broken || history_fault || (!active && !wait_ok)) execution_fault<=1;
             if (broken) begin scan_bad<=1; damaged<=1; end
+            // The rule samples the old scan_bad and any current broken/loss
+            // on this edge. Its validity decision is then latched in invalid.
+            // Consume the closed scan's flag; later faults still set it anew.
+            if (cut) scan_bad<=0;
             if (protect_owner && visit_token[9] && owes_write) drive<=1;
             if (protect_owner && visit_token[10] && owes_write) writing<=1;
             if (protect_owner && visit_token[15] && !we_n && drive && !select_n) begin
