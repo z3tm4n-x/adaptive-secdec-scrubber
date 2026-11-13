@@ -1,0 +1,80 @@
+{
+  "part": "xc7z020clg484-1",
+  "clock_MHz": 100,
+  "wns_ns": "0.064",
+  "whs_ns": "0.060",
+  "wpws_ns": "3.000",
+  "wns_failing": 0,
+  "whs_failing": 0,
+  "wpws_failing": 0,
+  "resources": {
+    "Slice LUTs": 362,
+    "Slice Registers": 273,
+    "ILOGIC": 1,
+    "OLOGIC": 36,
+    "Block RAM Tile": 0,
+    "DSPs": 0,
+    "BUFGCTRL": 2,
+    "MMCME2_ADV": 1
+  },
+  "internal_sta_model": {
+    "clock": "clk_i",
+    "wns_ns": "0.253",
+    "whs_ns": "0.060",
+    "user_setup_uncertainty_ns": "0.500",
+    "user_hold_uncertainty_ns": "0.100",
+    "scope": "Relative clock timing at the registers must meet this STA model, including the source and MMCM."
+  },
+  "routable_nets": 683,
+  "fully_routed_nets": 683,
+  "routing_errors": 0,
+  "drc_errors": [],
+  "drc_warnings": [
+    "ZPS7-1#1"
+  ],
+  "pad_counts": {
+    "input": 17,
+    "output": 34
+  },
+  "extrema_ns": {
+    "input_min": "0.246",
+    "input_max": "2.394",
+    "output_min": "1.016",
+    "output_max": "3.787",
+    "clock_spread": "0.965",
+    "uncertainty": "0.575",
+    "setup": "0.094",
+    "hold": "0.331"
+  },
+  "external_clock_budget": {
+    "minimum_clock_scale": "0.99999",
+    "per_edge_J_ns": "0.5",
+    "distinct_edge_shortening_2J_ns": "1.0",
+    "retained_STA_uncertainty_ns": "0.575",
+    "combined_allowance_ns": "1.575",
+    "FMC_round_trip_max_ns": "1.0",
+    "minimum_60ns_edge_separation_ns": "58.99940",
+    "available_SRAM_read_access_ns": "50.18440"
+  },
+  "external_margin_ns": {
+    "address_CE_ERR_read_access_45": "5.18440",
+    "OE_read_access_22": "28.18440",
+    "capture_hold_until_OE_high": "8.59090",
+    "WE_low_50_min35": "9.28850",
+    "address_CE_to_end_160_min35": "119.28740",
+    "write_data_setup_60_min25": "29.28840",
+    "write_data_hold_20_min0": "14.28880",
+    "write_address_setup_110_min0": "104.28790",
+    "write_address_hold_to_release_40": "34.28860",
+    "access_spacing_min240_cycle45": "189.28660",
+    "OE_high_to_FPGA_drive_30_min18": "6.28870",
+    "drive_off_to_next_OE_60_min0": "54.28840",
+    "WE_rise_before_release": "33.17260",
+    "last_repair_release_to_cut_140": "133.17160"
+  },
+  "notes": [
+    "High five SRAM address lines and both byte enables are static on this board top.",
+    "Conditional 15 pF and 0.1..0.5 ns adapter, 3 ns SRAM edges, clocks and primed memory."
+  ],
+  "pass": true
+}
