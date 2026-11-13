@@ -1,0 +1,62 @@
+{
+  "part": "xc7z020clg484-1",
+  "clock_MHz": 100,
+  "wns_ns": "0.064",
+  "whs_ns": "0.060",
+  "wpws_ns": "3.000",
+  "wns_failing": 0,
+  "whs_failing": 0,
+  "wpws_failing": 0,
+  "resources": {
+    "Slice LUTs": 363,
+    "Slice Registers": 273,
+    "ILOGIC": 1,
+    "OLOGIC": 36,
+    "Block RAM Tile": 0,
+    "DSPs": 0,
+    "BUFGCTRL": 2,
+    "MMCME2_ADV": 1
+  },
+  "routable_nets": 690,
+  "fully_routed_nets": 690,
+  "routing_errors": 0,
+  "drc_errors": [],
+  "drc_warnings": [
+    "ZPS7-1#1"
+  ],
+  "pad_counts": {
+    "input": 17,
+    "output": 34
+  },
+  "extrema_ns": {
+    "input_min": "0.246",
+    "input_max": "2.394",
+    "output_min": "1.016",
+    "output_max": "3.787",
+    "clock_spread": "0.965",
+    "uncertainty": "0.575",
+    "setup": "0.094",
+    "hold": "0.331"
+  },
+  "external_margin_ns": {
+    "address_CE_ERR_read_access_45": "6.18440",
+    "OE_read_access_22": "29.18440",
+    "capture_hold_until_OE_high": "9.59090",
+    "WE_low_50_min35": "10.28850",
+    "address_CE_to_end_160_min35": "120.28740",
+    "write_data_setup_60_min25": "30.28840",
+    "write_data_hold_20_min0": "15.28880",
+    "write_address_setup_110_min0": "105.28790",
+    "write_address_hold_to_release_40": "35.28860",
+    "access_spacing_min240_cycle45": "190.28660",
+    "OE_high_to_FPGA_drive_30_min18": "7.28870",
+    "drive_off_to_next_OE_60_min0": "55.28840",
+    "WE_rise_before_release": "34.17260",
+    "last_repair_release_to_cut_140": "134.17160"
+  },
+  "notes": [
+    "High five SRAM address lines and both byte enables are static on this board top.",
+    "Conditional 15 pF and 0.1..0.5 ns adapter, 3 ns SRAM edges, clocks and primed memory."
+  ],
+  "pass": true
+}

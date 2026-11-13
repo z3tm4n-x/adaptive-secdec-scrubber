@@ -55,6 +55,13 @@ foreach corner {Slow Fast} {
     foreach kind {min max} {
         report_timing -from $ins -to [all_registers] -corner $corner -delay_type $kind -max_paths 150 -nworst 4 -file clocked_input_${corner}_${kind}.rpt
         report_timing -from [all_registers] -to $outs -corner $corner -delay_type $kind -max_paths 150 -nworst 4 -file clocked_output_${corner}_${kind}.rpt
+        # The four worst paths to a bidirectional pad can all be T arcs.
+        # Explicitly request data AND output-enable launches on each bit.
+        foreach {signal group} {dq_out data pad_t_n direction} {
+            set launch [get_cells -hier -regexp [format {.*core/%s_reg\[[0-9]+\]} $signal]]
+            if {[llength $launch]!=16} {error "missing $signal pad FFs"}
+            report_timing -from $launch -to [get_ports {sram_dq[*]}] -corner $corner -delay_type $kind -max_paths 64 -nworst 4 -file clocked_${group}_${corner}_${kind}.rpt
+        }
     }
 }
 puts "NATIVE64_ROUTED"

@@ -16,7 +16,8 @@
       "seal_ns": 11468260,
       "good_zero_ns": 11468500,
       "command_ns": 11468700,
-      "next_ns": 11468800
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
     },
     "last": {
       "case": 1,
@@ -33,7 +34,8 @@
       "seal_ns": 11468360,
       "good_zero_ns": -1,
       "command_ns": 11468700,
-      "next_ns": 11468800
+      "next_ns": 11468800,
+      "partial_owner_ns": 3276830
     },
     "dense": {
       "case": 2,
@@ -50,7 +52,8 @@
       "seal_ns": 11468360,
       "good_zero_ns": -1,
       "command_ns": 11468700,
-      "next_ns": 11468800
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
     },
     "hit": {
       "case": 0,
@@ -67,7 +70,8 @@
       "seal_ns": -1,
       "good_zero_ns": -1,
       "command_ns": 11468700,
-      "next_ns": 11468800
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
     },
     "phase": {
       "case": 0,
@@ -84,14 +88,51 @@
       "seal_ns": -1,
       "good_zero_ns": -1,
       "command_ns": 11468700,
-      "next_ns": 11468800
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
+    },
+    "missed": {
+      "case": 0,
+      "fault": 4,
+      "reads": 32768,
+      "writes": 0,
+      "owner_ns": 3276800,
+      "longest_ns": 100,
+      "application_reads": 12,
+      "application_reserved_ns": 2880,
+      "last_sample_ns": -1,
+      "last_WE_rise_ns": -1,
+      "last_release_ns": 11468260,
+      "seal_ns": -1,
+      "good_zero_ns": -1,
+      "command_ns": 11468700,
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
+    },
+    "shared_sample": {
+      "case": 0,
+      "fault": 3,
+      "reads": 32768,
+      "writes": 0,
+      "owner_ns": 3276800,
+      "longest_ns": 100,
+      "application_reads": 12,
+      "application_reserved_ns": 2880,
+      "last_sample_ns": 11468220,
+      "last_WE_rise_ns": -1,
+      "last_release_ns": 11468260,
+      "seal_ns": 11468260,
+      "good_zero_ns": 11468500,
+      "command_ns": 11468700,
+      "next_ns": 11468800,
+      "partial_owner_ns": -1
     }
   },
   "policy": {
     "levels_mask": 1023,
     "saturation": 596,
-    "samples": 57968,
-    "report_cases": 13,
+    "samples": 65650,
+    "report_cases": 15,
     "post_install_loss": 1
   },
   "full_scan_boundary_trials": [
@@ -101,7 +142,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 2,
-      "literal_idle": 1
+      "literal_idle": 1,
+      "idle_app_reads": 1
     },
     {
       "level": 2,
@@ -109,7 +151,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 4,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 3,
@@ -117,7 +160,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 8,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 4,
@@ -125,7 +169,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 16,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 5,
@@ -133,7 +178,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 32,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 6,
@@ -141,7 +187,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 64,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 7,
@@ -149,7 +196,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 128,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 8,
@@ -157,7 +205,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 256,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 9,
@@ -165,7 +214,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 512,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 1,
@@ -173,7 +223,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 2,
-      "literal_idle": 1
+      "literal_idle": 1,
+      "idle_app_reads": 1
     },
     {
       "level": 1,
@@ -181,7 +232,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 0,
       "next_rounds": 1,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 1,
@@ -189,7 +241,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 0,
       "next_rounds": 1,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 1,
@@ -197,7 +250,8 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 1,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
     },
     {
       "level": 1,
@@ -205,12 +259,29 @@
       "physical_reads": 32768,
       "zero_at_cut": 1,
       "next_rounds": 1,
-      "literal_idle": 0
+      "literal_idle": 0,
+      "idle_app_reads": 0
+    },
+    {
+      "level": 2,
+      "defect": 6,
+      "physical_reads": 32768,
+      "zero_at_cut": 1,
+      "next_rounds": 1,
+      "literal_idle": 0,
+      "idle_app_reads": 0
     }
   ],
   "formal": {
     "policy_safety": "temporal induction, all inputs",
-    "pins_agree": "temporal induction, all inputs"
+    "calendar_positions": "temporal induction, all inputs",
+    "pins_bounded": "142 edges from cold start; arbitrary data, ERR and application requests"
+  },
+  "fault_observations": {
+    "missed": "Actual capture strobe suppressed on final ERR. Incomplete service; no report or authorizing zero. No repair.",
+    "shared_sample": "ERR sampled high at +60 ns, then its common FF corrupted before +70 ns. No repair and a false accepting zero.",
+    "hit": "One of two obligations lost after +70 ns. Actual write completes and report is withheld.",
+    "phase": "One phase bit flipped before the last sample. Actual sample and write complete; report is withheld."
   },
   "price": {
     "X_seconds_of_SRAM": 0,
@@ -226,22 +297,24 @@
     "all_ERR_duty_fraction": "4/7"
   },
   "source_sha256_LF": {
-    "rtl/native64k/board.sv": "4a72d1b033bd92656394f80dbc6b031caed6490fc2c1e468fcc19c1f380f26bd",
-    "rtl/native64k/core.sv": "9c1acac38bcac71fe8039cafbc68834c6352a68b440b51124ef83749e31f24e2",
+    "rtl/native64k/board.sv": "244f6497e681b84488d7d826ba73ec133cf4637458dac660131105b5c90aa9e0",
+    "rtl/native64k/core.sv": "c6e3ceb81050bae6d852b23895d76f1a35768dd043f7e90e90e716fc6a8ed8ac",
     "rtl/native64k/rule.sv": "8d4940d31e71770ef51b89d2b075551ad93be953b9841c09efec9783f15d3abb",
-    "experiments/t96-native64k/formal.sv": "e2a0249bb878343e8814e54ed8b9a0a3bdb9a720f6a862687bbc5f3bcea25272",
-    "experiments/t96-native64k/full_tb.sv": "003b27d5bbfb8e9d43ff377ca070f057ed42efe60e696ee262bfba8f4e44a0e8",
-    "experiments/t96-native64k/join_tb.sv": "1de6d733501f260056b3037b0c66a789d69c86ac2060a274d5ce08505568ce47",
-    "experiments/t96-native64k/policy_tb.sv": "8d02ccd1ef80326f551bccdd190e04c129f3f0d99f6a93d884049677dd023fd8",
-    "experiments/t96-native64k/run_formal.sh": "65abfd3dacfb18a4c058eafbdb20535a01d2d619d9178aa57a1d2c248c3ea41f",
-    "experiments/t96-native64k/run_join.sh": "1b59451e0b2ecd92ddd34a9f8495d3b08bf0339e6cdd280e558c7d656006f69f",
-    "experiments/t96-native64k/run_route.sh": "9a2f51375868fe5070b0d421794c2464e869c67cd1753cd8a74348a232861536",
-    "experiments/t96-native64k/run_sentinel.sh": "4e94befc5f068b3e968a7f903ceddf4f6132d1047e53168241b172f1f10c4927",
-    "experiments/t96-native64k/run_sim.sh": "2569ed13af23a47ccb3ce5a197ac34eafe6d51c76122661bcbf36253577f63cf",
-    "experiments/t96-native64k/check_route.py": "901dbac997ce79df2a7b3d0f4b95414540ee0b67ee10c155ea7fa67dd44bc8be",
-    "experiments/t96-native64k/collect.py": "ef4a5b67aee22fcdc6b66c70ec9ec3d9977ba9221403e2e680728e95317281ae",
+    "experiments/t96-native64k/formal.sv": "1d67dddc6f89bdf773d5adaa1fa1d9a1e1d3e83a4472d835bcda369b3bc33189",
+    "experiments/t96-native64k/full_tb.sv": "5fb1ae0f8a58abc3a6e2d5d4db800e1a94ce1be893ca265c6d1a8d8185b86498",
+    "experiments/t96-native64k/join_tb.sv": "576df4e74a973ab3265a372ecf717caeae781f883cd987baa48ed91531aeb5b1",
+    "experiments/t96-native64k/policy_tb.sv": "e7af963d58a70e01f6a6b85c88d164fb3af9c6c5f8d4827d984cf34533ad8313",
+    "experiments/t96-native64k/run_bounded.sh": "ee0af8d663237821c119d990381e1c28cf93f7fcc56e2e94d4e18cfbd62b0f45",
+    "experiments/t96-native64k/run_formal.sh": "8df885e4a98e79c90dfd83bf8442ba6ca01abacd27d418a50570e9784ee6eafe",
+    "experiments/t96-native64k/run_join.sh": "e32a80b569bb918af05cec135452bf074eeb50b428063d6977bec20533e830c5",
+    "experiments/t96-native64k/run_route.sh": "81ed183b8ade7c9292161031e568b0cabc4ba1ed4d68b46d907c823303defdbf",
+    "experiments/t96-native64k/run_sentinel.sh": "1cb6ce783a450e21585bc3a2d09d230dee5ad65d7d4061f2d2fd054e86309cd7",
+    "experiments/t96-native64k/run_sim.sh": "e796e14b8a52fc1f345645cb717b69d6bf475266aaee4465cff5e14ffc8c9adf",
+    "experiments/t96-native64k/check_route.py": "cacc148fc123b1d32abe53fade768cd7560244c696ad343d62bafd7d8b9d3c3d",
+    "experiments/t96-native64k/collect.py": "04ff978a5079b69e68362dbfbfa2ce395617283cadd100e9d226065297543d44",
+    "experiments/t96-native64k/export_evidence.py": "764e0ac6b92a0d37b0f70a0eaf35289de8ecaf17cff092e57a448d0a0e27695a",
     "experiments/t96-native64k/board.xdc": "729a75fbfd7da738472a925abe17b4ff0463249a868c2ec2416cf8a6e3203e15",
-    "experiments/t96-native64k/route.tcl": "040b60964099431489432d6da7435141c575aba81be3712dcf455af2f8692a21",
+    "experiments/t96-native64k/route.tcl": "4cd8109a2d0d7f1176e78cae502029d180c05470e60bbe8fad38787223de8314",
     "experiments/t96-native64k/CONTRACT.md": "ea56d5aa3c305f5f1e1b102b004769bd989a21b6bbcc65a8dd081353ff92c584"
   }
 }

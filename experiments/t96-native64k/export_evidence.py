@@ -23,6 +23,7 @@ if __name__=="__main__":
     with ZipFile(a.out,"w") as z:
         for name in ("timing","utilization","route","drc","check","pins","worst_setup","worst_hold"):
             add(z,"sta/"+name+".rpt",a.route/(name+".rpt"))
+        add(z,"sta/effective.xdc",a.route/"effective.xdc")
         for file in sorted(a.route.glob("clocked_*.rpt")):
             add(z,"sta/"+file.name,file)
         for name in ("clean","last","dense","hit","phase","shared_sample","missed","policy"):

@@ -64,6 +64,14 @@ def check(directory, read_access=D(45)):
                 require({x[0] for x in group} == expected[direction],
                         f"Incomplete pin timing coverage {direction}/{corner}/{kind}")
                 extrema[direction].extend(group)
+                if direction=="output":
+                    for name, reg in (("data","dq_out"),("direction","pad_t_n")):
+                        report=read(f"clocked_{name}_{corner}_{kind}.rpt")
+                        source_bits=set(re.findall(r"(?m)^  Source:\s+core/"+reg+r"_reg\[(\d+)\]/C",report))
+                        extra=list(paths(report,"output"))
+                        require(source_bits=={str(i) for i in range(16)} and
+                                {p[0] for p in extra}==set(ios), f"Missing {name} arcs/{corner}/{kind}")
+                        extrema[direction].extend(extra)
     ins, outs = extrema["input"], extrema["output"]
     bound = D(".001")   # reports print to 0.001 ns; round each input outwards
     lo, hi = D(".99999"), D("1.00001")
